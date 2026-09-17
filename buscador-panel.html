@@ -1,0 +1,21 @@
+<!-- =========================================================
+     BUSCADOR GLOBAL - Mundo Verde
+     Esqueleto del panel de búsqueda deslizable. buscador-global.js
+     lo trae con fetch() y lo inserta al final del <body> al cargar
+     la página. Los RESULTADOS (foto + nombre + precio de cada
+     producto) se siguen armando desde el JS, porque cambian según
+     lo que se escriba — pero esta parte fija (overlay, botón
+     cerrar, input, botón lupa) es HTML editable normal.
+     ========================================================= -->
+<div class="bg-overlay" id="bg-overlay"></div>
+
+<div class="bg-panel" id="bg-panel">
+    <div class="bg-panel-header">
+        <button type="button" class="bg-close" id="bg-close" aria-label="Cerrar buscador">&times;</button>
+    </div>
+    <div class="bg-panel-search">
+        <input type="text" class="bg-panel-input" id="bg-panel-input" placeholder="Plantas, productos, servicios, talleres...">
+        <button type="button" class="bg-panel-search-btn" id="bg-panel-search-btn" aria-label="Buscar">🔍</button>
+    </div>
+    <div class="bg-panel-resultados" id="bg-panel-resultados"></div>
+</div>

@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content="Vivero mundo verde. Plantas de interior, paisajimo para countries y huerta organica. Visitanos en Sourigues"/>
+    <meta name="keywords" content="vivero berazategui, plantas zona sur, paisajismo hudson, mundo verde"/>
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Spanish">
+    <meta name="author" content="Alex Barrera">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="img/varios/fab.White.64x64.webp">
+    <link rel="apple-touch-icon" sizes="180x180" href="img/varios/fab.White.64x64.webp">
+    <title>Vivero Mundo Verde</title>
+    <link rel="stylesheet" href="css/styles.css"/>
+    <link rel="stylesheet" href="CharonyPlywrite.css">
+</head>
+
+<style>
+  :root {
+    --bg:       #0d1a0f;
+    --surface:  #131f15;
+    --card:     #1a2b1c;
+    --border:   #243526;
+    --accent:   #4caf50;
+    --accent2:  #a5d6a7;
+    --danger:   #ef5350;
+    --warn:     #ff8f00;
+    --muted:    #6a8f6d;
+    --text:     #e8f5e9;
+    --text2:    #b2c9b4;
+    --mono:     'DM Mono', monospace;
+    --sans:     'DM Sans', sans-serif;
+    --serif:    'Fraunces', serif;
+    --radius:   10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(46,125,50,.18) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(76,175,80,.10) 0%, transparent 55%),
+      var(--bg);
+  }
+  .login-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: min(400px, 92vw);
+    box-shadow: 0 24px 80px rgba(0,0,0,.6);
+    animation: fadeIn .5s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+  .login-logo {
+    font-family: var(--serif);
+    font-size: 1.7rem;
+    color: var(--accent2);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .login-sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: .82rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+  }
+  .login-field { margin-bottom: 18px; }
+  .login-field label {
+    display: block;
+    font-size: .78rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .login-field input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: .92rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .login-field input:focus { border-color: var(--accent); }
+  .login-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 13px;
+    font-family: var(--sans);
+    font-size: .92rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .2s;
+    margin-top: 6px;
+  }
+  .login-btn:hover { background: #439a46; }
+  .login-btn:disabled { opacity: .6; cursor: default; }
+  .login-error {
+    color: var(--danger);
+    font-size: .82rem;
+    text-align: center;
+    margin-top: 14px;
+    min-height: 1.2em;
+  }
+
+  /* ── APP ── */
+  #app-screen { display: none; min-height: 100vh; flex-direction: column; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent2); }
+  .topbar-logo span { color: var(--muted); font-size: .8rem; margin-left: 8px; }
+  .topbar-right { display: flex; align-items: center; gap: 18px; }
+  .topbar-user { font-size: .82rem; color: var(--muted); font-family: var(--mono); }
+  .btn-logout {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    font-family: var(--sans);
+    font-size: .8rem;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 14px 28px 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: .85rem;
+    padding: 10px 18px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .2s, background .2s;
+  }
+  .tab-btn:hover { color: var(--text2); }
+  .tab-btn.active { color: var(--accent2); background: var(--bg); font-weight: 500; }
+
+  .admin-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+  }
+  .sticky-inner {
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 28px 16px;
+  }
+
+  .main { flex: 1; padding: 0 28px 60px; max-width: 1400px; width: 100%; margin: 0 auto; }
+
+  .panel-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+  .panel-title { font-family: var(--serif); font-size: 1.4rem; color: var(--text); }
+  .panel-count { font-family: var(--mono); font-size: .8rem; color: var(--muted); }
+
+  .table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: auto;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  thead th {
+    text-align: left;
+    padding: 12px 14px;
+    color: var(--muted);
+    font-size: .72rem;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    white-space: nowrap;
+    position: sticky; top: 0;
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(76,175,80,.04); }
+
+  .thumb-producto {
+    display: block;
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: transform .15s;
+  }
+  .thumb-producto:hover { transform: scale(2.4); z-index: 5; position: relative; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+  .cell-id { color: var(--muted); font-family: var(--mono); font-size: .75rem; }
+  .cell-mono { font-family: var(--mono); font-size: .78rem; }
+
+  td input[type="text"], td input[type="number"], td select {
+    width: 100%;
+    min-width: 110px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 9px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: .8rem;
+    outline: none;
+  }
+  td input:focus, td select:focus { border-color: var(--accent); }
+
+  .td-texto-largo { min-width: 320px; }
+  .td-texto-largo textarea {
+    width: 100%;
+    min-height: 52px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: .8rem;
+    line-height: 1.4;
+    resize: vertical;
+    outline: none;
+  }
+  .td-texto-largo textarea:focus { border-color: var(--accent); }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-family: var(--mono); }
+  .badge-verde { background: rgba(76,175,80,.18); color: #81c784; }
+  .badge-rojo  { background: rgba(239,83,80,.18); color: #ef9a9a; }
+  .badge-ambar { background: rgba(255,143,0,.18); color: #ffb74d; }
+  .badge-azul  { background: rgba(66,165,245,.18); color: #90caf9; }
+  .badge-gris  { background: rgba(178,201,180,.14); color: var(--text2); }
+
+  /* ── Resumen de ventas (arriba del panel de Pedidos) ── */
+  .stats-strip { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 18px; min-width: 150px; flex: 1;
+  }
+  .stat-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 6px; }
+  .stat-value { font-family: var(--serif); font-size: 1.35rem; color: var(--accent2); }
+  .stat-value.rojo { color: #ef9a9a; }
+  .stat-value.ambar { color: #ffb74d; }
+  .stat-value.verde { color: #81c784; }
+
+  .cell-money { font-family: var(--mono); white-space: nowrap; }
+  .cell-cliente strong { color: var(--text); display: block; }
+  .cell-cliente span { font-size: .75rem; color: var(--muted); }
+
+  .btn-detalle {
+    border: 1px solid var(--border); background: transparent; color: var(--muted);
+    border-radius: 6px; padding: 5px 9px; font-size: .72rem; cursor: pointer;
+    font-family: var(--sans); white-space: nowrap;
+  }
+  .btn-detalle:hover { border-color: var(--accent); color: var(--accent2); }
+
+  .fila-detalle td { background: var(--surface); padding: 0; }
+  .detalle-wrap { padding: 14px 20px; }
+  .detalle-titulo { font-size: .72rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 8px; }
+  table.detalle-items { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  table.detalle-items th {
+    text-align: left; color: var(--muted); font-size: .68rem; text-transform: uppercase;
+    padding: 6px 10px; border-bottom: 1px solid var(--border);
+  }
+  table.detalle-items td { padding: 7px 10px; color: var(--text2); border-bottom: 1px solid var(--border); }
+  table.detalle-items tr:last-child td { border-bottom: none; }
+  .sin-items { color: var(--muted); font-size: .8rem; padding: 4px 10px; }
+
+  .row-actions { display: flex; gap: 6px; white-space: nowrap; }
+
+  .btn-aceptar { white-space: normal; line-height: 1.2; max-width: 130px; text-align: center; }
+
+  @keyframes filaActualizada {
+    0%   { background: rgba(76,175,80,.35); }
+    100% { background: transparent; }
+  }
+  tr.fila-actualizada td { animation: filaActualizada 1.6s ease-out; }
+  .btn-mini {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: .75rem;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-mini:hover { border-color: var(--accent); color: var(--accent2); }
+  .btn-mini.danger:hover { border-color: var(--danger); color: var(--danger); }
+  .btn-mini.warn:hover { border-color: var(--warn); color: var(--warn); }
+  .btn-mini:disabled { opacity: .4; cursor: default; }
+
+  .empty-state { padding: 60px 20px; text-align: center; color: var(--muted); font-size: .9rem; }
+  .loading-state { padding: 40px 20px; text-align: center; color: var(--muted); font-size: .85rem; font-family: var(--mono); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 12px 22px; border-radius: var(--radius); font-size: .85rem;
+    box-shadow: 0 12px 40px rgba(0,0,0,.5); opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .25s; z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { border-color: var(--danger); color: #ef9a9a; }
+
+  /* ── Toolbar: buscador + filtros + agregar ── */
+  .toolbar {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 16px;
+  }
+  .toolbar-search {
+    position: relative; flex: 1; min-width: 220px;
+  }
+  .toolbar-search i {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: .82rem; pointer-events: none;
+  }
+  .toolbar-search input {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 9px 12px 9px 34px; color: var(--text);
+    font-family: var(--sans); font-size: .85rem; outline: none; transition: border-color .2s;
+  }
+  .toolbar-search input:focus { border-color: var(--accent); }
+  .toolbar-filter {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 9px 12px; color: var(--text2); font-family: var(--sans); font-size: .82rem;
+    outline: none; cursor: pointer;
+  }
+  .toolbar-filter:focus { border-color: var(--accent); }
+  .btn-add {
+    background: var(--accent); color: #fff; border: none; border-radius: var(--radius);
+    padding: 10px 16px; font-family: var(--sans); font-size: .85rem; font-weight: 500;
+    cursor: pointer; white-space: nowrap; transition: background .2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-add:hover { background: #439a46; }
+
+  /* ── Modal de alta ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.55);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  }
+  .modal-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px; width: min(480px, 100%); max-height: 86vh; overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,.6); animation: fadeIn .25s ease;
+  }
+  .modal-title { font-family: var(--serif); font-size: 1.2rem; color: var(--accent2); margin-bottom: 18px; }
+  .modal-field { margin-bottom: 14px; }
+  .modal-field label {
+    display: block; font-size: .74rem; letter-spacing: .5px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  .modal-field input, .modal-field select, .modal-field textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px; color: var(--text); font-family: var(--sans);
+    font-size: .85rem; outline: none;
+  }
+  .modal-field textarea { resize: vertical; line-height: 1.4; }
+  .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .btn-secundario {
+    background: transparent; border: 1px solid var(--border); color: var(--text2);
+    border-radius: var(--radius); padding: 9px 16px; font-family: var(--sans);
+    font-size: .82rem; cursor: pointer;
+  }
+  .btn-secundario:hover { border-color: var(--text2); }
+  .modal-error { color: var(--danger); font-size: .8rem; margin-top: 10px; min-height: 1.1em; }
+
+  /* ── Tablas como tarjetas apiladas en mobile ── */
+  @media (max-width: 768px) {
+    .table-wrap { background: transparent; border: none; overflow: visible; }
+
+    table.tabla-principal,
+    table.tabla-principal thead,
+    table.tabla-principal tbody,
+    table.tabla-principal th,
+    table.tabla-principal td,
+    table.tabla-principal tr {
+      display: block;
+    }
+    table.tabla-principal thead { display: none; }
+
+    table.tabla-principal tbody tr {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    table.tabla-principal tbody tr:hover { background: var(--card); }
+
+    table.tabla-principal tbody td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+    }
+    table.tabla-principal tbody td:last-child { border-bottom: none; }
+    table.tabla-principal tbody td::before {
+      content: attr(data-label);
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--muted);
+      text-align: left;
+      flex-shrink: 0;
+    }
+
+    table.tabla-principal td input[type="text"],
+    table.tabla-principal td input[type="number"],
+    table.tabla-principal td select {
+      width: auto; max-width: 62%; min-width: 0; text-align: right;
+    }
+
+    table.tabla-principal td.row-actions {
+      flex-direction: column; align-items: stretch;
+    }
+    table.tabla-principal td.row-actions::before { display: none; }
+    table.tabla-principal td.row-actions .btn-mini,
+    table.tabla-principal td.row-actions .btn-detalle {
+      width: 100%;
+    }
+
+    table.tabla-principal tr.fila-detalle {
+      background: transparent; border: none; padding: 0; margin: -8px 0 12px;
+    }
+    table.tabla-principal tr.fila-detalle td {
+      display: block; text-align: left; padding: 0; border: none;
+    }
+    table.tabla-principal tr.fila-detalle td::before { content: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🌿 Mundo Verde</div>
+    <div class="login-sub">Super Admin</div>
+    <form id="loginForm">
+      <div class="login-field">
+        <label for="admin-email">Email</label>
+        <input type="email" id="admin-email" autocomplete="username" required>
+      </div>
+      <div class="login-field">
+        <label for="admin-pass">Contraseña</label>
+        <input type="password" id="admin-pass" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="login-btn" id="login-btn">Ingresar</button>
+      <div class="login-error" id="login-error"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════ APP ══════════ -->
+<div id="app-screen">
+  <div class="admin-sticky">
+    <div class="topbar">
+      <div class="topbar-logo">🌿 Mundo Verde <span>SUPER ADMIN</span></div>
+      <div class="topbar-right">
+        <div class="topbar-user" id="topbar-user"></div>
+        <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+
+    <div class="sticky-inner">
+      <div class="panel-header">
+        <div class="panel-title" id="panel-title">—</div>
+        <div class="panel-count" id="panel-count"></div>
+      </div>
+      <div class="toolbar" id="toolbar"></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="table-wrap">
+      <div id="table-target"><div class="loading-state">Cargando...</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════════ MODAL AGREGAR ══════════ -->
+<div class="modal-overlay" id="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Agregar registro</div>
+    <form id="modal-form"></form>
+    <div class="modal-error" id="modal-error"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secundario" id="modal-cancelar">Cancelar</button>
+      <button type="submit" form="modal-form" class="login-btn" id="modal-guardar" style="width:auto; margin-top:0;">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+/* Etiquetas lindas para nombres de tabla y columna */
+const ETIQUETAS_TABLA = {
+  usuarios: 'Usuarios', newsletter_suscriptores: 'Newsletter',
+  productos: 'Productos', pedidos: 'Pedidos', pedido_items: 'Ítems de pedido',
+  // Sección reservada para el banner de anuncios rotativos (.anuncio en
+  // script.js/styles.css). En cuanto el backend exponga la tabla `anuncios`
+  // en mvAdmin.tablas() con esta forma, la pestaña aparece sola acá — el
+  // resto del panel (alta, edición inline, ocultar/mostrar, borrar,
+  // buscador) ya funciona para cualquier tabla sin tocar más código:
+  //   columnas:  ['id', 'texto', 'orden', 'activo']
+  //   pk:        'id'
+  //   editables: { texto: 'text', orden: 'number' }
+  //   toggle_col:'activo'   → habilita el badge Activo/Oculto y su filtro
+  anuncios: 'Anuncios',
+};
+function etiquetaCol(c) {
+  return c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+/* ── Miniaturas de imagen en las tablas ── */
+function esColumnaImagen(c) {
+  return /imagen|foto|img|thumbnail/i.test(c);
+}
+function miniaturaImagen(url) {
+  if (!url) return '<span style="color:var(--muted)">— sin imagen —</span>';
+  const src = url.toString().replace(/"/g, '&quot;');
+  return `<a href="${src}" target="_blank" rel="noopener">
+      <img src="${src}" alt="" class="thumb-producto"
+           onerror="this.onerror=null; this.replaceWith(Object.assign(document.createElement('span'),{textContent:'⚠ no carga',style:'color:var(--danger);font-size:.75rem'}))">
+    </a>`;
+}
+
+let META = null;
+let TABLA_ACTUAL = null;
+
+// Debe apuntar a la misma base que usa js/api.js para las llamadas fetch
+// (la carpeta del backend PHP), así se puede armar el link al comprobante
+// subido, que se guarda como ruta relativa ("uploads/comprobantes/...").
+const URL_BASE_ARCHIVOS = (window.mvAdmin && mvAdmin.baseUrl) || '';
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => { t.className = 'toast'; }, 2800);
+}
+
+/* ── LOGIN ── */
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('admin-email').value.trim();
+  const pass = document.getElementById('admin-pass').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  err.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Ingresando...';
+  try {
+    const data = await mvAuth.login(email, pass);
+    if (!['admin', 'vendedor'].includes(data.usuario.rol)) {
+      mvCerrarSesion();
+      throw new Error('Esta cuenta no tiene permisos para acceder al panel.');
+    }
+    mvSetSesion(data.token, data.usuario);
+    await iniciarApp();
+  } catch (ex) {
+    err.textContent = ex.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Ingresar';
+  }
+});
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  try { await mvAuth.logout(); } catch {}
+  mvCerrarSesion();
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+});
+
+/* ── Arranque: si ya hay sesión admin guardada, entra directo ── */
+(async function init() {
+  const usuario = mvUsuarioActual();
+  if (usuario && ['admin', 'vendedor'].includes(usuario.rol) && mvGetToken()) {
+    try { await iniciarApp(); return; } catch { mvCerrarSesion(); }
+  }
+  document.getElementById('login-screen').style.display = 'flex';
+})();
+
+async function iniciarApp() {
+  const usuario = mvUsuarioActual();
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'flex';
+  document.getElementById('topbar-user').textContent = `${usuario.nombre} · ${usuario.email}`;
+
+  META = await mvAdmin.tablas();
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = '';
+  Object.keys(META).forEach((tabla, i) => {
+    const b = document.createElement('button');
+    b.className = 'tab-btn' + (i === 0 ? ' active' : '');
+    b.textContent = ETIQUETAS_TABLA[tabla] || tabla;
+    b.onclick = () => seleccionarTabla(tabla, b);
+    b.dataset.tabla = tabla;
+    tabsEl.appendChild(b);
+  });
+  const primera = Object.keys(META)[0];
+  seleccionarTabla(primera, tabsEl.querySelector(`[data-tabla="${primera}"]`));
+}
+
+function seleccionarTabla(tabla, btnEl) {
+  TABLA_ACTUAL = tabla;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  document.getElementById('panel-title').textContent = ETIQUETAS_TABLA[tabla] || tabla;
+  FILTROS_ACTIVOS = {};
+  BUSQUEDA_ACTUAL = '';
+  cargarTabla(tabla);
+}
+
+let FILAS_CACHE = [];
+let FILTROS_ACTIVOS = {};
+let BUSQUEDA_ACTUAL = '';
+
+async function cargarTabla(tabla, pkAResaltar) {
+  const target = document.getElementById('table-target');
+  target.innerHTML = '<div class="loading-state">Cargando...</div>';
+  try {
+    const filas = await mvAdmin.listar(tabla);
+    FILAS_CACHE = filas;
+    renderToolbar(tabla);
+    renderVista(tabla, pkAResaltar);
+  } catch (ex) {
+    target.innerHTML = `<div class="empty-state">Error al cargar: ${ex.message}</div>`;
+  }
+}
+
+/* Aplica filtros de columna + búsqueda de texto sobre las filas cacheadas y renderiza */
+function renderVista(tabla, pkAResaltar) {
+  const filas = aplicarFiltros(FILAS_CACHE);
+  const totalTxt = filas.length === FILAS_CACHE.length
+    ? `${filas.length} registro${filas.length === 1 ? '' : 's'}`
+    : `${filas.length} de ${FILAS_CACHE.length} registros`;
+  document.getElementById('panel-count').textContent = totalTxt;
+
+  if (tabla === 'pedidos') {
+    renderPedidos(filas);
+  } else {
+    renderTabla(tabla, filas);
+  }
+  if (pkAResaltar !== undefined) {
+    const fila = document.querySelector(`tr[data-pk="${pkAResaltar}"], tr[data-pedido-id="${pkAResaltar}"]`);
+    if (fila) {
+      fila.classList.add('fila-actualizada');
+      setTimeout(() => fila.classList.remove('fila-actualizada'), 1600);
+    }
+  }
+}
+
+function aplicarFiltros(filas) {
+  let resultado = filas;
+  const meta = META[TABLA_ACTUAL];
+
+  Object.entries(FILTROS_ACTIVOS).forEach(([col, val]) => {
+    if (val === '' || val === undefined) return;
+    if (meta && col === meta.toggle_col) {
+      resultado = resultado.filter(f => (!!f[col] ? '1' : '0') === val);
+    } else {
+      resultado = resultado.filter(f => String(f[col]) === val);
+    }
+  });
+
+  if (BUSQUEDA_ACTUAL.trim() !== '') {
+    const q = BUSQUEDA_ACTUAL.trim().toLowerCase();
+    const cols = meta ? meta.columnas : (filas[0] ? Object.keys(filas[0]) : []);
+    resultado = resultado.filter(f => cols.some(c => String(f[c] ?? '').toLowerCase().includes(q)));
+  }
+
+  return resultado;
+}
+
+/* ── Toolbar: buscador + filtros por columna + botón agregar ── */
+function renderToolbar(tabla) {
+  const toolbarEl = document.getElementById('toolbar');
+  toolbarEl.innerHTML = '';
+
+  if (tabla === 'pedidos') return; // Pedidos ya tiene su propio resumen/detalle
+
+  const meta = META[tabla];
+
+  const buscador = document.createElement('div');
+  buscador.className = 'toolbar-search';
+  buscador.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i><input type="text" id="toolbar-buscar" placeholder="Buscar por nombre, codigo...">`;
+  toolbarEl.appendChild(buscador);
+  const inputBuscar = buscador.querySelector('input');
+  inputBuscar.value = BUSQUEDA_ACTUAL;
+  inputBuscar.addEventListener('input', (e) => {
+    BUSQUEDA_ACTUAL = e.target.value;
+    renderVista(tabla);
+  });
+
+  // Un filtro select por cada columna editable de tipo "select:" (ej. categoria, tipo)
+  Object.entries(meta.editables || {}).forEach(([col, tipo]) => {
+    if (!tipo.startsWith('select:')) return;
+    const opciones = tipo.split(':')[1].split(',');
+    const sel = document.createElement('select');
+    sel.className = 'toolbar-filter';
+    sel.innerHTML = `<option value="">${etiquetaCol(col)}: todos</option>` +
+      opciones.map(o => `<option value="${o}">${o}</option>`).join('');
+    sel.value = FILTROS_ACTIVOS[col] || '';
+    sel.addEventListener('change', () => { FILTROS_ACTIVOS[col] = sel.value; renderVista(tabla); });
+    toolbarEl.appendChild(sel);
+  });
+
+  // Filtro para la columna de estado (Activo/Oculto) si la tabla tiene toggle
+  if (meta.toggle_col) {
+    const sel = document.createElement('select');
+    sel.className = 'toolbar-filter';
+    sel.innerHTML = `<option value="">Estado: todos</option><option value="1">Activo</option><option value="0">Oculto</option>`;
+    sel.value = FILTROS_ACTIVOS[meta.toggle_col] || '';
+    sel.addEventListener('change', () => { FILTROS_ACTIVOS[meta.toggle_col] = sel.value; renderVista(tabla); });
+    toolbarEl.appendChild(sel);
+  }
+
+  if (!meta.solo_lectura) {
+    const btnAdd = document.createElement('button');
+    btnAdd.className = 'btn-add';
+    btnAdd.innerHTML = `<i class="fa-solid fa-plus"></i> Agregar`;
+    btnAdd.onclick = () => abrirModalAgregar(tabla);
+    toolbarEl.appendChild(btnAdd);
+  }
+}
+
+/* ── Modal de alta (Agregar) ── */
+let TABLA_MODAL = null;
+
+function abrirModalAgregar(tabla) {
+  TABLA_MODAL = tabla;
+  const meta = META[tabla];
+  document.getElementById('modal-title').textContent = `Agregar ${(ETIQUETAS_TABLA[tabla] || tabla).toLowerCase().replace(/s$/, '')}`;
+  document.getElementById('modal-error').textContent = '';
+
+  const form = document.getElementById('modal-form');
+  form.innerHTML = '';
+
+  meta.columnas.forEach(col => {
+    if (col === meta.pk) return; // autoincremental, no se pide
+    if (col === 'creado_en' || col === 'actualizado_en') return; // se genera solo
+
+    const campo = document.createElement('div');
+    campo.className = 'modal-field';
+    const label = document.createElement('label');
+    label.textContent = etiquetaCol(col);
+    campo.appendChild(label);
+
+    let input;
+    if (col === meta.toggle_col) {
+      input = document.createElement('select');
+      input.innerHTML = `<option value="1">Activo</option><option value="0">Oculto</option>`;
+    } else if (meta.editables && meta.editables[col] && meta.editables[col].startsWith('select:')) {
+      const opciones = meta.editables[col].split(':')[1].split(',');
+      input = document.createElement('select');
+      input.innerHTML = opciones.map(o => `<option value="${o}">${o}</option>`).join('');
+    } else if (col === 'texto' || (meta.editables && meta.editables[col] === 'textarea')) {
+      input = document.createElement('textarea');
+      input.rows = 3;
+    } else if (meta.editables && meta.editables[col] === 'number') {
+      input = document.createElement('input');
+      input.type = 'number';
+      input.step = 'any';
+    } else {
+      input = document.createElement('input');
+      input.type = 'text';
+    }
+    input.dataset.col = col;
+    campo.appendChild(input);
+    form.appendChild(campo);
+  });
+
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function cerrarModalAgregar() {
+  document.getElementById('modal-overlay').style.display = 'none';
+  TABLA_MODAL = null;
+}
+
+document.getElementById('modal-cancelar').addEventListener('click', cerrarModalAgregar);
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-overlay') cerrarModalAgregar();
+});
+
+document.getElementById('modal-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('modal-error');
+  err.textContent = '';
+  const btn = document.getElementById('modal-guardar');
+  const datos = {};
+  document.querySelectorAll('#modal-form [data-col]').forEach(inp => { datos[inp.dataset.col] = inp.value; });
+
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+  try {
+    const resultado = await mvAdmin.crear(TABLA_MODAL, datos);
+
+    // Caso especial: al crear un usuario (vendedor/mantenimiento/admin) el
+    // backend devuelve una contraseña temporal generada al vuelo. Se
+    // muestra UNA sola vez acá — si se pierde, no hay forma de recuperarla,
+    // solo de generar una nueva editando el registro.
+    if (resultado && resultado.password_temporal) {
+      const texto = `Cuenta creada para ${datos.email || datos.nombre}.\n\nContraseña temporal:\n${resultado.password_temporal}\n\nCopiala ahora y pasásela a la persona por un canal seguro (no queda guardada en ningún lado).`;
+      try {
+        await navigator.clipboard.writeText(resultado.password_temporal);
+        alert(texto + '\n\n(Ya se copió al portapapeles)');
+      } catch {
+        alert(texto);
+      }
+      showToast('Cuenta creada ✓');
+    } else {
+      showToast('Registro agregado ✓');
+    }
+
+    cerrarModalAgregar();
+    cargarTabla(TABLA_MODAL);
+  } catch (ex) {
+    err.textContent = ex.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar';
+  }
+});
+
+/* Ancho de columnas editables, en caracteres visibles (unidad CSS ch) */
+const COL_ANCHO_CH = {
+  nombre: 30,
+  stock: 8,
+  texto: 90,
+  orden: 5,
+};
+function anchoEstilo(c) {
+  const ch = COL_ANCHO_CH[c];
+  return ch ? ` style="width:${ch}ch; min-width:${ch}ch"` : '';
+}
+
+function renderTabla(tabla, filas) {
+  const meta = META[tabla];
+  const target = document.getElementById('table-target');
+
+  if (filas.length === 0) {
+    target.innerHTML = '<div class="empty-state">No hay registros en esta tabla.</div>';
+    return;
+  }
+
+  const cols = meta.columnas;
+  const editables = meta.editables;
+  const toggleCol = meta.toggle_col;
+  const soloLectura = !!meta.solo_lectura;
+
+  let html = '<table class="tabla-principal"><thead><tr>';
+  cols.forEach(c => { html += `<th>${etiquetaCol(c)}</th>`; });
+  if (!soloLectura) html += '<th>Acciones</th>';
+  html += '</tr></thead><tbody>';
+
+  filas.forEach((fila, idx) => {
+    const pkVal = fila[meta.pk];
+    html += `<tr data-idx="${idx}" data-pk="${pkVal}">`;
+    cols.forEach(c => {
+      const val = fila[c];
+      const etiqueta = etiquetaCol(c);
+      if (c === toggleCol) {
+        const activo = !!val;
+        html += `<td data-label="${etiqueta}"><span class="badge ${activo ? 'badge-verde' : 'badge-rojo'}">${activo ? 'Activo' : 'Oculto'}</span></td>`;
+      } else if (!soloLectura && c in editables) {
+        const tipo = editables[c];
+        if (tipo === 'number') {
+          html += `<td data-label="${etiqueta}"><input type="number" step="any" data-col="${c}" value="${val ?? ''}"${anchoEstilo(c)}></td>`;
+        } else if (tipo.startsWith('select:')) {
+          const opciones = tipo.split(':')[1].split(',');
+          html += `<td data-label="${etiqueta}"><select data-col="${c}">${opciones.map(o => `<option value="${o}" ${o === val ? 'selected' : ''}>${o}</option>`).join('')}</select></td>`;
+        } else if (esColumnaImagen(c)) {
+          html += `<td data-label="${etiqueta}">${miniaturaImagen(val)}</td>`;
+        } else if (c === 'texto' || tipo === 'textarea') {
+          html += `<td data-label="${etiqueta}" class="td-texto-largo"><textarea data-col="${c}" rows="2"${anchoEstilo(c)}>${(val ?? '').toString().replace(/</g, '&lt;')}</textarea></td>`;
+        } else {
+          html += `<td data-label="${etiqueta}"><input type="text" data-col="${c}" value="${(val ?? '').toString().replace(/"/g, '&quot;')}"${anchoEstilo(c)}></td>`;
+        }
+      } else if (esColumnaImagen(c)) {
+        html += `<td data-label="${etiqueta}">${miniaturaImagen(val)}</td>`;
+      } else {
+        const claseId = (c === meta.pk) ? ' class="cell-id"' : (typeof val === 'string' && val.length > 20 ? ' class="cell-mono"' : '');
+        html += `<td data-label="${etiqueta}"${claseId}>${val === null || val === undefined ? '<span style="color:var(--muted)">—</span>' : val}</td>`;
+      }
+    });
+    if (!soloLectura) {
+      html += `<td class="row-actions" data-label="Acciones">
+        <button class="btn-mini btn-aceptar" onclick="guardarFila('${tabla}', '${pkVal}', ${idx})">Aceptar el cambio realizado</button>
+        ${toggleCol ? `<button class="btn-mini warn" onclick="toggleFila('${tabla}', '${pkVal}')">Ocultar/Mostrar</button>` : ''}
+        <button class="btn-mini danger" onclick="eliminarFila('${tabla}', '${pkVal}')">Eliminar</button>
+      </td>`;
+    }
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  target.innerHTML = html;
+}
+
+/* ── Formato de moneda y etiquetas amigables ── */
+function formatMoney(v) {
+  const n = Number(v) || 0;
+  return '$' + n.toLocaleString('es-AR', { maximumFractionDigits: 0 });
+}
+const ETIQUETAS_ESTADO = {
+  pendiente: { texto: 'Pendiente', clase: 'badge-ambar' },
+  pagado: { texto: 'Pagado', clase: 'badge-verde' },
+  confirmado: { texto: 'Confirmado', clase: 'badge-azul' },
+  entregado: { texto: 'Entregado', clase: 'badge-verde' },
+  cancelado: { texto: 'Cancelado', clase: 'badge-rojo' },
+};
+const ETIQUETAS_ENTREGA = { retiro: 'Retiro en local', envio: 'Envío a domicilio' };
+const ETIQUETAS_PAGO = { efectivo: 'Efectivo', transferencia: 'Transferencia', tarjeta: 'Tarjeta' };
+
+/* ── Panel especial de Pedidos: resumen + detalle de compra expandible ── */
+function renderPedidos(pedidos) {
+  const target = document.getElementById('table-target');
+
+  // Resumen arriba de la tabla
+  const totalVentas = pedidos.reduce((acc, p) => acc + Number(p.total || 0), 0);
+  const pendientes = pedidos.filter(p => p.estado === 'pendiente').length;
+  const pagados = pedidos.filter(p => p.estado === 'pagado').length;
+  const cancelados = pedidos.filter(p => p.estado === 'cancelado').length;
+  const stats = `
+    <div class="stats-strip">
+      <div class="stat-card"><div class="stat-label">Total vendido</div><div class="stat-value">${formatMoney(totalVentas)}</div></div>
+      <div class="stat-card"><div class="stat-label">Pedidos</div><div class="stat-value">${pedidos.length}</div></div>
+      <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value ambar">${pendientes}</div></div>
+      <div class="stat-card"><div class="stat-label">Pagados</div><div class="stat-value verde">${pagados}</div></div>
+      <div class="stat-card"><div class="stat-label">Cancelados</div><div class="stat-value rojo">${cancelados}</div></div>
+    </div>`;
+
+  if (pedidos.length === 0) {
+    target.innerHTML = stats + '<div class="empty-state">Todavía no hay pedidos registrados.</div>';
+    return;
+  }
+
+  let html = stats + '<table class="tabla-principal"><thead><tr>' +
+    '<th>ID</th><th>Cliente</th><th>Entrega</th><th>Retira</th><th>Pago</th><th>Comprobante</th><th>Envío</th>' +
+    '<th>Subtotal</th><th>Descuento</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th>' +
+    '</tr></thead><tbody>';
+
+  pedidos.forEach((p, idx) => {
+    const estadoInfo = ETIQUETAS_ESTADO[p.estado] || { texto: p.estado, clase: 'badge-gris' };
+    html += `<tr data-idx="${idx}" data-pedido-id="${p.id}">
+      <td class="cell-id" data-label="ID">#${p.id}</td>
+      <td class="cell-cliente" data-label="Cliente">
+        <strong>${p.cliente_nombre || '—'}</strong>
+        <span>${p.cliente_email || ''}${p.cliente_celular ? ' · ' + p.cliente_celular : ''}</span>
+      </td>
+      <td data-label="Entrega">${ETIQUETAS_ENTREGA[p.forma_entrega] || p.forma_entrega}</td>
+      <td data-label="Retira">${p.forma_entrega === 'retiro'
+            ? `<strong>${p.retiro_nombre || '—'}</strong><span class="cell-mono" style="display:block">DNI ${p.retiro_dni || '—'}</span>`
+            : '—'}</td>
+      <td data-label="Pago">${ETIQUETAS_PAGO[p.forma_pago] || p.forma_pago}</td>
+      <td data-label="Comprobante">${p.comprobante_url
+            ? `<a href="${URL_BASE_ARCHIVOS}${p.comprobante_url}" target="_blank" rel="noopener" class="btn-mini">Ver comprobante</a>`
+            : '<span class="cell-mono">—</span>'}</td>
+      <td data-label="Envío">${p.envio_localidad || '—'}</td>
+      <td class="cell-money" data-label="Subtotal">${formatMoney(p.subtotal)}</td>
+      <td class="cell-money" data-label="Descuento">${Number(p.descuento) > 0 ? '-' + formatMoney(p.descuento) : '—'}</td>
+      <td class="cell-money" data-label="Total"><strong>${formatMoney(p.total)}</strong></td>
+      <td data-label="Estado">
+        <select data-col="estado">
+          ${Object.keys(ETIQUETAS_ESTADO).map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${ETIQUETAS_ESTADO[e].texto}</option>`).join('')}
+        </select>
+      </td>
+      <td class="cell-mono" data-label="Fecha">${(p.creado_en || '').replace('T', ' ').slice(0, 16)}</td>
+      <td class="row-actions" data-label="Acciones">
+        <button class="btn-mini" onclick="guardarEstadoPedido(${p.id}, ${idx})">Guardar</button>
+        <button class="btn-detalle" onclick="toggleDetallePedido(${p.id})">Ver detalle</button>
+        <button class="btn-mini danger" onclick="eliminarFila('pedidos', '${p.id}')">Eliminar</button>
+      </td>
+    </tr>
+    <tr class="fila-detalle" id="detalle-${p.id}" style="display:none">
+      <td colspan="13">
+        <div class="detalle-wrap">
+          <div class="detalle-titulo">Detalle de la compra — Pedido #${p.id}</div>
+          ${renderItemsPedido(p.items)}
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  target.innerHTML = html;
+}
+
+function renderItemsPedido(items) {
+  if (!items || items.length === 0) {
+    return '<div class="sin-items">Sin ítems registrados para este pedido.</div>';
+  }
+  let html = '<table class="detalle-items"><thead><tr>' +
+    '<th>Código</th><th>Producto / Servicio</th><th>Precio unit.</th><th>Cantidad</th><th>Subtotal</th>' +
+    '</tr></thead><tbody>';
+  items.forEach(it => {
+    html += `<tr>
+      <td class="cell-mono">${it.codigo}</td>
+      <td>${it.nombre}</td>
+      <td class="cell-money">${formatMoney(it.precio_unitario)}</td>
+      <td>${it.cantidad}</td>
+      <td class="cell-money">${formatMoney(it.subtotal)}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+function toggleDetallePedido(pedidoId) {
+  const fila = document.getElementById(`detalle-${pedidoId}`);
+  if (!fila) return;
+  fila.style.display = fila.style.display === 'none' ? '' : 'none';
+}
+
+async function guardarEstadoPedido(pedidoId, idx) {
+  const fila = document.querySelector(`tr[data-idx="${idx}"][data-pedido-id="${pedidoId}"]`);
+  const nuevoEstado = fila.querySelector('select[data-col="estado"]').value;
+  try {
+    await mvAdmin.editar('pedidos', pedidoId, { estado: nuevoEstado });
+    showToast('Estado actualizado ✓');
+    cargarTabla('pedidos', pedidoId);
+  } catch (ex) {
+    showToast(ex.message, true);
+  }
+}
+
+async function guardarFila(tabla, pkVal, idx) {
+  const fila = document.querySelector(`tr[data-idx="${idx}"]`);
+  const cambios = {};
+  fila.querySelectorAll('[data-col]').forEach(inp => { cambios[inp.dataset.col] = inp.value; });
+  try {
+    await mvAdmin.editar(tabla, pkVal, cambios);
+    showToast('Cambio aceptado ✓');
+    cargarTabla(tabla, pkVal);
+  } catch (ex) {
+    showToast(ex.message, true);
+  }
+}
+
+async function toggleFila(tabla, pkVal) {
+  try {
+    await mvAdmin.toggle(tabla, pkVal);
+    showToast('Estado actualizado ✓');
+    cargarTabla(tabla);
+  } catch (ex) {
+    showToast(ex.message, true);
+  }
+}
+
+async function eliminarFila(tabla, pkVal) {
+  if (!confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
+  try {
+    await mvAdmin.eliminar(tabla, pkVal);
+    showToast('Registro eliminado ✓');
+    cargarTabla(tabla);
+  } catch (ex) {
+    showToast(ex.message, true);
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# Enruta cualquier pedido dentro de /api/ hacia index.php,
+# conservando la ruta original en PATH_INFO.
+# (requiere que XAMPP tenga mod_rewrite habilitado, viene activado por defecto)
+
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]

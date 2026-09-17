@@ -1,0 +1,44 @@
+@font-face {
+    font-family: "BrRegular";
+    src: url("fonts/PlaywriteBR-ExtraLight.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "BrMedium";
+    src: url("fonts/PlaywriteBR-Light.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "BrLight";
+    src: url("fonts/PlaywriteBR-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "BrThin";
+    src: url("fonts/PlaywriteBR-Thin.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Iosevka-Regular";
+    src: url("fonts/IosevkaCharon-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Iosevka-Light";
+    src: url("fonts/IosevkaCharon-Light.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Iosevka-italic";
+    src: url("fonts/IosevkaCharon-Italic.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Iosevka-bolder";
+    src: url("fonts/IosevkaCharon-Bold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "DancingScript-Regular";
+    src: url("fonts/DancingScript-Regular.ttf") format("truetype");
+}

@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content="Vivero mundo verde. Plantas de interior, paisajimo para countries y huerta organica. Visitanos en Sourigues"/><!-- Meta tags para SEO -->
+    <meta name="keywords" content="vivero berazategui, plantas zona sur, paisajismo hudson, mundo verde"/><!--Meta tags para SEO -->
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Spanish">
+    <meta name="author" content="Alex Barrera">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="img/varios/fab.White.64x64.webp">
+    <link rel="apple-touch-icon" sizes="180x180" href="img/varios/fab.White.64x64.webp">
+    <link rel="stylesheet" href="css/styles.css?v=3">
+    <link rel="stylesheet" href="CharonyPlywrite.css">
+    <title>Vivero Mundo Verde</title>
+</head>
+
+<body>
+<!--Banner con anucios y ofertas movil-->
+<div class="header-nav-fijo">
+        <div class="anuncios-rotador">
+            <div class="anuncios-track">
+                <p class="anuncios">🪴 Todas las plantas publicas pueden venir MÁS GRANDES 🌳, consulta tarifas por Whatsapp</p>
+                <p class="anuncios">🔍 Buscas alguna planta que no está en nuestro catalogo?; Seguro la conseguimos 💚, avisanos</p>
+                <p class="anuncios">💻 Seguimos cargando nuestros productos 📲</p>
+                <p class="anuncios">🎁 Todos las compras en el local traen sorpresas</p>
+                <!-- misma lista repetida, oculta a lectores de pantalla: hace que el loop no tenga corte -->
+                <p class="anuncios" aria-hidden="true">🪴 Todas las plantas publicas pueden venir MÁS GRANDES 🌳, consulta tarifas por Whatsapp
+                </p>
+                <p class="anuncios" aria-hidden="true">🔍 Buscas alguna planta que no está en nuestro catalogo?; Seguro la conseguimos 💚, avisanos</p>
+                <p class="anuncios" aria-hidden="true">💻 Seguimos cargando nuestros productos 📲</p>
+                <p class="anuncios" aria-hidden="true">🎁 Todos las compras en el local traen sorpresas</p>
+            </div>
+        </div>
+
+<!--Buscador, Logotipo, Carrito-->
+<header class="header">
+    <!--Izquierda-->
+    <div class="header-left">
+
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navList">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+    </button>
+
+    <div class="search-box">
+
+        <button class="search-btn" id="searchBtn">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <input 
+            type="text" 
+            id="searchInput"
+            placeholder="Buscar...">
+
+    </div>
+
+</div>
+    <!--Centro-->
+<div class="header-center">
+    <h1 class="Tit_Ppal">
+        <span>Mundo</span>
+        <img src="img/varios/Logo de Mundo verde 250x250px.webp" alt="Logo">
+        <span>Verde</span>
+    </h1>
+</div>
+    <!--Derecha-->
+    <div class="header-right">
+        <button class="btn-login" onclick="window.location.href='login.html'" title="Iniciar sesión">👤</button>
+        <button class="btn-carrito" onclick="abrirCarrito()">
+            🛒
+            <span class="carrito-badge">0</span>
+        </button>
+    </div>
+</header>
+
+<!-- BARRA DE NAVEGACIÓN PRINCIPAL -->
+<nav class="nav">
+    <ul class="nav_list" id="navList">
+        <li class="nav_item"><a href="1_0_vivero.html" class="nav_link">VIVERO</a></li>
+
+        <li class="nav_item nav_item--dropdown">
+            <div class="nav_row">
+                <a href="1_1_plantas.html" class="nav_link">PLANTAS</a>
+                <button type="button" class="nav_subtoggle" aria-label="Mostrar subcategorías de Plantas" aria-expanded="false">
+                    <span class="nav_subtoggle-icon">▾</span>
+                </button>
+            </div>
+            <ul class="nav_submenu">
+                <li><a href="1_2_interior.html" class="nav_link nav_sublink">Interior</a></li>
+                <li><a href="1_2_exterior.html" class="nav_link nav_sublink">Exterior</a></li>
+                <li><a href="1_2_arbustos.html" class="nav_link nav_sublink">Arbustos</a></li>
+                <li><a href="1_2_aromaticas.html" class="nav_link nav_sublink">Aromáticas</a></li>
+                <li><a href="1_2_productos.html" class="nav_link nav_sublink">Productos</a></li>
+            </ul>
+        </li>
+
+        <li class="nav_item"><a href="1_2_productos.html" class="nav_link">PRODUCTOS</a></li>
+
+        <li class="nav_item nav_item--dropdown">
+            <div class="nav_row">
+                <a href="2_0_talleres.html" class="nav_link">TALLERES</a>
+                <button type="button" class="nav_subtoggle" aria-label="Mostrar subcategorías de Talleres" aria-expanded="false">
+                    <span class="nav_subtoggle-icon">▾</span>
+                </button>
+            </div>
+            <ul class="nav_submenu">
+                <li><a href="2_1_tall_cer.html" class="nav_link nav_sublink">Cerámica</a></li>
+                <li><a href="2_1_tall_mos.html" class="nav_link nav_sublink">Mosaiquismo</a></li>
+                <li><a href="2_1_tall_EstCog.html" class="nav_link nav_sublink">Estimulación Cognitiva</a></li>
+                <li><a href="2_1_tall_exc.html" class="nav_link nav_sublink">Excursiones</a></li>
+                <li><a href="2_1_tall_tall.html" class="nav_link nav_sublink">Espacio para Talleres</a></li>
+            </ul>
+        </li>
+
+        <li class="nav_item nav_item--dropdown">
+            <div class="nav_row">
+                <a href="3_0_servicios.html" class="nav_link">SERVICIOS</a>
+                <button type="button" class="nav_subtoggle" aria-label="Mostrar subcategorías de Servicios" aria-expanded="false">
+                    <span class="nav_subtoggle-icon">▾</span>
+                </button>
+            </div>
+            <ul class="nav_submenu">
+                <li><a href="3_1_serv_vir.html" class="nav_link nav_sublink">Asesoría Virtual</a></li>
+                <li><a href="3_1_serv_dom.html" class="nav_link nav_sublink">Asesoría a Domicilio</a></li>
+                <li><a href="3_1_serv_com.html" class="nav_link nav_sublink">Locales Comerciales</a></li>
+                <li><a href="3_1_serv_jar.html" class="nav_link nav_sublink">Service de Jardinería</a></li>
+            </ul>
+        </li>
+
+        <li class="nav_item"><a href="4_0_ramos.html" class="nav_link">RAMOS</a></li>
+    </ul>
+    </nav>
+<!--<p class="fondo-TipPlantas">-->
+
+    <p class="TipPlantas"> <a href="1_2_interior.html" class="activo">Interior</a> <a href="1_2_plantines.html">Plantines florales</a> <a href="1_2_arbustos.html">Arbustos</a> <a href="1_2_aromaticas.html">Aromáticas</a></p>
+</div>
+</div><!-- /.header-nav-fijo -->
+
+<!-- ═══════════════════════════════════════
+   CHECKOUT / FINALIZAR COMPRA
+═══════════════════════════════════════ -->
+<!-- Overlay -->
+<div class="carrito-overlay" id="carrito-overlay"></div>
+
+<!-- Panel principal -->
+<div class="carrito-panel" id="carrito-panel">
+
+    <!-- HEADER (título cambia según el paso) -->
+    <div class="carrito-header">
+        <button id="checkout-volver" class="checkout-volver-btn"
+                onclick="irAPaso(pasoActual - 1)" style="display:none"
+                aria-label="Volver al paso anterior">&#8592;</button>
+        <h2>🛒 Tu carrito</h2>
+        <button class="carrito-cerrar" onclick="cerrarCarrito()" aria-label="Cerrar carrito">×</button>
+    </div>
+
+    <!-- BARRA DE PASOS (solo visible del paso 2 en adelante) -->
+    <div id="checkout-steps" class="checkout-steps-bar" style="display:none">
+        <div class="step-item" id="step-dot-1">
+            <div class="step-circle">1</div>
+            <span class="step-label">Carrito</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item" id="step-dot-2">
+            <div class="step-circle">2</div>
+            <span class="step-label">Entrega</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item" id="step-dot-3">
+            <div class="step-circle">3</div>
+            <span class="step-label">Pago</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item" id="step-dot-4">
+            <div class="step-circle">4</div>
+            <span class="step-label">Confirmar</span>
+        </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PASO 1: Carrito
+    ───────────────────────────────────────── -->
+    <div id="checkout-paso-1" style="display:flex; flex-direction:column; flex:1;">
+
+        <div class="carrito-items" id="carrito-lista">
+            <div class="carrito-vacio">Tu carrito está vacío 🌱</div>
+        </div>
+
+        <div class="carrito-footer" id="carrito-footer-p1">
+            <div id="aviso-envio-gratis" class="aviso-envio" style="display:none"></div>
+            <div id="aviso-fragil-carrito" class="aviso-fragil" style="display:none">
+                🌱 Tenés plantas y/o productos frágiles en tu carrito. Para evitar daños en el traslado, te recomendamos elegir <strong>retiro en local</strong> en el próximo paso.
+            </div>
+            <div class="carrito-total">
+                <span>Total</span>
+                <span id="carrito-total">$0</span>
+            </div>
+            <button class="btn-pedido" onclick="irAPaso(2)">
+                Continuar →
+            </button>
+            <button class="btn-vaciar" onclick="vaciarCarrito()">Vaciar carrito</button>
+        </div>
+
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PASO 2: Forma de entrega
+    ───────────────────────────────────────── -->
+    <div id="checkout-paso-2" style="display:inline-block; flex-direction:column; flex:1;">
+
+        <div class="checkout-metodos">
+
+            <!-- Recuadros de forma de entrega, uno al lado del otro -->
+            <div class="metodos-row">
+
+                <!-- Opción A: Retiro en local -->
+                <label class="metodo-box">
+                    <input type="radio" name="formaEntrega" value="retiro">
+                    <div class="metodo-contenido">
+                        <strong>Retiro en local</strong>
+                        <p>Camino General Belgrano 4470, Berazategui</p>
+                    </div>
+                </label>
+
+                <!-- Opción B: Envío a domicilio -->
+                <label class="metodo-box">
+                    <input type="radio" name="formaEntrega" value="envio">
+                    <div class="metodo-contenido">
+                        <strong>Envío a domicilio</strong>
+                        <p>Gratis desde $150.000 en Berazategui y Quilmes Centro</p>
+                    </div>
+                </label>
+
+            </div>
+
+            <!-- Opción C: coordinar la entrega directamente con un vendedor
+                 por WhatsApp (ocupa el ancho de las dos opciones de arriba) -->
+            <button type="button" class="btn-coordinar-vendedor" onclick="coordinarConVendedor()">
+                <i class="fab fa-whatsapp"></i> Coordinar compra y entrega con la vendedora.
+            </button>
+
+            <!-- Formulario de retiro (visible solo al elegir retiro en local):
+                 nombre y DNI de quien retira, para poder identificarlo al
+                 momento de entregar la planta (puede ser distinto de quien
+                 compró/pagó, ej: usuario invitado que manda a alguien más). -->
+            <div id="datosRetiro" class="oculto">
+                <input type="text" id="retiro-nombre" placeholder="Nombre de quien retira *" autocomplete="name">
+                <input type="text" id="retiro-dni" placeholder="DNI *" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+            </div>
+
+            <!-- Formulario de envío (visible solo al elegir envío a domicilio) -->
+            <div id="datosEnvio" class="oculto">
+                <input type="text" id="envio-nombre" placeholder="Nombre completo *" autocomplete="name">
+                <input type="tel"  id="envio-celular" placeholder="Celular *" inputmode="numeric" pattern="[0-9]*" maxlength="15" autocomplete="tel">
+                <input type="text"   id="envio-domicilio" placeholder="Domicilio (calle y número) *">
+                <select id="envio-localidad">
+                    <option value="">Localidad *</option>
+                    <option value="Avellaneda Centro">Avellaneda</option>
+                    <option value="Crucesita">Crucesita</option>
+                    <option value="Quinta Galli">Quinta Galli</option>
+                    <option value="Gerli">Gerli</option>
+                    <option value="Sarandi">Sarandí</option>
+                    <option value="Villa Dominico">Villa Dominico</option>
+                    <option value="Wilde">Wilde</option>
+                    <option value="Bernal Residencial">Bernal Residecial</option>
+                    <option value="Bernal Centro">Bernal Centro</option>
+                    <option value="Country Nuevo Quilmes">Country Nuevo Quilmes</option>
+                    <option value="Quilmes">Quilmes Centro</option>
+                    <option value="Berazategui">Berazategui</option>
+                    <option value="Country el Cármen">Country el Cármen</option>
+                    <option value="Country Abril Sur">Country Abril Sur</option>
+                    <option value="Fincas de Hudson">Fincas de Hudson</option>
+                    <option value="Fincas de Iraola">Fincas de Iraola</option>
+                    <option value="Lanús">Lanús</option>
+                    <option value="Banfield">Banfield</option>
+                    <option value="Lomas de Zamora">Lomas de Zamora</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <div id="zona-cobertura-msg" class="zona-msg" style="display:none"></div>
+                <input type="number" id="envio-cp" placeholder="Código postal *">
+                <br><br>
+                <a href="https://www.correoargentino.com.ar/formularios/cpa" target="_blank">
+            Pulsa aqui para conocer mi Codigo Postal
+        </a>
+            </div>
+            <div id="aviso-fragil-envio" class="aviso-fragil" style="display:none">
+                🌱 Tu carrito tiene plantas y/o productos frágiles. Pueden sufrir daños durante el envío — considerá elegir <strong>retiro en local</strong> para esos productos.
+            </div>
+            <br>
+            <a href="https://www.google.com/maps/d/edit?mid=1sqnUizttSTMKmUOTFNrtT2oSeUKbW2g&usp=sharing" target="_blank">
+            <div class="mapa-link">
+            <i class="fa-solid fa-map-location-dot"></i>
+                Ver mapa de cobertura para Quilmes Centro
+            </div>
+        </a>
+        
+        </div>
+        
+
+        <div class="checkout-footer">
+            <button class="btn-pedido" onclick="avanzarAPaso3Pago()">
+                Continuar al pago →
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PASO 3: Forma de pago
+    ───────────────────────────────────────── -->
+    <div id="checkout-paso-3" style="display:none; flex-direction:column; flex:1;">
+
+        <div class="checkout-metodos">
+
+            <p class="zona-msg" style="display:block; color:#555; margin-bottom:10px;">
+                Elegí cómo vas a pagar. Por ahora podés completar la compra con
+                <strong>Transferencia</strong> o <strong>Tarjeta</strong>; el resto de las
+                opciones va a estar disponible muy pronto.
+            </p>
+
+            <!-- Grilla de botones: todos del mismo tamaño, solo ícono + nombre.
+                 Al tocar cualquiera se despliega su renglón de datos en el
+                 panel de abajo (#metodoDetalle). -->
+            <div class="metodos-grid">
+
+                <label class="metodo-card">
+                    <input type="radio" name="metodoPago" value="transferencia" checked>
+                    <i class="fa-solid fa-building-columns"></i>
+                    <span>Transferencia bancaria</span>
+                </label>
+
+                <label class="metodo-card">
+                    <input type="radio" name="metodoPago" value="tarjeta">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>Tarjeta de crédito / débito</span>
+                </label>
+
+                <label class="metodo-card metodo-card--proximamente">
+                    <input type="radio" name="metodoPago" value="modo">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>MODO</span>
+                    <span class="metodo-proximamente-tag">Próximamente</span>
+                </label>
+
+                <label class="metodo-card metodo-card--proximamente">
+                    <input type="radio" name="metodoPago" value="mercadopago">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span>Mercado Pago</span>
+                    <span class="metodo-proximamente-tag">Próximamente</span>
+                </label>
+
+                <label class="metodo-card metodo-card--proximamente">
+                    <input type="radio" name="metodoPago" value="mercadocredito">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                    <span>Mercado Crédito</span>
+                    <span class="metodo-proximamente-tag">Próximamente</span>
+                </label>
+
+                <label class="metodo-card metodo-card--proximamente">
+                    <input type="radio" name="metodoPago" value="cuotasdebito">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Cuotas sin interés con Débito</span>
+                    <span class="metodo-proximamente-tag">Próximamente</span>
+                </label>
+
+            </div>
+
+            <!-- Panel de detalle: un solo renglón completo debajo de la
+                 grilla que cambia de contenido según el método elegido
+                 (lo controla aplicarVisibilidadMetodo en script.js). -->
+            <div id="metodoDetalle" class="metodo-detalle-panel">
+
+                <!-- Transferencia (FUNCIONAL) -->
+                <div id="detalle-transferencia" class="metodo-detalle">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Hasta 3 cuotas sin interés desde $150.000
+                    </p>
+                    <!--<div id="cbu-info" class="cbu-info-box">
+                        <div class="cbu-row">
+                            <span class="cbu-label">Alias</span>
+                            <span class="cbu-value">AGUS.MUNDO.VERDE</span>
+                        </div>
+                        <div class="cbu-row">
+                            <span class="cbu-label">Banco</span>
+                            <span class="cbu-value">Banco Santander</span>
+                        </div>
+                    </div>-->
+                    <div id="comprobanteBox">
+                        <label class="comprobante-label">
+                            Subí el comprobante de pago * (JPG, PNG o PDF)
+                        </label>
+                        <input type="file" accept="image/*,.pdf" id="comprobante-archivo">
+                    </div>
+                </div>
+
+                <!-- Tarjeta vía Mercado Pago Bricks (FUNCIONAL) -->
+                <div id="detalle-tarjeta" class="metodo-detalle" style="display:none">
+                    <div id="tarjetaBox">
+
+                        <!-- Se muestra SOLO si MP_PUBLIC_KEY todavía no está configurada
+                             en script.js (ver inicializarBrickTarjeta). Con la Public Key
+                             puesta, este aviso se oculta solo y el Brick real ocupa su lugar. -->
+                        <div class="mp-preview-banner" id="mp-preview-banner">
+                            Vista previa — se conecta cuando cargues tu Public Key de Mercado Pago en script.js (MP_PUBLIC_KEY)
+                        </div>
+
+                        <!-- Acá el SDK de Mercado Pago monta el Card Payment Brick real:
+                             número de tarjeta, vencimiento, CVV, cuotas y DNI, todo
+                             tokenizado en el navegador del cliente. Mundo Verde nunca
+                             recibe el número de tarjeta ni el código de seguridad. -->
+                        <div id="cardPaymentBrick_container"></div>
+
+                        <div class="zona-msg" style="display:block; color:#555; margin-top:8px;">
+                            Con tarjeta el pago se confirma al instante — no hace falta adjuntar comprobante.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODO — todavía sin integración -->
+                <div id="detalle-modo" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Vas a poder pagar directamente desde la app MODO. Todavía estamos
+                        conectando este medio de pago.
+                    </p>
+                </div>
+
+                <!-- Mercado Pago (billetera) — todavía sin integración -->
+                <div id="detalle-mercadopago" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Pago con el saldo de tu cuenta de Mercado Pago. Todavía estamos
+                        conectando este medio de pago.
+                    </p>
+                </div>
+
+                <!-- Mercado Crédito — todavía sin integración -->
+                <div id="detalle-mercadocredito" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Financiá tu compra con tu línea de Mercado Crédito. Todavía estamos
+                        conectando este medio de pago.
+                    </p>
+                </div>
+
+                <!-- Cuotas sin interés con Débito — todavía sin integración -->
+                <div id="detalle-cuotasdebito" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Plan de cuotas sin interés pagando con tarjeta de débito. Todavía
+                        estamos conectando este medio de pago.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="checkout-footer">
+            <button class="btn-pedido" id="btnContinuarPago" onclick="avanzarAPaso4()">
+                Ver resumen del pedido →
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PASO 4: Confirmar pedido
+    ───────────────────────────────────────── -->
+    <div id="checkout-paso-4" style="display:none; flex-direction:column; flex:1;">
+
+        <div class="confirm-body">
+
+            <div class="confirm-section">
+                <div class="confirm-section-title">Productos</div>
+                <div id="confirm-productos"></div>
+            </div>
+
+            <div class="confirm-section">
+                <div class="confirm-section-title">Entrega</div>
+                <div id="confirm-entrega"></div>
+            </div>
+
+            <div id="confirm-retiro" style="display:none">
+                <!-- se llena dinámicamente -->
+            </div>
+
+            <div id="confirm-envio" style="display:none">
+                <!-- se llena dinámicamente -->
+            </div>
+
+            <div class="confirm-section">
+                <div class="confirm-section-title">Pago</div>
+                <div id="confirm-pago"></div>
+            </div>
+
+            <div class="confirm-total-row">
+                <span>Total final</span>
+                <span id="confirm-total-final">$0</span>
+            </div>
+
+        </div>
+
+        <div class="checkout-footer checkout-botones">
+            <button class="btn-confirmar" onclick="enviarPedidoWhatsApp()">
+                <i class="fab fa-whatsapp"></i> Enviar pedido por WhatsApp
+            </button>
+            <!--<button class="btn-mail" onclick="enviarPedidoMail()">
+                ✉️ Enviar por email
+            </button> -->
+        </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PASO 5: Confirmación post-pedido
+    ───────────────────────────────────────── -->
+    <div id="checkout-paso-5" style="display:none; flex-direction:column; flex:1; align-items:center; justify-content:center; padding:32px 24px; text-align:center;">
+        <div style="font-size:48px; margin-bottom:16px;">🌿</div>
+        <h3 style="color:#2e7d32; margin-bottom:8px;">¡Pedido enviado!</h3>
+        <p style="color:#555; font-size:14px; line-height:1.6;">
+            Te vamos a responder a la brevedad para confirmar y coordinar la entrega.
+        </p>
+        <button class="btn-vaciar" style="margin-top:24px;" onclick="cerrarCarrito()">
+            Cerrar
+        </button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Botón flotante WhatsApp -->
+<a href="https://wa.me/5491168316730?text=Hola%20quiero%20consultar" class="whatsapp-float" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+</a>
+
+<div class="catalogo" id="catalogo">
+    <div class="producto" data-id="int-01">
+        <img src="img/interior/Anglaonema.webp" loading="lazy" alt="Anglaonema">
+        <h3><a target="_blank">Aglaonema</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Aglaonema', 25000, 'img/interior/Anglaonema.webp', 'int-01')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-02">
+        <img src="img/interior/AnglaonemaPattaya.webp" loading="lazy" alt="AnglaonemaPattaya">
+        <h3><a target="_blank">Aglaonema Pattaya</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('AglaonemaPattaya', 25000, 'img/interior/AnglaonemaPattaya.webp', 'int-02')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-03">
+        <img src="img/interior/Anthurium.jpg" loading="lazy" alt="Anthurium">
+        <h3><a target="_blank">Anthurium</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Anthurium', 25000, 'img/interior/Anthurium.jpg', 'int-03')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-04">
+        <img src="img/interior/AraliaArbolica.jpg" loading="lazy" alt="AraliaArbolica">
+        <h3><a target="_blank">Aralia Arbolica</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('AraliaArbolica', 25000, 'img/interior/AraliaArbolica.jpg', 'int-04')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-05">
+        <img src="img/interior/AraliaElegantissima.jpg" loading="lazy" alt="AraliaElegantissima">
+        <h3><a target="_blank">Aralia Elegantissima</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('AraliaElegantissima', 25000, 'img/interior/AraliaElegantissima.jpg', 'int-05')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-06">
+        <img src="img/interior/Asplenium.webp" loading="lazy" alt="Asplenium">
+        <h3><a target="_blank">Asplenium</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Asplenium', 25000, 'img/interior/Asplenium.webp', 'int-06')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-07">
+        <img src="img/interior/BegoniaAlaDeAngel.jpg" loading="lazy" alt="BegoniaAlaDeAngel">
+        <h3><a target="_blank">Begonia ala de ángel</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('BegoniaAlaDeAngel', 25000, 'img/interior/BegoniaAlaDeAngel.jpg', 'int-07')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-08">
+        <img src="img/interior/BegoniaCleopatra.jpg" loading="lazy" alt="BegoniaCleopatra">
+        <h3><a target="_blank">Begonia Cleopatra</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('BegoniaCleopatra', 25000, 'img/interior/BegoniaCleopatra.jpg', 'int-08')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-09">
+        <img src="img/interior/BegoniaSolimutata.jpg" loading="lazy" alt="BegoniaSolimutata">
+        <h3><a target="_blank">Begonia Solimutata</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('BegoniaSolimutata', 25000, 'img/interior/BegoniaSolimutata.jpg', 'int-09')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-10">
+        <img src="img/interior/CalasDeColor.jpg" loading="lazy" alt="CalasDeColor">
+        <h3><a target="_blank">Calas de Color</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('CalasDeColor', 25000, 'img/interior/CalasDeColor.jpg', 'int-10')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-11">
+        <img src="img/interior/Calathea.jpg" loading="lazy" alt="Calathea">
+        <h3><a target="_blank">Calathea</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Calathea', 25000, 'img/interior/Calathea.jpg', 'int-11')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-12">
+        <img src="img/interior/CalatheaMacoyana.webp" loading="lazy" alt="CalatheaMacoyana">
+        <h3><a target="_blank">Calathea Macoyana</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('CalatheaMacoyana', 25000, 'img/interior/CalatheaMacoyana.webp', 'int-12')">Agregar al carrito</button>
+    </div>
+    
+    <div class="producto" data-id="int-13">
+        <img src="img/interior/CalatheaOmata.webp" loading="lazy" alt="CalatheaOmata">
+        <h3><a target="_blank">Calathea Ornata</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('CalatheaOmata', 25000, 'img/interior/CalatheaOmata.webp', 'int-13')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-14">
+        <img src="img/interior/CalatheaStromathe.webp" loading="lazy" alt="CalatheaStromathe">
+        <h3><a target="_blank">Calathea Stromathe</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('CalatheaStromathe', 25000, 'img/interior/CalatheaStromathe.webp', 'int-14')">Agregar al carrito</button>
+    </div>
+    
+    <div class="producto" data-id="int-15">
+        <img src="img/interior/Chamadorea.jpg" loading="lazy" alt="Cissus">
+        <h3><a target="_blank">Chamadorea</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('', 25000, 'img/interior/Chamadorea.jpg', 'int-15')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-16">
+        <img src="img/interior/Cissus.webp" loading="lazy" alt="Cissus">
+        <h3><a target="_blank"></a>Cissus</h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Cissus', 25000, 'img/interior/Cissus.webp', 'int-16')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-17">
+        <img src="img/interior/CordatumVerdeCorzon.jpg" loading="lazy" alt="CordatumVerdeCorzon">
+        <h3><a target="_blank">Cordatum verde corzón</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Cordatum Verde Corzon', 25000, 'img/interior/CordatumVerdeCorzon.jpg', 'int-17')">Cordatum verde corzón</button>
+    </div>
+    <div class="producto" data-id="int-18">
+        <img src="img/interior/CrotonFideo.webp" loading="lazy" alt="CrotonFideo">
+        <h3><a target="_blank">Crotón fideo</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Crotón Fideo', 25000, 'img/interior/CrotonFideo.webp', 'int-18')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-19">
+        <img src="img/interior/CrotonMandarina.webp" loading="lazy" alt="">
+        <h3><a target="_blank">Crotón Mandarina</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Crotón Mandarina', 25000, 'img/interior/CrotonMandarina.webp', 'int-19')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-20">
+        <img src="img/interior/CrotonMonaLisa.webp" loading="lazy" alt="CrotonMonaLisa">
+        <h3><a target="_blank">Crotón mona lisa</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Crotón mona lisa', 25000, 'img/interior/CrotonMonaLisa.webp', 'int-20')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-21">
+        <img src="img/interior/CrotonPetra.webp" loading="lazy" alt="CrotonPetra">
+        <h3><a target="_blank">Crotón Petra</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Crotón Petra', 25000, 'img/interior/CrotonPetra.webp', 'int-21')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-22">
+        <img src="img/interior/DracaenaLimon.webp" loading="lazy" alt="Dracaena_Limon">
+        <h3><a target="_blank">Dracaena Limón</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Dracaena Limón', 25000, 'img/interior/DracaenaLimon.webp', 'int-22')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-23">
+        <img src="img/interior/DracenaLemon.webp" loading="lazy" alt="DracenaLemon">
+        <h3><a target="_blank">Dracena Lemon</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Dracena Lemon', 25000, 'img/interior/DracenaLemon.webp', 'int-23')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-24">
+        <img src="img/interior/DracenaMarginata.webp" loading="lazy" alt="DracenaMarginata">
+        <h3><a target="_blank">Dracena Marginata</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Dracena Marginata', 25000, 'img/interior/DracenaMarginata.webp', 'int-24')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-25">
+        <img src="img/interior/DracenaRubra.jpg" loading="lazy" alt="Dracena Rubra">
+        <h3><a target="_blank">Dracena Rubra</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Dracena Rubra', 25000, 'img/interior/DracenaRubra.jpg', 'int-25')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-26">
+        <img src="img/interior/EstrellaFederal.jpg" loading="lazy" alt="Estrella Federal">
+        <h3><a target="_blank">Estrella Federal</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Estrella Federal', 25000, 'img/interior/EstrellaFederal.jpg', 'int-26')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-27">
+        <img src="img/interior/FitoniaEscudoPersa.jpg" loading="lazy" alt="Fitonia Escudo Persa">
+        <h3><a target="_blank">Fitonia escudo Persa</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Fitonia escudo Persa', 25000, 'img/interior/FitoniaEscudoPersa.jpg', 'int-27')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-28">
+        <img src="img/interior/FitoniaRosada.jpg" loading="lazy" alt="Fitonia Rosada">
+        <h3><a target="_blank">Fitonia Rosada</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Fitonia Rosada', 25000, 'img/interior/FitoniaRosada.jpg', 'int-28')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-29">
+        <img src="img/interior/GomeroAudrey.webp" loading="lazy" alt="Gomero Audrey">
+        <h3><a target="_blank">Gomero Audrey</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Gomero Audrey', 25000, 'img/interior/GomeroAudrey.webp', 'int-29')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-30">
+        <img src="img/interior/Gymura.jpg" loading="lazy" alt="Gymura">
+        <h3><a target="_blank">Gymura</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Gymura', 25000, 'img/interior/Gymura.jpg', 'int-30')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-31">
+        <img src="img/interior/Helecho.webp" loading="lazy" alt="Helecho">
+        <h3><a target="_blank">Helecho</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Helecho', 25000, 'img/interior/Helecho.webp', 'int-31')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-32">
+        <img src="img/interior/HelechoAspardagus.webp" loading="lazy" alt="Helecho Aspardagus">
+        <h3><a target="_blank">Helecho Aspardagus</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Helecho Aspardagus', 25000, 'img/interior/HelechoAspardagus.webp', 'int-32')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-33">
+        <img src="img/interior/HelechoSerrucho.jpg" loading="lazy" alt="HelechoAspardagus">
+        <h3><a target="_blank">Helecho Serrucho</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Helecho Serrucho', 25000, 'img/interior/HelechoSerrucho.jpg', 'int-33')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-34">
+        <img src="img/interior/HojaDeSalon.jpg" loading="lazy" alt="HojaDeSalon">
+        <h3><a target="_blank">Hoja de Salón</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Hoja de Salón', 25000, 'img/interior/HojaDeSalon.jpg', 'int-34')">Agregar al carrito</button>
+    </div>      
+    <div class="producto" data-id="int-35">
+        <img src="img/interior/Leptospermun.jpg" loading="lazy" alt="Leptospermun">
+        <h3><a target="_blank">Leptospermun</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Leptospermun', 25000, 'img/interior/Leptospermun.jpg', 'int-35')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-36">
+        <img src="img/interior/CalatheaMacoyana.webp" loading="lazy" alt="CalatheaMacoyana">
+        <h3><a target="_blank">Calathea Macoyana</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Calathea Macoyana', 2000, 'img/interior/CalatheaMacoyana.webp', 'int-36')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-37">
+        <img src="img/interior/Misionero.jpg" loading="lazy" alt="Misionero">
+        <h3><a target="_blank">Misionero</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Misionero', 25000, 'img/interior/Misionero.jpg', 'int-37')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-38">
+        <img src="img/interior/Monstera.webp" loading="lazy" alt="Monstera">
+        <h3><a target="_blank">Monstera</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Monstera', 25000, 'img/interior/Monstera.webp', 'int-38')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-39">
+        <img src="img/interior/OrejaDeElefante.jpg" loading="lazy" alt="Oreja De Elefante">
+        <h3><a target="_blank">Oreja de Elefante</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Oreja de Elefante', 25000, 'img/interior/OrejaDeElefante.jpg', 'int-39')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-40">
+        <img src="img/interior/Orquídeas.jpg" loading="lazy" alt="Orquídeas">
+        <h3><a target="_blank">Orquídeas</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Orquídeas', 25000, 'img/interior/Orquídeas.jpg', 'int-40')">Agregar al carrito</button>
+    </div>       
+    <div class="producto" data-id="int-41">
+        <img src="img/interior/Osaka.jpg" loading="lazy" alt="Osaka">
+        <h3><a target="_blank">Osaka</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Osaka', 25000, 'img/interior/Osaka.jpg', 'int-41')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-42">
+        <img src="img/interior/GomeroNegro.jpg" loading="lazy" alt="Gomero Negro">
+        <h3><a target="_blank">Gomero Negro</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Gomero Negro', 25000, 'img/interior/GomeroNegro.jpg', 'int-42')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-43">
+        <img src="img/interior/GomeroRubí.jpg" loading="lazy" alt="Gomero Rubí">
+        <h3><a target="_blank">Gomero Rubí</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Gomero Rubí', 25000, 'img/interior/GomeroRubí.jpg', 'int-43')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-44">
+        <img src="img/interior/Palmito.webp" loading="lazy" alt="Palmito">
+        <h3><a target="_blank">Palmito</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Palmito', 25000, 'img/interior/Palmito.webp', 'int-44')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-45">
+        <img src="img/interior/PaloDeAguaCh.jpg" loading="lazy" alt="PaloDeAgua">
+        <h3><a target="_blank">Palo de agua</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('PaloDeAgua', 25000, 'img/interior/PaloDeAguaCh.jpg', 'int-45')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-46">
+        <img src="img/interior/PaloDeAguaGr.webp" loading="lazy" alt="PaloDeAguaw">
+        <h3><a target="_blank">Palo de agua</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Palo de agua', 25000, 'img/interior/PaloDeAguaGr.webp', 'int-46')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-47">
+        <img src="img/interior/Pandurata.webp" loading="lazy" alt="Pandurata">
+        <h3><a target="_blank">Pandurata</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Pandurata', 25000, 'img/interior/Pandurata.webp', 'int-47')">Agregar al carrito</button>
+    </div>       
+    <div class="producto" data-id="int-48">
+        <img src="img/interior/PeperoniaBlanca.webp" loading="lazy" alt="Peperonia Blanca">
+        <h3><a target="_blank">Peperonia Blanca</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('PeperoniaBlanca', 25000, 'img/interior/PeperoniaBlanca.webp', 'int-48')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-49">
+        <img src="img/interior/PeperoniaLemon.jpg" loading="lazy" alt="Peperonia Lemon">
+        <h3><a target="_blank">Peperonia Lemon</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Peperonia Lemon', 25000, 'img/interior/PeperoniaLemon.jpg', 'int-49')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-50">
+        <img src="img/interior/PeperoniaRosada.jpg" loading="lazy" alt="PeperoniaRosada">
+        <h3><a target="_blank">Peperonia Rosada</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Peperonia Rosada', 25000, 'img/interior/PeperoniaRosada.jpg', 'int-50')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-51">
+        <img src="img/interior/PeperoniaVerde.jpg" loading="lazy" alt="PeperoniaVerde">
+        <h3><a target="_blank">Peperonia Verde</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Peperonia Verde', 25000, 'img/interior/PeperoniaVerde.jpg', 'int-51')">Agregar al carrito</button>
+    </div>       
+    <div class="producto" data-id="int-52">
+        <img src="img/interior/Perubiano.webp" loading="lazy" alt="Perubiano">
+        <h3><a target="_blank">Perubiano</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Perubiano', 25000, 'img/interior/Perubiano.webp', 'int-52')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-53">
+        <img src="img/interior/PhilodendroBrasil.webp" loading="lazy" alt="PhilodendroBrasil">
+        <h3><a target="_blank">Philodendro Brasil</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Philodendro Brasil', 25000, 'img/interior/PhilodendroBrasil.webp', 'int-53')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-54">
+        <img src="img/interior/PhilodendroLimon.webp" loading="lazy" alt="Philodendro Limón">
+        <h3><a target="_blank">Philodendro Limón</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Philodendro Limón', 25000, 'img/interior/PhilodendroLimon.webp', 'int-54')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-55">
+        <img src="img/interior/PhilodendroReal.jpg" loading="lazy" alt="PhilodendroReal">
+        <h3><a target="_blank">Philodendro Real</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Philodendro Real', 25000, 'img/interior/PhilodendroReal.jpg', 'int-55')">Agregar al carrito</button>
+    </div>       
+    <!--<div class="producto" data-id="int-">
+        <img src="img/interior/" loading="lazy" alt="">
+        <h3><a target="_blank"></a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('', 25000, 'img/interior/', 'int-')">Agregar al carrito</button>
+    </div>-->
+    <div class="producto" data-id="int-57">
+        <img src="img/interior/PhilodendroSanguíneo.jpg" loading="lazy" alt="PhilodendroSanguíneo">
+        <h3><a target="_blank">Philodendro Sanguíneo</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Philodendro Sanguíneo', 25000, 'img/interior/PhilodendroSanguíneo.jpg', 'int-57')">Agregar al carrito</button>
+    </div>
+     <div class="producto" data-id="int-58">
+        <img src="img/interior/potusConTutor.webp" loading="lazy" alt="potus_con_tutor_1">
+        <h3><a target="_blank">Potus con tutor</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('potus con tutor', 25000, 'img/interior/potusConTutor.webp', 'int-58')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-59">
+        <img src="img/interior/potusBlanco.webp" loading="lazy" alt="potusBlanco">
+        <h3><a target="_blank">Potus Blanco</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('potusBlanco', 25000, 'img/interior/potusBlanco.webp', 'int-59')">Agregar al carrito</button>
+    </div>     
+    <!--<div class="producto" data-id="int-">
+        <img src="img/" loading="lazy" alt="">
+        <h3><a target="_blank"></a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('', 25000, '', 'int-')">Agregar al carrito</button>
+    </div>--> 
+    <div class="producto" data-id="int-61">
+        <img src="img/interior/PotusColgante.webp" loading="lazy" alt="PotusColgante">
+        <h3><a target="_blank">Potus Colgante</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Potus Colgante', 25000, 'img/interior/PotusColgante.webp', 'int-61')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-62">
+        <img src="img/interior/PotusLemon.webp" loading="lazy" alt="PotusLemon">
+        <h3><a target="_blank">Potus Lemon</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('PotusLemon', 25000, 'img/interior/PotusLemon.webp', 'int-62')">Agregar al carrito</button>
+    </div>
+     <div class="producto" data-id="int-63">
+        <img src="img/interior/PotusPlantin.webp" loading="lazy" alt="PotusPlantin">
+        <h3><a target="_blank">Potus Plantin</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Potus Plantin', 25000, 'img/interior/PotusPlantin.webp', 'int-63')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-64">
+        <img src="img/interior/Raphi.webp" loading="lazy" alt="Raphi">
+        <h3><a target="_blank">Raphi</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Raphi', 25000, 'img/interior/Raphi.webp', 'int-64')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-65">
+        <img src="img/interior/Rhaphidophora.webp" loading="lazy" alt="Rhaphidophora">
+        <h3><a target="_blank">Rhaphidophora</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Rhaphidophora', 25000, 'img/interior/Robusta.webp', 'int-65')">Agregar al carrito</button>
+    </div>       
+    <div class="producto" data-id="int-66">
+        <img src="img/interior/Robusta.webp" loading="lazy" alt="Robusta">
+        <h3><a target="_blank">Robusta</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Robusta', 25000, 'img/interior/Robusta.webp', 'int-66')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-67">
+        <img src="img/interior/Sanderiana.webp" loading="lazy" alt="Sanderiana">
+        <h3><a target="_blank">Sanderiana</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Sanderiana', 25000, 'img/interior/Sanderiana.webp', 'int-67')">Agregar al carrito</button>
+    </div>
+     <div class="producto" data-id="int-68">
+        <img src="img/interior/Sansiviera.webp" loading="lazy" alt="Sansiviera">
+        <h3><a target="_blank">Sansiviera</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Sansiviera', 25000, 'img/interior/Sansiviera.webp', 'int-68')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-69">
+        <img src="img/interior/Sansivierenana.jpg" loading="lazy" alt="SansivierEenana">
+        <h3><a target="_blank">Sansiviera enana</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Sansiviera enana', 25000, 'img/interior/Sansivierenana.jpg', 'int-69')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-70">
+        <img src="img/interior/Seafortia.jpg" loading="lazy" alt="Seafortia">
+        <h3><a target="_blank">Seafortia</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Seafortia', 25000, 'img/interior/Seafortia.jpg', 'int-70')">Agregar al carrito</button>
+    </div>       
+    <div class="producto" data-id="int-71">
+        <img src="img/interior/Spathiphyllum.webp" loading="lazy" alt="Spathiphyllum">
+        <h3><a target="_blank">Spathiphyllum</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Spathiphyllum', 25000, 'img/interior/Spathiphyllum.webp', 'int-71')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-72">
+        <img src="img/interior/SterlitziaNicolai.jpg" loading="lazy" alt="SterlitziaNicolai">
+        <h3><a target="_blank">Sterlitzia Nicolai</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('SterlitziaNicolai', 25000, 'img/interior/SterlitziaNicolai.jpg', 'int-72')">Agregar al carrito</button>
+    </div> 
+    <div class="producto" data-id="int-73">
+        <img src="img/interior/SyngonioInterior.jpg" loading="lazy" alt="SyngonioInterior">
+        <h3><a target="_blank">Syngonio Interior</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('SyngonioInterior', 25000, 'img/interior/SyngonioInterior.jpg', 'int-73')">Agregar al carrito</button>
+    </div>
+     <div class="producto" data-id="int-75">
+        <img src="img/interior/SyngoniumRosado.webp" loading="lazy" alt="SyngoniumRosado">
+        <h3><a target="_blank">Syngonium Rosado</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('SyngoniumRosado', 25000, 'img/interior/SyngoniumRosado.webp', 'int-75')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="int-76">
+        <img src="img/interior/TrandiscantiaRosada.jpg" loading="lazy" alt="TrandiscantiaRosada">
+        <h3><a target="_blank">Trandiscantia Rosada</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Trandiscantia Rosada', 25000, 'img/interior/TrandiscantiaRosada.jpg', 'int-76')">Agregar al carrito</button>
+    </div>     
+    <!--<div class="producto" data-id="int-">
+        <img src="img/interior" loading="lazy" alt="">
+        <h3><a target="_blank"></a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('', 25000, '', 'int-')">Agregar al carrito</button>
+    </div>-->       
+    <div class="producto" data-id="int-78">
+        <img src="img/interior/Tropic.jpg" loading="lazy" alt="Tropic">
+        <h3><a target="_blank">Tropic</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Tropic', 25000, 'img/interior/Tropic.jpg', 'int-78')">Agregar al carrito</button>
+    </div>     
+    <div class="producto" data-id="int-79">
+        <img src="img/interior/Zamioculca.webp" loading="lazy" alt="Zamioculca">
+        <h3><a target="_blank">Zamioculca</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Zamioculca', 25000, 'img/interior/Zamioculca.webp', 'int-79')">Agregar al carrito</button>
+    </div>             
+</div>
+
+<!--═══════════════════════════════════════════
+   FOOTER
+   ════════════════════════════════════════ -->
+<footer class="footer-natural">
+    <div class="footer-natural-grid">
+        <!-- Marca -->
+        <div class="footer-brand">
+            <img src="img/varios/logo-300x315.webp" alt="Logo" class="footer-logo">
+        
+        <p class="pfot">Vendemos plantas y experiencias</p>
+        <p class="pfot">alrededor del mundo botánico</p></div>
+
+        <!-- Redes -->
+        <div class="footer-social-box">
+            <h3>Sigamos conectados</h3>
+            <div class="footer-social-natural">
+                <a href="https://www.instagram.com/vivemundoverde/" target="_blank">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://www.youtube.com/channel/UCkcuwAC_tYU88KkIiRyHY1g" target="_blank">
+                    <i class="fab fa-youtube"></i>
+                </a>
+                   <a href="https://www.facebook.com/profile.php?id=100079284327539" target="_blank">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                
+            </div>
+            <div class="footer-social-natural">
+                <a href="https://wa.me/5491168316730" target="_blank">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="https://www.tiktok.com/@vmundo_verde" target="_blank">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+                <a href="https://open.spotify.com/playlist/5FSLNFP9xzJtlwApkQbwHi?si=YKLybuptTK2RkuFqI5971w&pi=c_k0108ySGOS5" target="_blank">
+                    <i class="fab fa-spotify"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="footer-links">
+            <h3>Categorías</h3>
+            <ul>
+                <li><a href="1_0_vivero.html">Vivero</a></li>
+                <li><a href="1_1_plantas.html">Plantas</a></li>
+                <li><a href="2_0_talleres.html">Talleres</a></li>
+                <li><a href="3_0_servicios.html">Servicios</a></li>
+                <li><a href="4_0_ramos.html">Ramos</a></li>
+            </ul>
+        </div>
+        <!-- Contacto -->
+        <div class="footer-contact">
+        <h3>Contactános</h3>
+            <ul class="contacto-lista">
+            <li>📱 11 6831-6730</li>
+            <li>
+                <i class="fa-solid fa-envelope"></i>
+                <a target="_blank" href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox">viveunmundoverde@gmail.com</a>
+            </li>
+            <li>📍 Camino General Belgrano 4470</li>
+            <li>📌 Berazategui</li>
+        </ul>
+          
+        </div>
+
+        <!-- Mapa-->
+        <div class="mapa">
+            <h3>Visitanos</h3>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3282.441086419203!2d-58.22444198476909!3d-34.83108658047395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95a32e9c8b1c9d7%3A0x1c8e7b9a5c8e4f!2sCamino%20General%20Belgrano%204470%2C%20Berazategui%2C%20Provincia%20de%20Buenos%20Aires%2C%20Argentina!5e0!3m2!1ses-419!2sar!4v1700000000000!5m2!1ses-419!2sar" width="100%" height="200" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </div>
+
+    <div class="footer-natural-copy">
+        © 2021 Mundo Verde · Todos los derechos reservados
+    </div>
+</footer>
+
+<script src="js/anuncios.js"></script>
+<script src="js/script.js"></script>
+<script src="js/api.js"></script>
+<script src="js/catalogo.js"></script>
+<script src="js/buscador-global.js"></script>
+
+</body>
+</html>

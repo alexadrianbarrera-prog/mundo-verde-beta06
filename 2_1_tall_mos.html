@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content="Vivero mundo verde. Plantas de interior, paisajimo para countries y huerta organica. Visitanos en Sourigues"/><!-- Meta tags para SEO -->
+    <meta name="keywords" content="vivero berazategui, plantas zona sur, paisajismo hudson, mundo verde"/><!--Meta tags para SEO -->
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Spanish">
+    <meta name="author" content="Alex Barrera">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="img/varios/fab.White.64x64.webp">
+    <link rel="apple-touch-icon" sizes="180x180" href="img/varios/fab.White.64x64.webp">
+    <title>Vivero Mundo Verde</title>
+    <link rel="stylesheet" href="css/styles.css?v=3"/>
+    <link rel="stylesheet" href="CharonyPlywrite.css">
+</head>
+
+ 
+
+<body>
+<!--Banner con anucios y ofertas movil-->
+<div class="header-nav-fijo">
+        <div class="anuncios-rotador">
+            <div class="anuncios-track">
+                <p class="anuncios">
+                    💐 21 de septiembre: No te olvides de reservar tu ramo de flores para el Día de la Primavera.
+                </p>
+                <p class="anuncios">🌐 Inauguramos nuestra página web con un 10% extra en todas las compras </p>
+                <p class="anuncios">🛻 Envios gratis en compras superiores a $150.000 a Quilmes y Berazategui</p>
+                <p class="anuncios">🎁 Todos las compras en el local traen sorpresas</p>
+                <!-- misma lista repetida, oculta a lectores de pantalla: hace que el loop no tenga corte -->
+                <p class="anuncios" aria-hidden="true">
+                    💐 21 de septiembre: No te olvides de reservar tu ramo de flores para el Día de la Primavera.
+                </p>
+                <p class="anuncios" aria-hidden="true">🌐 Inauguramos nuestra página web con un 10% extra en todas las compras </p>
+                <p class="anuncios" aria-hidden="true">🛻 Envios gratis en compras superiores a $150.000 a Quilmes y Berazategui</p>
+                <p class="anuncios" aria-hidden="true">🎁 Todos las compras en el local traen sorpresas</p>
+            </div>
+        </div>
+<header class="header">
+    <!--Izquierda-->
+    <div class="header-left">
+
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navList">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+    </button>
+
+    <div class="search-box">
+
+        <button class="search-btn" id="searchBtn">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <input 
+            type="text" 
+            id="searchInput"
+            placeholder="Buscar..."
+        >
+
+    </div>
+
+</div>
+    <!--Centro-->
+<div class="header-center">
+    <h1 class="Tit_Ppal">
+        <span>Mundo</span>
+        <img src="img/varios/Logo de Mundo verde 250x250px.webp" alt="Logo">
+        <span>Verde</span>
+    </h1>
+</div>
+    <!--Derecha-->
+    <div class="header-right">
+        <button class="btn-login" onclick="window.location.href='login.html'" title="Iniciar sesión">👤</button>
+        <button class="btn-carrito" onclick="abrirCarrito()">
+            🛒
+            <span class="carrito-badge">0</span>
+        </button>
+    </div>
+</header>
+
+<!-- BARRA DE NAVEGACIÓN PRINCIPAL -->
+<nav class="nav">
+    <ul class="nav_list" id="navList">
+        <li class="nav_item"><a href="1_0_vivero.html" class="nav_link">VIVERO</a></li>
+
+        <li class="nav_item nav_item--dropdown">
+            <div class="nav_row">
+                <a href="1_1_plantas.html" class="nav_link">PLANTAS</a>
+                <button type="button" class="nav_subtoggle" aria-label="Mostrar subcategorías de Plantas" aria-expanded="false">
+                    <span class="nav_subtoggle-icon">▾</span>
+                </button>
+            </div>
+            <ul class="nav_submenu">
+                <li><a href="1_2_interior.html" class="nav_link nav_sublink">Interior</a></li>
+                <li><a href="1_2_exterior.html" class="nav_link nav_sublink">Exterior</a></li>
+                <li><a href="1_2_arbustos.html" class="nav_link nav_sublink">Arbustos</a></li>
+                <li><a href="1_2_aromaticas.html" class="nav_link nav_sublink">Aromáticas</a></li>
+                <li><a href="1_2_productos.html" class="nav_link nav_sublink">Productos</a></li>
+            </ul>
+        </li>
+
+        <li class="nav_item"><a href="1_2_productos.html" class="nav_link">PRODUCTOS</a></li>
+
+        <li class="nav_item nav_item--dropdown">
+            <div class="nav_row">
+                <a href="2_0_talleres.html" class="nav_link">TALLERES</a>
+                <button type="button" class="nav_subtoggle" aria-label="Mostrar subcategorías de Talleres" aria-expanded="false">
+                    <span class="nav_subtoggle-icon">▾</span>
+                </button>
+            </div>
+            <ul class="nav_submenu">
+                <li><a href="2_1_tall_cer.html" class="nav_link nav_sublink">Cerámica</a></li>
+                <li><a href="2_1_tall_mos.html" class="nav_link nav_sublink">Mosaiquismo</a></li>
+                <li><a href="2_1_tall_EstCog.html" class="nav_link nav_sublink">Estimulación Cognitiva</a></li>
+                <li><a href="2_1_tall_exc.html" class="nav_link nav_sublink">Excursiones</a></li>
+                <li><a href="2_1_tall_tall.html" class="nav_link nav_sublink">Espacio para Talleres</a></li>
+            </ul>
+        </li>
+
+        <li class="nav_item nav_item--dropdown">
+            <div class="nav_row">
+                <a href="3_0_servicios.html" class="nav_link">SERVICIOS</a>
+                <button type="button" class="nav_subtoggle" aria-label="Mostrar subcategorías de Servicios" aria-expanded="false">
+                    <span class="nav_subtoggle-icon">▾</span>
+                </button>
+            </div>
+            <ul class="nav_submenu">
+                <li><a href="3_1_serv_vir.html" class="nav_link nav_sublink">Asesoría Virtual</a></li>
+                <li><a href="3_1_serv_dom.html" class="nav_link nav_sublink">Asesoría a Domicilio</a></li>
+                <li><a href="3_1_serv_com.html" class="nav_link nav_sublink">Locales Comerciales</a></li>
+                <li><a href="3_1_serv_jar.html" class="nav_link nav_sublink">Service de Jardinería</a></li>
+            </ul>
+        </li>
+
+        <li class="nav_item"><a href="4_0_ramos.html" class="nav_link">RAMOS</a></li>
+    </ul>
+    </nav>
+</div>
+</div><!-- /.header-nav-fijo -->
+
+<!-- ═══════════════════════════════════════
+   CHECKOUT / FINALIZAR COMPRA
+═══════════════════════════════════════ -->
+<!-- Overlay -->
+<div class="carrito-overlay" id="carrito-overlay"></div>
+
+<!-- Panel principal -->
+<div class="carrito-panel" id="carrito-panel">
+
+    <!-- HEADER (título cambia según el paso) -->
+    <div class="carrito-header">
+        <button id="checkout-volver" class="checkout-volver-btn"
+                onclick="irAPaso(pasoActual - 1)" style="display:none"
+                aria-label="Volver al paso anterior">&#8592;</button>
+        <h2>🛒 Tu carrito</h2>
+        <button class="carrito-cerrar" onclick="cerrarCarrito()" aria-label="Cerrar carrito">×</button>
+    </div>
+
+    <!-- BARRA DE PASOS (solo visible del paso 2 en adelante) -->
+    <div id="checkout-steps" class="checkout-steps-bar" style="display:none">
+        <div class="step-item" id="step-dot-1">
+            <div class="step-circle">1</div>
+            <span class="step-label">Carrito</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item" id="step-dot-2">
+            <div class="step-circle">2</div>
+            <span class="step-label">Entrega</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item" id="step-dot-3">
+            <div class="step-circle">3</div>
+            <span class="step-label">Pago</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item" id="step-dot-4">
+            <div class="step-circle">4</div>
+            <span class="step-label">Confirmar</span>
+        </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PASO 1: Carrito
+    ───────────────────────────────────────── -->
+    <div id="checkout-paso-1" style="display:flex; flex-direction:column; flex:1;">
+
+        <div class="carrito-items" id="carrito-lista">
+            <div class="carrito-vacio">Tu carrito está vacío 🌱</div>
+        </div>
+
+        <div class="carrito-footer" id="carrito-footer-p1">
+            <div id="aviso-envio-gratis" class="aviso-envio" style="display:none"></div>
+            <div id="aviso-fragil-carrito" class="aviso-fragil" style="display:none">
+                🌱 Tenés plantas y/o productos frágiles en tu carrito. Para evitar daños en el traslado, te recomendamos elegir <strong>retiro en local</strong> en el próximo paso.
+            </div>
+            <div class="carrito-total">
+                <span>Total</span>
+                <span id="carrito-total">$0</span>
+            </div>
+            <button class="btn-pedido" onclick="irAPaso(2)">
+                Continuar →
+            </button>
+            <button class="btn-vaciar" onclick="vaciarCarrito()">Vaciar carrito</button>
+        </div>
+
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PASO 2: Forma de entrega
+    ───────────────────────────────────────── -->
+    <div id="checkout-paso-2" style="display:inline-block; flex-direction:column; flex:1;">
+
+        <div class="checkout-metodos">
+
+            <!-- Recuadros de forma de entrega, uno al lado del otro -->
+            <div class="metodos-row">
+
+                <!-- Opción A: Retiro en local -->
+                <label class="metodo-box">
+                    <input type="radio" name="formaEntrega" value="retiro">
+                    <div class="metodo-contenido">
+                        <strong>Retiro en local</strong>
+                        <p>Camino General Belgrano 4470, Berazategui</p>
+                    </div>
+                </label>
+
+                <!-- Opción B: Envío a domicilio -->
+                <label class="metodo-box">
+                    <input type="radio" name="formaEntrega" value="envio">
+                    <div class="metodo-contenido">
+                        <strong>Envío a domicilio</strong>
+                        <p>Gratis desde $150.000 en Berazategui y Quilmes Centro</p>
+                    </div>
+                </label>
+
+            </div>
+
+            <!-- Opción C: coordinar la entrega directamente con un vendedor
+                 por WhatsApp (ocupa el ancho de las dos opciones de arriba) -->
+            <button type="button" class="btn-coordinar-vendedor" onclick="coordinarConVendedor()">
+                <i class="fab fa-whatsapp"></i> Coordinar compra y entrega con la vendedora.
+            </button>
+
+            <!-- Formulario de retiro (visible solo al elegir retiro en local):
+                 nombre y DNI de quien retira, para poder identificarlo al
+                 momento de entregar la planta (puede ser distinto de quien
+                 compró/pagó, ej: usuario invitado que manda a alguien más). -->
+            <div id="datosRetiro" class="oculto">
+                <input type="text" id="retiro-nombre" placeholder="Nombre de quien retira *" autocomplete="name">
+                <input type="text" id="retiro-dni" placeholder="DNI *" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+            </div>
+
+            <!-- Formulario de envío (visible solo al elegir envío a domicilio) -->
+            <div id="datosEnvio" class="oculto">
+                <input type="text" id="envio-nombre" placeholder="Nombre completo *" autocomplete="name">
+                <input type="tel"  id="envio-celular" placeholder="Celular *" inputmode="numeric" pattern="[0-9]*" maxlength="15" autocomplete="tel">
+                <input type="text"   id="envio-domicilio" placeholder="Domicilio (calle y número) *">
+                <select id="envio-localidad">
+                    <option value="">Localidad *</option>
+                    <option value="Avellaneda Centro">Avellaneda</option>
+                    <option value="Crucesita">Crucesita</option>
+                    <option value="Quinta Galli">Quinta Galli</option>
+                    <option value="Gerli">Gerli</option>
+                    <option value="Sarandi">Sarandí</option>
+                    <option value="Villa Dominico">Villa Dominico</option>
+                    <option value="Wilde">Wilde</option>
+                    <option value="Bernal Residencial">Bernal Residecial</option>
+                    <option value="Bernal Centro">Bernal Centro</option>
+                    <option value="Country Nuevo Quilmes">Country Nuevo Quilmes</option>
+                    <option value="Quilmes">Quilmes Centro</option>
+                    <option value="Berazategui">Berazategui</option>
+                    <option value="Country el Cármen">Country el Cármen</option>
+                    <option value="Country Abril Sur">Country Abril Sur</option>
+                    <option value="Fincas de Hudson">Fincas de Hudson</option>
+                    <option value="Fincas de Iraola">Fincas de Iraola</option>
+                    <option value="Lanús">Lanús</option>
+                    <option value="Banfield">Banfield</option>
+                    <option value="Lomas de Zamora">Lomas de Zamora</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <div id="zona-cobertura-msg" class="zona-msg" style="display:none"></div>
+                <input type="number" id="envio-cp" placeholder="Código postal *">
+                <br><br>
+                <a href="https://www.correoargentino.com.ar/formularios/cpa" target="_blank">
+            Pulsa aqui para conocer mi Codigo Postal
+        </a>
+            </div>
+            <div id="aviso-fragil-envio" class="aviso-fragil" style="display:none">
+                🌱 Tu carrito tiene plantas y/o productos frágiles. Pueden sufrir daños durante el envío — considerá elegir <strong>retiro en local</strong> para esos productos.
+            </div>
+            <br>
+            <a href="https://www.google.com/maps/d/edit?mid=1sqnUizttSTMKmUOTFNrtT2oSeUKbW2g&usp=sharing" target="_blank">
+            <div class="mapa-link">
+            <i class="fa-solid fa-map-location-dot"></i>
+                Ver mapa de cobertura para Quilmes Centro
+            </div>
+        </a>
+        
+        </div>
+        
+
+        <div class="checkout-footer">
+            <button class="btn-pedido" onclick="avanzarAPaso3Pago()">
+                Continuar al pago →
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PASO 3: Forma de pago
+    ───────────────────────────────────────── -->
+    <div id="checkout-paso-3" style="display:none; flex-direction:column; flex:1;">
+
+        <div class="checkout-metodos">
+
+            <p class="zona-msg" style="display:block; color:#555; margin-bottom:10px;">
+                Elegí cómo vas a pagar. Por ahora podés completar la compra con
+                <strong>Transferencia</strong> o <strong>Tarjeta</strong>; el resto de las
+                opciones va a estar disponible muy pronto.
+            </p>
+
+            <!-- Grilla de botones: todos del mismo tamaño, solo ícono + nombre.
+                 Al tocar cualquiera se despliega su renglón de datos en el
+                 panel de abajo (#metodoDetalle). -->
+            <div class="metodos-grid">
+
+                <label class="metodo-card">
+                    <input type="radio" name="metodoPago" value="transferencia" checked>
+                    <i class="fa-solid fa-building-columns"></i>
+                    <span>Transferencia bancaria</span>
+                </label>
+
+                <label class="metodo-card">
+                    <input type="radio" name="metodoPago" value="tarjeta">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>Tarjeta de crédito / débito</span>
+                </label>
+
+                <label class="metodo-card metodo-card--proximamente">
+                    <input type="radio" name="metodoPago" value="modo">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>MODO</span>
+                    <span class="metodo-proximamente-tag">Próximamente</span>
+                </label>
+
+                <label class="metodo-card metodo-card--proximamente">
+                    <input type="radio" name="metodoPago" value="mercadopago">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span>Mercado Pago</span>
+                    <span class="metodo-proximamente-tag">Próximamente</span>
+                </label>
+
+                <label class="metodo-card metodo-card--proximamente">
+                    <input type="radio" name="metodoPago" value="mercadocredito">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                    <span>Mercado Crédito</span>
+                    <span class="metodo-proximamente-tag">Próximamente</span>
+                </label>
+
+                <label class="metodo-card metodo-card--proximamente">
+                    <input type="radio" name="metodoPago" value="cuotasdebito">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Cuotas sin interés con Débito</span>
+                    <span class="metodo-proximamente-tag">Próximamente</span>
+                </label>
+
+            </div>
+
+            <!-- Panel de detalle: un solo renglón completo debajo de la
+                 grilla que cambia de contenido según el método elegido
+                 (lo controla aplicarVisibilidadMetodo en script.js). -->
+            <div id="metodoDetalle" class="metodo-detalle-panel">
+
+                <!-- Transferencia (FUNCIONAL) -->
+                <div id="detalle-transferencia" class="metodo-detalle">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Hasta 3 cuotas sin interés desde $150.000
+                    </p>
+                    <!--<div id="cbu-info" class="cbu-info-box">
+                        <div class="cbu-row">
+                            <span class="cbu-label">Alias</span>
+                            <span class="cbu-value">AGUS.MUNDO.VERDE</span>
+                        </div>
+                        <div class="cbu-row">
+                            <span class="cbu-label">Banco</span>
+                            <span class="cbu-value">Banco Santander</span>
+                        </div>
+                    </div>-->
+                    <div id="comprobanteBox">
+                        <label class="comprobante-label">
+                            Subí el comprobante de pago * (JPG, PNG o PDF)
+                        </label>
+                        <input type="file" accept="image/*,.pdf" id="comprobante-archivo">
+                    </div>
+                </div>
+
+                <!-- Tarjeta vía Mercado Pago Bricks (FUNCIONAL) -->
+                <div id="detalle-tarjeta" class="metodo-detalle" style="display:none">
+                    <div id="tarjetaBox">
+
+                        <!-- Se muestra SOLO si MP_PUBLIC_KEY todavía no está configurada
+                             en script.js (ver inicializarBrickTarjeta). Con la Public Key
+                             puesta, este aviso se oculta solo y el Brick real ocupa su lugar. -->
+                        <div class="mp-preview-banner" id="mp-preview-banner">
+                            Vista previa — se conecta cuando cargues tu Public Key de Mercado Pago en script.js (MP_PUBLIC_KEY)
+                        </div>
+
+                        <!-- Acá el SDK de Mercado Pago monta el Card Payment Brick real:
+                             número de tarjeta, vencimiento, CVV, cuotas y DNI, todo
+                             tokenizado en el navegador del cliente. Mundo Verde nunca
+                             recibe el número de tarjeta ni el código de seguridad. -->
+                        <div id="cardPaymentBrick_container"></div>
+
+                        <div class="zona-msg" style="display:block; color:#555; margin-top:8px;">
+                            Con tarjeta el pago se confirma al instante — no hace falta adjuntar comprobante.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODO — todavía sin integración -->
+                <div id="detalle-modo" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Vas a poder pagar directamente desde la app MODO. Todavía estamos
+                        conectando este medio de pago.
+                    </p>
+                </div>
+
+                <!-- Mercado Pago (billetera) — todavía sin integración -->
+                <div id="detalle-mercadopago" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Pago con el saldo de tu cuenta de Mercado Pago. Todavía estamos
+                        conectando este medio de pago.
+                    </p>
+                </div>
+
+                <!-- Mercado Crédito — todavía sin integración -->
+                <div id="detalle-mercadocredito" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Financiá tu compra con tu línea de Mercado Crédito. Todavía estamos
+                        conectando este medio de pago.
+                    </p>
+                </div>
+
+                <!-- Cuotas sin interés con Débito — todavía sin integración -->
+                <div id="detalle-cuotasdebito" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Plan de cuotas sin interés pagando con tarjeta de débito. Todavía
+                        estamos conectando este medio de pago.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="checkout-footer">
+            <button class="btn-pedido" id="btnContinuarPago" onclick="avanzarAPaso4()">
+                Ver resumen del pedido →
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PASO 4: Confirmar pedido
+    ───────────────────────────────────────── -->
+    <div id="checkout-paso-4" style="display:none; flex-direction:column; flex:1;">
+
+        <div class="confirm-body">
+
+            <div class="confirm-section">
+                <div class="confirm-section-title">Productos</div>
+                <div id="confirm-productos"></div>
+            </div>
+
+            <div class="confirm-section">
+                <div class="confirm-section-title">Entrega</div>
+                <div id="confirm-entrega"></div>
+            </div>
+
+            <div id="confirm-retiro" style="display:none">
+                <!-- se llena dinámicamente -->
+            </div>
+
+            <div id="confirm-envio" style="display:none">
+                <!-- se llena dinámicamente -->
+            </div>
+
+            <div class="confirm-section">
+                <div class="confirm-section-title">Pago</div>
+                <div id="confirm-pago"></div>
+            </div>
+
+            <div class="confirm-total-row">
+                <span>Total final</span>
+                <span id="confirm-total-final">$0</span>
+            </div>
+
+        </div>
+
+        <div class="checkout-footer checkout-botones">
+            <button class="btn-confirmar" onclick="enviarPedidoWhatsApp()">
+                <i class="fab fa-whatsapp"></i> Enviar pedido por WhatsApp
+            </button>
+            <!--<button class="btn-mail" onclick="enviarPedidoMail()">
+                ✉️ Enviar por email
+            </button> -->
+        </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PASO 5: Confirmación post-pedido
+    ───────────────────────────────────────── -->
+    <div id="checkout-paso-5" style="display:none; flex-direction:column; flex:1; align-items:center; justify-content:center; padding:32px 24px; text-align:center;">
+        <div style="font-size:48px; margin-bottom:16px;">🌿</div>
+        <h3 style="color:#2e7d32; margin-bottom:8px;">¡Pedido enviado!</h3>
+        <p style="color:#555; font-size:14px; line-height:1.6;">
+            Te vamos a responder a la brevedad para confirmar y coordinar la entrega.
+        </p>
+        <button class="btn-vaciar" style="margin-top:24px;" onclick="cerrarCarrito()">
+            Cerrar
+        </button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<a href="https://wa.me/5491168316730?text=Hola%20quiero%20consultar" class="whatsapp-float" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+</a>
+
+<!-- ── GALERÍA DE TALLERES ─────────────────────────────── -->
+<div class="container">
+    <main>
+      <img src="img/talleres/2tall-mos_350x350(1).webp" alt="Taller de mosaico" loading="lazy">
+    </main>
+
+    <aside>
+        <p class="fondo"><a href="1_0_vivero.html">VIVERO</a> .  <a href="2_0_talleres.html">TALLERES</a> . MOSAICO</p>
+        
+        <!--<h3>Bienvenido al Taller de Mosaiquismo</h3>-->
+        <br>
+        <p class="parr_tall">
+            Vení a aprender entre las plantas de esta técnica milenaria
+            <br><br>
+            El mosaiquismo es el arte de unir meticulosamente de pequeñas piezas para crear imágenes, patrones y dibujos sobre diferentes superficies.
+            <br><br>
+            El taller se dicta más de una vez a la semana, y las clases se abonan de manera individual. Los materiales a utilizar como venecitas, piedras y silicona estan incluidos. 
+            <br><br>
+            Solo tenés que traer una pieza para intervenir o elegir entre las opciones que la profe Ale trae para ofrecer.
+            <br><br>
+            El mosaico es popular por sus beneficios para la salud mental. 
+            <br><br>
+            Te invitamos a sentir esta meditación creativa en el mejor ambiente posible,
+             nuestro vivero. 
+            <br>
+            <br>
+        </p><strong>Para reservas, escribinos por</strong><a href="https://wa.me/5491168316730" target="_blank">
+                    <i class="fab fa-whatsapp"></i>
+        <strong></a>Whatsapp o bien envianos un mail a</strong>
+            <a target="_blank" href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox">viveunmundoverde@gmail.com</a>
+    </aside>
+</div>
+
+<!--═══════════════════════════════════════════
+   FOOTER
+   ════════════════════════════════════════ -->
+<footer class="footer-natural">
+    <div class="footer-natural-grid">
+        <!-- Marca -->
+        <div class="footer-brand">
+            <img src="img/varios/logo-300x315.webp" alt="Logo" class="footer-logo">
+        
+        <p class="pfot">Vendemos plantas y experiencias</p>
+        <p class="pfot">alrededor del mundo botánico</p></div>
+
+        <!-- Redes -->
+        <div class="footer-social-box">
+            <h3>Sigamos conectados</h3>
+            <div class="footer-social-natural">
+                <a href="https://www.instagram.com/vivemundoverde/" target="_blank">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://www.youtube.com/channel/UCkcuwAC_tYU88KkIiRyHY1g" target="_blank">
+                    <i class="fab fa-youtube"></i>
+                </a>
+                   <a href="https://www.facebook.com/profile.php?id=100079284327539" target="_blank">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                
+            </div>
+            <div class="footer-social-natural">
+                <a href="https://wa.me/5491168316730" target="_blank">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="https://www.tiktok.com/@vmundo_verde" target="_blank">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+                <a href="https://open.spotify.com/playlist/5FSLNFP9xzJtlwApkQbwHi?si=YKLybuptTK2RkuFqI5971w&pi=c_k0108ySGOS5" target="_blank">
+                    <i class="fab fa-spotify"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="footer-links">
+            <h3>Categorías</h3>
+            <ul>
+                <li><a href="1_0_vivero.html">Vivero</a></li>
+                <li><a href="1_1_plantas.html">Plantas</a></li>
+                <li><a href="2_0_talleres.html">Talleres</a></li>
+                <li><a href="3_0_servicios.html">Servicios</a></li>
+                <li><a href="4_0_ramos.html">Ramos</a></li>
+            </ul>
+        </div>
+        <!-- Contacto -->
+        <div class="footer-contact">
+        <h3>Contactános</h3>
+            <ul class="contacto-lista">
+            <li>📱 11 6831-6730</li>
+            <li>
+                <i class="fa-solid fa-envelope"></i>
+                <a target="_blank" href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox">viveunmundoverde@gmail.com</a>
+            </li>
+            <li>📍 Camino General Belgrano 4470</li>
+            <li>📌 Berazategui</li>
+        </ul>
+          
+        </div>
+
+        <!-- Mapa-->
+        <div class="mapa">
+            <h3>Visitanos</h3>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3282.441086419203!2d-58.22444198476909!3d-34.83108658047395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95a32e9c8b1c9d7%3A0x1c8e7b9a5c8e4f!2sCamino%20General%20Belgrano%204470%2C%20Berazategui%2C%20Provincia%20de%20Buenos%20Aires%2C%20Argentina!5e0!3m2!1ses-419!2sar!4v1700000000000!5m2!1ses-419!2sar" width="100%" height="200" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </div>
+
+    <div class="footer-natural-copy">
+        © 2021 Mundo Verde · Todos los derechos reservados
+    </div>
+</footer>
+
+<script src="js/script.js"></script>
+<script src="js/api.js"></script>
+<script src="js/catalogo.js"></script>
+<script src="js/buscador-global.js"></script>
+
+</body>
+</html>
