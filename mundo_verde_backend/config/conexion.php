@@ -1,16 +1,17 @@
 <?php
 /**
  * Conexión a la base de datos MySQL vía PDO.
- * XAMPP se reseteó a su instalación de fábrica: usuario "root" con
- * contraseña vacía, MySQL escuchando en 127.0.0.1:3306. Coincide con
- * lo que usa phpMyAdmin (ver config.inc.php).
- * Si en algún momento le ponés contraseña a root, actualizala acá.
+ *
+ * Configuración para Hostinger (rama "desarrollo" / servidor de Hostinger).
+ * En Hostinger, cuando el PHP corre en el mismo servidor que la base de
+ * datos, el host casi siempre es "localhost" (no la IP pública que se usa
+ * para MySQL remoto).
  */
 
-$host = '127.0.0.1';
-$db   = 'mundo_verde';
-$user = 'root';
-$pass = '';
+$host = 'localhost';
+$db   = 'u366545585_Vivero80';
+$user = 'u366545585_MundoVerde';
+$pass = 'GreenLife80'; // <-- reemplazá esto por tu contraseña completa
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -27,8 +28,8 @@ try {
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
-        'error' => 'No se pudo conectar a la base de datos. Verificá que MySQL esté ' .
-                   'corriendo en XAMPP y que la base "mundo_verde" exista (importá mundo_verde.sql).',
+        'error' => 'No se pudo conectar a la base de datos. Verificá el usuario, la contraseña ' .
+                   'y que la base "u366545585_Vivero80" exista y tenga las tablas importadas.',
     ]);
     exit;
 }
