@@ -260,7 +260,19 @@ async function mvSincronizarPrecios() {
             boton.disabled = false;
             const nombre = (div.querySelector('h3')?.textContent || prod.nombre || '').trim();
             const img = div.querySelector('img');
-            const imgSrc = img ? img.getAttribute('src') : '';
+            let imgSrc = img ? img.getAttribute('src') : '';
+
+            // Algunas tarjetas (ej: categoría "Servicios") no tienen una
+            // <img> propia dentro de .producto: la ruta de la imagen está
+            // escrita a mano como 3er argumento del onclick original en el
+            // HTML. Si no encontramos <img>, la recuperamos de ahí antes de
+            // pisar el botón, para no perder la imagen al sincronizar precios.
+            if (!imgSrc) {
+                const onclickOriginal = boton.getAttribute('onclick') || '';
+                const match = onclickOriginal.match(/agregarCarrito\([^,]+,[^,]+,\s*'([^']*)'/);
+                if (match) imgSrc = match[1];
+            }
+
             boton.onclick = () => agregarCarrito(nombre, precioReal, imgSrc, prod.codigo);
         }
     });
