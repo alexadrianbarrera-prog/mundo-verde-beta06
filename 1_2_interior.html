@@ -22,12 +22,12 @@
 <div class="header-nav-fijo">
         <div class="anuncios-rotador">
             <div class="anuncios-track">
-                <p class="anuncios">🪴 Todas las plantas publicas pueden venir MÁS GRANDES 🌳, consulta tarifas por Whatsapp</p>
+                <p class="anuncios">🪴 Todas las plantas publicadas podes pedirlas MÁS GRANDES 🌳, consulta tarifas por Whatsapp</p>
                 <p class="anuncios">🔍 Buscas alguna planta que no está en nuestro catalogo?; Seguro la conseguimos 💚, avisanos</p>
                 <p class="anuncios">💻 Seguimos cargando nuestros productos 📲</p>
                 <p class="anuncios">🎁 Todos las compras en el local traen sorpresas</p>
                 <!-- misma lista repetida, oculta a lectores de pantalla: hace que el loop no tenga corte -->
-                <p class="anuncios" aria-hidden="true">🪴 Todas las plantas publicas pueden venir MÁS GRANDES 🌳, consulta tarifas por Whatsapp
+                <p class="anuncios" aria-hidden="true">🪴 Todas las plantas publicadas podes pedirlas MÁS GRANDES 🌳, consulta tarifas por Whatsapp
                 </p>
                 <p class="anuncios" aria-hidden="true">🔍 Buscas alguna planta que no está en nuestro catalogo?; Seguro la conseguimos 💚, avisanos</p>
                 <p class="anuncios" aria-hidden="true">💻 Seguimos cargando nuestros productos 📲</p>
@@ -35,6 +35,7 @@
             </div>
         </div>
 
+<!-- HEADER PARA TODOS LOS HOJAS.HTML -->
 <!--Buscador, Logotipo, Carrito-->
 <header class="header">
     <!--Izquierda-->
@@ -56,9 +57,7 @@
             type="text" 
             id="searchInput"
             placeholder="Buscar...">
-
     </div>
-
 </div>
     <!--Centro-->
 <div class="header-center">
@@ -70,12 +69,17 @@
 </div>
     <!--Derecha-->
     <div class="header-right">
-        <button class="btn-login" onclick="window.location.href='login.html'" title="Iniciar sesión">👤</button>
-        <button class="btn-carrito" onclick="abrirCarrito()">
-            🛒
-            <span class="carrito-badge">0</span>
-        </button>
-    </div>
+
+    <button class="btn-login" onclick="window.location.href='login.html'" title="Iniciar sesión">
+        👤
+    </button>
+
+    <button class="btn-carrito" onclick="abrirCarrito()">
+        🛒
+        <span class="carrito-badge">0</span>
+    </button>
+
+</div>
 </header>
 
 <!-- BARRA DE NAVEGACIÓN PRINCIPAL -->
@@ -136,8 +140,7 @@
     </ul>
     </nav>
 <!--<p class="fondo-TipPlantas">-->
-
-    <p class="TipPlantas"> <a href="1_2_interior.html" class="activo">Interior</a> <a href="1_2_plantines.html">Plantines florales</a> <a href="1_2_arbustos.html">Arbustos</a> <a href="1_2_aromaticas.html">Aromáticas</a></p>
+    <p class="TipPlantas"> <a href="1_2_interior.html">Interior</a> <a href="1_2_plantines.html">Plantines florales</a> <a href="1_2_arbustos.html" class="activo">Arbustos</a> <a href="1_2_aromaticas.html">Aromáticas</a> </p>
 </div>
 </div><!-- /.header-nav-fijo -->
 
