@@ -11,7 +11,7 @@
 $host = 'localhost';
 $db   = 'u366545585_Vivero80';
 $user = 'u366545585_MundoVerde';
-$pass = './TPeEXb7ZJ1v7Wv'; // <-- reemplazá esto por tu contraseña completa
+$pass = './TPeEXb7ZJ1v7Wv'; // <-- Cambiar a la contraseña real de la base de datos en Hostinger
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
