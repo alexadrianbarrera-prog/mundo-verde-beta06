@@ -9,7 +9,7 @@
 $host = 'localhost';
 $db   = 'mundo_verde';   // nombre real de tu base local
 $user = 'root';          // usuario típico de XAMPP
-$pass = './TPeEXb7ZJ1v7Wv';               // contraseña típica de XAMPP (vacía) - ajustá si la tuya es distinta
+$pass = 'GreenLife80';               // contraseña típica de XAMPP (vacía) - ajustá si la tuya es distinta
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
