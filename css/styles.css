@@ -192,6 +192,7 @@ body {
     .anuncios {
         font-size: 12px;
         padding: 0 24px;
+        
     }
 }
 
@@ -1275,17 +1276,23 @@ aside {
     background: #ffffff;
     padding: 24px 28px;
     box-shadow: 0 4px 8px rgba(11, 129, 31, 0.9);
+    /* Fallback base: 'Lucida Sans'/'Lucida Grande' vienen preinstaladas
+       en Windows/Mac (por eso se ven bien en laptop/PC), pero no existen
+       en Android/iOS. Se agregan 'Segoe UI'/'Helvetica Neue'/Arial al
+       final para que en el celular el texto se vea lo más parecido
+       posible, en vez de caer en la fuente por defecto del navegador. */
+    font-family: 'Lucida Sans Regular', 'Lucida Sans', 'Lucida Grande', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }
 .fondo {
     background: rgb(100, 194, 93);
     padding: 10px 10px 10px;
     border-top: 2px solid rgba(8, 82, 14, 0.507);
     display: block;
-    font-family: 'Lucida Sans Regular', 'BrRegular','Iosevka-bolder',  'Lucida Sans','DancingScript-Regular',  'Lucida Grande';
+    font-family: 'Lucida Sans Regular', 'BrRegular','Iosevka-bolder',  'Lucida Sans','DancingScript-Regular',  'Lucida Grande', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }
 .parr_tall {
     color:#16821c;
-    font-family: 'Lucida Sans Regular','DancingScript-Regular','Iosevka-bolder','BrRegular', 'Iosevka-Regular', 'Lucida Sans',  'Lucida Grande';
+    font-family: 'Lucida Sans Regular','DancingScript-Regular','Iosevka-bolder','BrRegular', 'Iosevka-Regular', 'Lucida Sans',  'Lucida Grande', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }
 
 /*========================================*/
@@ -1899,12 +1906,15 @@ Responsive para FOOTER
     backdrop-filter: blur(10px);
 }
 
-/*20-05-2026*/
-/* Aside + Main en mobile/tablet: una sola media query (antes había
-   dos superpuestas con valores contradictorios). Apila la foto
-   arriba y el texto abajo, ambos centrados y con el mismo margen
-   a los costados. */
+
 @media (max-width: 768px) {
+    /* La barra gris de subcategorías (Interior, Plantines florales,
+       Arbustos, Aromáticas...) queda oculta en mobile: ese mismo
+       listado ya está disponible en el menú hamburguesa. */
+    .TipPlantas {
+        display: none;
+    }
+
     .container {
         display: flex;
         flex-direction: column; /* Apila el contenido verticalmente */
