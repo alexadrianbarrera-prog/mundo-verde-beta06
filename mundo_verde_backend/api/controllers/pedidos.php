@@ -93,6 +93,7 @@ function pedidos_crear(PDO $pdo): void
     }
     $total = $subtotal - $descuento;
 
+    $pedidoId = 0; // se inicializa acá para que el editor no marque "variable posiblemente indefinida" más abajo
     $pdo->beginTransaction();
     try {
         $stmt = $pdo->prepare(
