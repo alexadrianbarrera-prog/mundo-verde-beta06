@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/catalogo_rubros.php';
+
 /**
  * Panel Superadmin: CRUD genérico sobre un conjunto whitelisteado de tablas.
  * Todo esto exige sesión de administrador (requerirAdmin).
@@ -33,14 +35,21 @@ function tablasWhitelist(): array
         ],
         'productos' => [
             'pk'         => 'id',
-            'columnas'   => ['id', 'codigo', 'nombre', 'categoria', 'tipo', 'precio', 'stock', 'imagen', 'activo', 'creado_en'],
+            'columnas'   => ['id', 'codigo', 'rubro', 'nombre', 'categoria', 'tipo', 'precio', 'stock', 'imagen', 'activo', 'creado_en'],
             'editables'  => [
                 'nombre'    => 'text',
-                'categoria' => 'select:arbustos,aromaticas,exterior,interior,insumos,servicios',
+                // Rubro y categoría salen de catalogo_rubros.php (una sola lista para todo)
+                'rubro'     => 'select:' . implode(',', array_keys(rubrosCatalogo())),
+                'categoria' => 'select:' . implode(',', categoriasCatalogo()),
                 'tipo'      => 'select:producto,servicio',
                 'precio'    => 'number',
                 'stock'     => 'number',
                 'imagen'    => 'text',
+            ],
+            // Campos que se piden SOLO al crear (no se editan en la grilla, porque
+            // cambiar un código rompería el enlace con las tarjetas del HTML).
+            'creables'   => [
+                'codigo'    => 'text',
             ],
             'toggle_col' => 'activo',
         ],
@@ -185,6 +194,23 @@ function admin_listar(PDO $pdo, string $tabla): void
     responder($filas);
 }
 
+/**
+ * Que la categoría pertenezca al rubro (ej.: no se permite rubro "plantas"
+ * con categoría "venenos"). $actual es la fila hoy en la base (null al crear).
+ */
+function validarRubroCategoriaProducto(?array $actual, array $cambios): void
+{
+    $rubro     = $cambios['rubro']     ?? ($actual['rubro']     ?? null);
+    $categoria = $cambios['categoria'] ?? ($actual['categoria'] ?? null);
+    if ($rubro === null || $categoria === null) {
+        error('Elegí el rubro y la categoría del producto.');
+    }
+    $mapa = rubrosCatalogo();
+    if (!isset($mapa[$rubro]) || !in_array($categoria, $mapa[$rubro], true)) {
+        error("La categoría \"$categoria\" no pertenece al rubro \"$rubro\".");
+    }
+}
+
 function admin_editar(PDO $pdo, string $tabla, string $pk): void
 {
     $meta = tablaValidaOError($tabla);
@@ -216,6 +242,12 @@ function admin_editar(PDO $pdo, string $tabla, string $pk): void
             }
         }
         $cambios[$col] = $valor;
+    }
+
+    if ($tabla === 'productos' && (isset($cambios['rubro']) || isset($cambios['categoria']))) {
+        $stmtActual = $pdo->prepare('SELECT rubro, categoria FROM productos WHERE id = :pk');
+        $stmtActual->execute(['pk' => $pk]);
+        validarRubroCategoriaProducto($stmtActual->fetch() ?: null, $cambios);
     }
 
     $sets = [];
@@ -252,13 +284,14 @@ function admin_crear(PDO $pdo, string $tabla): void
         return;
     }
 
-    $datos = array_intersect_key($body, $meta['editables']);
+    $permitidos = $meta['editables'] + ($meta['creables'] ?? []);
+    $datos = array_intersect_key($body, $permitidos);
     if (empty($datos)) {
         error('No se envió ningún campo válido para crear el registro.');
     }
 
     foreach ($datos as $col => $valor) {
-        $tipo = $meta['editables'][$col];
+        $tipo = $permitidos[$col];
         if ($tipo === 'number') {
             if ($valor === '' || !is_numeric($valor)) {
                 error("El campo \"$col\" tiene que ser un número.");
@@ -275,6 +308,21 @@ function admin_crear(PDO $pdo, string $tabla): void
             }
         }
         $datos[$col] = $valor;
+    }
+
+    if ($tabla === 'productos') {
+        // El código identifica al producto en el HTML y en los pedidos: obligatorio,
+        // en mayúsculas, con formato PREFIJO-NN (ej.: PLT-48) y sin repetirse.
+        $codigo = strtoupper(trim((string)($datos['codigo'] ?? '')));
+        if (!preg_match('/^[A-Z]{2,5}-\d{1,3}$/', $codigo)) {
+            error('El código tiene que ser tipo PLT-48 (letras, guion y número).');
+        }
+        $existe = $pdo->prepare('SELECT id FROM productos WHERE codigo = :codigo');
+        $existe->execute(['codigo' => $codigo]);
+        if ($existe->fetch()) error("Ya existe un producto con el código $codigo.", 409);
+        $datos['codigo'] = $codigo;
+
+        validarRubroCategoriaProducto(null, $datos);
     }
 
     $columnas   = array_map(fn($c) => "`$c`", array_keys($datos));
