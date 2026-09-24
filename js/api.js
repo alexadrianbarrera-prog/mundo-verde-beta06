@@ -245,7 +245,7 @@ async function mvSincronizarPrecios() {
             return;
         }
 
-        const precioReal = prod.precio;
+        const precioReal = Number(prod.precio); // MySQL/PDO manda DECIMAL como texto ("2000.00")
 
         // 1) Actualiza el precio visible, si esta tarjeta lo muestra
         if (elPrecio) {
@@ -258,7 +258,9 @@ async function mvSincronizarPrecios() {
         // seguro que intentar reescribir el string del atributo HTML).
         if (boton) {
             boton.disabled = false;
-            const nombre = (div.querySelector('h3')?.textContent || prod.nombre || '').trim();
+            // En Servicios el único <h3> es el del precio (h3.precio), que ya
+            // se pisó arriba: se lo excluye para no guardar "$150.000" como nombre.
+            const nombre = (div.querySelector('h3:not(.precio)')?.textContent || prod.nombre || '').trim();
             const img = div.querySelector('img');
             let imgSrc = img ? img.getAttribute('src') : '';
 

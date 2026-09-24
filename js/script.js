@@ -379,7 +379,69 @@ function abrirCarrito() {
     irAPaso(1);
     document.getElementById('carrito-panel')?.classList.add('abierto');
     document.getElementById('carrito-overlay')?.classList.add('abierto');
+    sincronizarPreciosCarrito(); // refresca precios con los del admin
 }
+
+/* ------------------------------------------------------
+   Sincronizar los precios del carrito guardado con la base
+   El carrito vive en localStorage con el precio del momento en que
+   se agregó cada ítem. Si el admin cambia un precio después, acá se
+   actualiza (por código) para que el total que ve el cliente coincida
+   con el que cobra el backend. Los productos que ya no existen o
+   quedaron inactivos se sacan del carrito.
+   ------------------------------------------------------ */
+async function sincronizarPreciosCarrito() {
+    if (typeof mvApi !== 'function') return; // api.js no está cargado en esta página
+
+    const items = cargarCarrito();
+    if (items.length === 0) return;
+
+    let productos;
+    try {
+        productos = await mvApi('/productos');
+    } catch (err) {
+        return; // backend apagado: se deja el carrito como está
+    }
+
+    const porCodigo = {};
+    productos.forEach(p => { porCodigo[String(p.codigo).toUpperCase()] = p; });
+
+    const vigentes = [];
+    const quitados = [];
+    let huboCambios = false;
+
+    items.forEach(it => {
+        if (!it.codigo) { vigentes.push(it); return; } // sin código no se puede verificar
+        const p = porCodigo[String(it.codigo).toUpperCase()];
+        const inactivo = p && [0, '0', false].includes(p.activo);
+        if (!p || inactivo) {
+            quitados.push(it.nombre);
+            huboCambios = true;
+            return;
+        }
+        const precioReal = Number(p.precio);
+        if (it.precio !== precioReal) {
+            it.precio = precioReal;
+            huboCambios = true;
+        }
+        vigentes.push(it);
+    });
+
+    if (!huboCambios) return;
+
+    guardarCarrito(vigentes);
+    actualizarBadge();
+    if (document.getElementById('carrito-panel')?.classList.contains('abierto')) {
+        renderPaso1();
+    }
+    if (quitados.length) {
+        mostrarToast('⚠️ Ya no está disponible: ' + quitados.join(', '));
+    } else {
+        mostrarToast('🌿 Actualizamos los precios de tu carrito');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', sincronizarPreciosCarrito);
 
 function cerrarCarrito() {
     document.getElementById('carrito-panel')?.classList.remove('abierto');
