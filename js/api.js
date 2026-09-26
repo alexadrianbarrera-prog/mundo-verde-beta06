@@ -189,95 +189,104 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
-/* ═══════════════════════════════════════════════════════════
-   SINCRONIZAR PRECIOS con la base de datos
-   Cada tarjeta de producto en el HTML tiene un precio escrito
-   como texto fijo (para que la página cargue rápido y funcione
-   aunque el backend esté apagado). Esta función pisa ese precio
-   con el valor real de /api/productos apenas carga la página,
-   así lo que se edita en el panel Admin se refleja automáticamente
-   sin tener que tocar el HTML de cada categoría a mano.
-   ═══════════════════════════════════════════════════════════ */
+/* ── Sincroniza precios y stock de productos en la página ──
+   (para que lo cargado desde el Admin aparezca solo, sin tocar ningún
+   archivo HTML). Se ejecuta al cargar la página y también se puede
+   llamar manualmente desde la consola del navegador. ── */
 async function mvSincronizarPrecios() {
-    // Algunas páginas usan <div class="producto" id="QUI-01">,
-    // otras (servicios) usan <div class="producto" data-id="serv-jar">.
-    const tarjetas = document.querySelectorAll('.producto[id], .producto[data-id]');
-    if (!tarjetas.length) return; // esta página no tiene productos (ej: login, admin)
+    const catalogo = document.getElementById('catalogo');
+    const categoriaPagina = catalogo?.dataset.categoria;
+    const tarjetasExistentes = document.querySelectorAll('.producto[id], .producto[data-id]');
+
+    if (!tarjetasExistentes.length && !categoriaPagina) return;
 
     let productos;
     try {
         productos = await mvApi('/productos');
     } catch (err) {
-        // Backend apagado o sin conexión: se queda con los precios
-        // escritos en el HTML en vez de romper la página.
-        console.warn('[precios] No se pudieron sincronizar (se muestran los precios por defecto):', err.message);
+        console.warn('[precios] No se pudieron sincronizar:', err.message);
         return;
     }
 
     const porCodigo = {};
     productos.forEach(p => { porCodigo[p.codigo.toUpperCase()] = p; });
 
-    tarjetas.forEach(div => {
+    // 1) Sincroniza precio/estado de las tarjetas ya escritas a mano
+    tarjetasExistentes.forEach(div => {
         const codigo = div.id || div.dataset.id;
-        // El código en la base siempre se guarda en mayúsculas (ARB-01), pero
-        // varias páginas escriben el atributo en minúsculas (arb-01, serv-jar).
-        // Sin este .toUpperCase() la búsqueda fallaba en silencio para esas
-        // categorías y el precio nunca se actualizaba.
         const prod = porCodigo[(codigo || '').toUpperCase()];
-        if (!prod) return; // código de la tarjeta no existe (o está inactivo) en la base
-
-        const elPrecio = div.querySelector('.precio');
-        const boton = div.querySelector('button');
-
-        // Producto marcado como inactivo/oculto en el admin: se muestra
-        // "SIN STOCK" en vez del precio y se bloquea el botón de compra.
-        if (!prod.activo) {
-            if (elPrecio) {
-                elPrecio.textContent = 'SIN STOCK';
-                elPrecio.classList.add('sin-stock');
-            }
-            if (boton) {
-                boton.disabled = true;
-                boton.textContent = 'Sin stock';
-                boton.onclick = null;
-            }
-            return;
-        }
-
-        const precioReal = Number(prod.precio); // MySQL/PDO manda DECIMAL como texto ("2000.00")
-
-        // 1) Actualiza el precio visible, si esta tarjeta lo muestra
-        if (elPrecio) {
-            elPrecio.classList.remove('sin-stock');
-            elPrecio.textContent = '$' + precioReal.toLocaleString('es-AR');
-        }
-
-        // 2) Actualiza qué precio se manda al carrito al hacer clic.
-        // Reemplazamos el onclick inline por un listener propio (más
-        // seguro que intentar reescribir el string del atributo HTML).
-        if (boton) {
-            boton.disabled = false;
-            // En Servicios el único <h3> es el del precio (h3.precio), que ya
-            // se pisó arriba: se lo excluye para no guardar "$150.000" como nombre.
-            const nombre = (div.querySelector('h3:not(.precio)')?.textContent || prod.nombre || '').trim();
-            const img = div.querySelector('img');
-            let imgSrc = img ? img.getAttribute('src') : '';
-
-            // Algunas tarjetas (ej: categoría "Servicios") no tienen una
-            // <img> propia dentro de .producto: la ruta de la imagen está
-            // escrita a mano como 3er argumento del onclick original en el
-            // HTML. Si no encontramos <img>, la recuperamos de ahí antes de
-            // pisar el botón, para no perder la imagen al sincronizar precios.
-            if (!imgSrc) {
-                const onclickOriginal = boton.getAttribute('onclick') || '';
-                const match = onclickOriginal.match(/agregarCarrito\([^,]+,[^,]+,\s*'([^']*)'/);
-                if (match) imgSrc = match[1];
-            }
-
-            boton.onclick = () => agregarCarrito(nombre, precioReal, imgSrc, prod.codigo);
-        }
+        if (prod) aplicarProductoATarjeta(div, prod);
     });
+
+    // 2) Genera la tarjeta de cualquier producto activo de esta categoría
+    // que todavía no exista en el HTML — así, lo cargado desde el Admin
+    // aparece solo, sin tocar ningún archivo.
+    if (categoriaPagina) {
+        const idsExistentes = new Set(
+            Array.from(tarjetasExistentes).map(div => (div.id || div.dataset.id || '').toUpperCase())
+        );
+        productos
+            .filter(p => p.categoria === categoriaPagina && p.activo && !idsExistentes.has(p.codigo.toUpperCase()))
+            .forEach(prod => catalogo.appendChild(crearTarjetaProducto(prod)));
+    }
+}
+
+function aplicarProductoATarjeta(div, prod) {
+    const elPrecio = div.querySelector('.precio');
+    const boton = div.querySelector('button');
+
+    if (!prod.activo) {
+        if (elPrecio) { elPrecio.textContent = 'SIN STOCK'; elPrecio.classList.add('sin-stock'); }
+        if (boton) { boton.disabled = true; boton.textContent = 'Sin stock'; boton.onclick = null; }
+        return;
+    }
+
+    const precioReal = Number(prod.precio);
+    if (elPrecio) {
+        elPrecio.classList.remove('sin-stock');
+        elPrecio.textContent = '$' + precioReal.toLocaleString('es-AR');
+    }
+    if (boton) {
+        boton.disabled = false;
+        const nombre = (div.querySelector('h3:not(.precio)')?.textContent || prod.nombre || '').trim();
+        const img = div.querySelector('img');
+        let imgSrc = img ? img.getAttribute('src') : '';
+        if (!imgSrc) {
+            const onclickOriginal = boton.getAttribute('onclick') || '';
+            const match = onclickOriginal.match(/agregarCarrito\([^,]+,[^,]+,\s*'([^']*)'/);
+            if (match) imgSrc = match[1];
+        }
+        boton.onclick = () => agregarCarrito(nombre, precioReal, imgSrc, prod.codigo);
+    }
+}
+
+function crearTarjetaProducto(prod) {
+    const precioReal = Number(prod.precio);
+    const div = document.createElement('div');
+    div.className = 'producto';
+    div.dataset.id = prod.codigo.toLowerCase();
+
+    const img = document.createElement('img');
+    img.src = prod.imagen;
+    img.alt = prod.nombre;
+
+    const h3 = document.createElement('h3');
+    const a = document.createElement('a');
+    a.target = '_blank';
+    a.textContent = prod.nombre;
+    h3.appendChild(a);
+
+    const p = document.createElement('p');
+    p.className = 'precio';
+    p.textContent = '$' + precioReal.toLocaleString('es-AR');
+
+    const boton = document.createElement('button');
+    boton.textContent = 'Agregar al carrito';
+    boton.onclick = () => agregarCarrito(prod.nombre, precioReal, prod.imagen, prod.codigo);
+
+    div.append(img, h3, p, boton);
+    return div;
 }
 
 document.addEventListener('DOMContentLoaded', mvSincronizarPrecios);
+
