@@ -3426,3 +3426,12 @@ input[type="file"] {
     0%, 100% { outline-color: #4a7c3a; }
     50%      { outline-color: #a3d9a5; }
 }
+/**********LETRAS DE CATEGORÍAS (MOBILE)**********/
+/* Celulares: reemplaza el manuscrito dentro de aside y .fondo */
+@media (max-width: 768px) {
+    aside *,
+    .fondo,
+    .fondo * {
+        font-family: 'Lucida Sans', Verdana, system-ui, sans-serif !important;
+    }
+}
