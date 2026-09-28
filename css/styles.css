@@ -3437,3 +3437,50 @@ input[type="file"] {
         font-family: 'Lucida Sans', Verdana, system-ui, sans-serif !important;
     }
 }
+/* Celulares en HORIZONTAL: header en una sola fila, como en PC
+   (menú + lupa | logo | login + carrito). El banner queda arriba. */
+@media (max-width: 768px) and (max-height: 500px) and (orientation: landscape) {
+
+    .header {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+    }
+
+    .header-left {
+        order: 1;
+        width: auto;
+        max-width: none;
+        height: 56px;
+    }
+
+    .header-center {
+        order: 2;
+        width: auto;
+        max-width: none;
+        min-width: 0;
+        height: 56px;
+    }
+
+    .header-right {
+        order: 3;
+        width: auto;
+        max-width: none;
+        height: 56px;
+    }
+
+    /* El menú desplegable sigue ocupando todo el ancho debajo del header */
+    .nav {
+        order: 4;
+        grid-column: 1 / -1;
+    }
+
+    /* Logo más compacto para que el header no se coma la pantalla */
+    .header-center .Tit_Ppal {
+        font-size: 34px;
+    }
+    .header-center .Tit_Ppal img {
+        width: 44px;
+        height: 44px;
+    }
+}
