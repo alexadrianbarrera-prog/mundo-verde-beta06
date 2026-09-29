@@ -3429,12 +3429,16 @@ input[type="file"] {
     50%      { outline-color: #a3d9a5; }
 }
 /**********LETRAS DE CATEGORÍAS (MOBILE)**********/
-/* Celulares: reemplaza el manuscrito dentro de aside y .fondo */
+/* Celulares: reemplaza el manuscrito dentro de aside y .fondo
+   por una fuente sans-serif parecida a Lucida Sans */
 @media (max-width: 768px) {
+    aside,
     aside *,
     .fondo,
     .fondo * {
-        font-family: 'Lucida Sans', Verdana, system-ui, sans-serif !important;
+        font-family: 'Lucida Sans', 'Lucida Grande', Verdana,
+                     -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                     Roboto, 'Helvetica Neue', Arial, sans-serif !important;
     }
 }
 /* Celulares en HORIZONTAL: header en una sola fila, como en PC
