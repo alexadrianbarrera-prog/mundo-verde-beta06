@@ -4,6 +4,8 @@
  * Contrato esperado por js/api.js (objeto mvAuth).
  */
 
+require_once __DIR__ . '/mailer.php';
+
 function auth_registro(PDO $pdo): void
 {
     $body = leerBody();
@@ -73,6 +75,10 @@ function auth_registro(PDO $pdo): void
     // Cuando se configure un mailer real, quitar "dev_codigo" de la
     // respuesta y enviar el código por email en su lugar.
     $respuesta['dev_codigo'] = $codigo;
+
+    // Mail de bienvenida. Si falla el envío NO se corta el registro:
+    // la cuenta ya está creada, el error queda en el log del servidor.
+    enviarMailBienvenida($email, $nombre);
 
     responder($respuesta, 201);
 }
