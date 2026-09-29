@@ -414,6 +414,12 @@
   .btn-secundario:hover { border-color: var(--text2); }
   .modal-error { color: var(--danger); font-size: .8rem; margin-top: 10px; min-height: 1.1em; }
 
+  /* ── Anuncios: casillas de "Aparece en" ── */
+  .chk-paginas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; min-width: 230px; max-height: 132px; overflow-y: auto; padding-right: 4px; text-align: left; }
+  .chk-paginas label { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--text2); text-transform: none; letter-spacing: 0; margin: 0; cursor: pointer; }
+  .chk-paginas label.todas { grid-column: 1 / -1; color: var(--accent2); font-weight: 600; }
+  .chk-paginas input[type=checkbox] { width: auto; margin: 0; accent-color: var(--accent); }
+
   /* ── Tablas como tarjetas apiladas en mobile ── */
   @media (max-width: 768px) {
     .table-wrap { background: transparent; border: none; overflow: visible; }
@@ -565,7 +571,59 @@ const ETIQUETAS_TABLA = {
   //   toggle_col:'activo'   → habilita el badge Activo/Oculto y su filtro
   anuncios: 'Anuncios',
 };
+/* ── Anuncios: en qué páginas del sitio aparece cada uno.
+   Para sumar/quitar una página, editar esta lista: [valor, etiqueta].
+   El valor es el que después pide el front (?pagina=plantas). ── */
+const PAGINAS_ANUNCIO = [
+  ['todas', 'Todas las páginas'],
+  ['inicio', 'Página principal'],
+  ['plantas', 'Plantas'],
+  ['arbustos', 'Arbustos'],
+  ['aromaticas', 'Aromáticas'],
+  ['interior', 'Interior'],
+  ['plantines', 'Plantines florales'],
+  ['productos', 'Productos'],
+  ['talleres', 'Talleres'],
+  ['excursiones', 'Excursiones'],
+  ['espacio', 'Espacio para talleres'],
+  ['estimulacion', 'Estimulación cognitiva'],
+  ['ceramica', 'Cerámica'],
+  ['mosaiquismo', 'Mosaiquismo'],
+  ['servicios', 'Servicios'],
+  ['ramos', 'Ramos'],
+  ['newsletter', 'Newsletter'],
+  ['login', 'Iniciar sesión'],
+];
+function agregarColumnaPaginas(meta) {
+  const a = meta && meta.anuncios;
+  if (!a) return;
+  const cols = a.columnas.filter(c => c !== 'paginas');
+  const i = cols.indexOf('texto');
+  cols.splice(i >= 0 ? i + 1 : cols.length, 0, 'paginas');
+  a.columnas = cols;
+  a.editables = Object.assign({}, a.editables, { paginas: 'paginas' });
+}
+function checksPaginas(valor) {
+  const sel = String(valor || 'todas').split(',').map(x => x.trim()).filter(Boolean);
+  const todas = sel.includes('todas');
+  const chks = PAGINAS_ANUNCIO.map(([v, et]) => {
+    const esTodas = v === 'todas';
+    return `<label class="${esTodas ? 'todas' : ''}"><input type="checkbox" value="${v}" ${sel.includes(v) ? 'checked' : ''} ${!esTodas && todas ? 'disabled' : ''} onchange="syncPaginas(this)">${et}</label>`;
+  }).join('');
+  return `<div class="chk-paginas">${chks}<input type="hidden" data-col="paginas" value="${todas ? 'todas' : sel.join(',')}"></div>`;
+}
+function syncPaginas(chk) {
+  const cont = chk.closest('.chk-paginas');
+  const todas = cont.querySelector('input[value="todas"]');
+  const otros = [...cont.querySelectorAll('input[type=checkbox]')].filter(i => i !== todas);
+  if (todas.checked) otros.forEach(i => { i.checked = false; });
+  else if (!otros.some(i => i.checked)) todas.checked = true; // nunca queda vacío
+  otros.forEach(i => { i.disabled = todas.checked; });
+  const vals = todas.checked ? ['todas'] : otros.filter(i => i.checked).map(i => i.value);
+  cont.querySelector('input[type=hidden]').value = vals.join(',');
+}
 function etiquetaCol(c) {
+  if (c === 'paginas') return 'Aparece en';
   return c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
@@ -660,6 +718,7 @@ async function iniciarApp() {
 
   META = await mvAdmin.tablas();
   agregarColumnaComentarios(META);
+  agregarColumnaPaginas(META);
   const tabsEl = document.getElementById('tabs');
   tabsEl.innerHTML = '';
   Object.keys(META).forEach((tabla, i) => {
@@ -729,6 +788,13 @@ function aplicarFiltros(filas) {
 
   Object.entries(FILTROS_ACTIVOS).forEach(([col, val]) => {
     if (val === '' || val === undefined) return;
+    if (col === 'paginas') {
+      resultado = resultado.filter(f => {
+        const p = String(f.paginas || 'todas').split(',');
+        return p.includes('todas') || p.includes(val);
+      });
+      return;
+    }
     if (meta && col === meta.toggle_col) {
       resultado = resultado.filter(f => (!!f[col] ? '1' : '0') === val);
     } else {
@@ -778,6 +844,17 @@ function renderToolbar(tabla) {
     toolbarEl.appendChild(sel);
   });
 
+  // Anuncios: filtro por página donde aparece
+  if (meta.columnas.includes('paginas')) {
+    const sel = document.createElement('select');
+    sel.className = 'toolbar-filter';
+    sel.innerHTML = `<option value="">Aparece en: cualquiera</option>` +
+      PAGINAS_ANUNCIO.filter(([v]) => v !== 'todas').map(([v, et]) => `<option value="${v}">${et}</option>`).join('');
+    sel.value = FILTROS_ACTIVOS.paginas || '';
+    sel.addEventListener('change', () => { FILTROS_ACTIVOS.paginas = sel.value; renderVista(tabla); });
+    toolbarEl.appendChild(sel);
+  }
+
   // Filtro para la columna de estado (Activo/Oculto) si la tabla tiene toggle
   if (meta.toggle_col) {
     const sel = document.createElement('select');
@@ -818,6 +895,12 @@ function abrirModalAgregar(tabla) {
     const label = document.createElement('label');
     label.textContent = etiquetaCol(col);
     campo.appendChild(label);
+
+    if (col === 'paginas') {
+      campo.insertAdjacentHTML('beforeend', checksPaginas('todas'));
+      form.appendChild(campo);
+      return;
+    }
 
     let input;
     if (col === meta.toggle_col) {
@@ -901,7 +984,7 @@ const COL_ANCHO_CH = {
   nombre: 30,
   comentarios: 40,
   stock: 8,
-  texto: 90,
+  texto: 60,
   orden: 5,
 };
 function anchoEstilo(c) {
@@ -934,7 +1017,9 @@ function renderTabla(tabla, filas) {
     cols.forEach(c => {
       const val = fila[c];
       const etiqueta = etiquetaCol(c);
-      if (c === toggleCol) {
+      if (c === 'paginas' && tabla === 'anuncios') {
+        html += `<td data-label="${etiqueta}">${checksPaginas(val)}</td>`;
+      } else if (c === toggleCol) {
         const activo = !!val;
         html += `<td data-label="${etiqueta}"><span class="badge ${activo ? 'badge-verde' : 'badge-rojo'}">${activo ? 'Activo' : 'Oculto'}</span></td>`;
       } else if (!soloLectura && c in editables) {
