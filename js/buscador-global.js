@@ -29,7 +29,11 @@
     "aromaticas": "1_2_aromaticas.html",
     "interior": "1_2_interior.html",
     "plantines": "1_2_plantines.html",
-    "productos": "1_2_productos.html"
+    "productos": "1_2_productos.html",
+    // Subcategorías que viven en la página de Productos
+    "tierras": "1_2_productos.html",
+    "sustratos": "1_2_productos.html",
+    "venenos": "1_2_productos.html"
   };
 
   // Solo para mostrar en el panel (más prolijo que el valor crudo de la
@@ -40,8 +44,16 @@
     "aromaticas": "Aromáticas",
     "interior": "Plantas de Interior",
     "plantines": "Plantines florales",
-    "productos": "Productos"
+    "productos": "Productos",
+    "tierras": "Tierras",
+    "sustratos": "Sustratos",
+    "venenos": "Venenos"
   };
+
+  // Página a la que se manda un producto cuya categoría no reconocemos
+  // (ej. una categoría nueva creada desde el admin). Así no queda afuera
+  // del buscador.
+  var PAGINA_POR_DEFECTO = "1_2_productos.html";
 
   // Convierte lo que devuelve GET /productos (mismos datos que ve el
   // Superadmin en la pestaña "Productos") al formato que usa el panel.
@@ -51,12 +63,7 @@
     return (productos || [])
       .filter(function (p) { return p && p.activo; })
       .map(function (p) {
-        var pagina = CATEGORIA_A_PAGINA[p.categoria];
-        // Si el producto tiene una categoría que no reconocemos (ej. se
-        // agregó una categoría nueva desde el admin y todavía no tiene
-        // página asociada acá), lo dejamos afuera del buscador en vez de
-        // mandar a un link roto.
-        if (!pagina) return null;
+        var pagina = CATEGORIA_A_PAGINA[p.categoria] || PAGINA_POR_DEFECTO;
         return {
           nombre: p.nombre,
           categoria: (CATEGORIA_ETIQUETA[p.categoria] || p.categoria),
@@ -64,8 +71,7 @@
           imagen: p.imagen || null,
           precio: (typeof p.precio === "number") ? p.precio : null
         };
-      })
-      .filter(Boolean);
+      });
   }
 
   function normalizar(txt) {
@@ -164,17 +170,31 @@
     var indiceActivo = -1;
     var resultadosActuales = [];
 
+    // Busca por nombre o categoría y ordena por relevancia:
+    //   0 = el nombre empieza con lo buscado
+    //   1 = alguna palabra del nombre empieza con lo buscado
+    //   2 = el nombre contiene lo buscado
+    //   3 = coincide solo la categoría
+    // Así los productos de la base no quedan tapados por talleres o
+    // categorías cuando hay muchas coincidencias.
     function buscar(query) {
       var q = normalizar(query);
       if (!q) return [];
       return catalogo
-        .filter(function (item) {
-          return (
-            normalizar(item.nombre).indexOf(q) !== -1 ||
-            normalizar(item.categoria).indexOf(q) !== -1
-          );
+        .map(function (item) {
+          var n = normalizar(item.nombre);
+          var c = normalizar(item.categoria);
+          var score = -1;
+          if (n.indexOf(q) === 0) score = 0;
+          else if (n.split(/\s+/).some(function (w) { return w.indexOf(q) === 0; })) score = 1;
+          else if (n.indexOf(q) !== -1) score = 2;
+          else if (c.indexOf(q) !== -1) score = 3;
+          return { item: item, score: score };
         })
-        .slice(0, 20);
+        .filter(function (r) { return r.score !== -1; })
+        .sort(function (a, b) { return a.score - b.score; })
+        .slice(0, 40)
+        .map(function (r) { return r.item; });
     }
 
     function renderResultados(lista, query) {
@@ -366,14 +386,10 @@
     if (typeof mvApi === "function") {
       mvApi("/productos")
         .then(function (productos) {
-          var categoriasVivas = Object.keys(CATEGORIA_A_PAGINA);
           var vivos = productosApiACatalogo(productos);
-          // Saca del catálogo estático las categorías que ahora vienen de
-          // la base (evita duplicados y productos viejos/borrados) y
-          // agrega los productos actuales.
-          catalogo = catalogo
-            .filter(function (item) { return categoriasVivas.indexOf(item.categoria) === -1; })
-            .concat(vivos);
+          // Los productos de la base se agregan al catálogo estático
+          // (talleres, ramos, servicios y secciones de catalogo.js).
+          catalogo = catalogo.concat(vivos);
           // Si el usuario ya estaba escribiendo mientras esto cargaba,
           // refrescamos los resultados con los datos al día.
           if (inputPanel.value) renderResultados(buscar(inputPanel.value), inputPanel.value);
