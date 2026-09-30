@@ -14,13 +14,28 @@ function crearMailer(): PHPMailer
 {
     $base    = __DIR__ . '/phpmailer/src/';
     $cfgPath = __DIR__ . '/config_mail.php';
-    if (!file_exists($base . 'PHPMailer.php') || !file_exists($cfgPath)) {
-        throw new \RuntimeException('Falta PHPMailer o config_mail.php');
+    if (!file_exists($base . 'PHPMailer.php')) {
+        throw new \RuntimeException('Falta PHPMailer en ' . $base);
     }
     require_once $base . 'Exception.php';
     require_once $base . 'PHPMailer.php';
     require_once $base . 'SMTP.php';
-    $cfg = require $cfgPath;
+
+    // Datos NO secretos, ya cargados. config_mail.php puede pisarlos si hace falta.
+    $cfg = [
+        'host'       => 'smtp.gmail.com',
+        'port'       => 465,                          // 465 = SSL, 587 = STARTTLS
+        'usuario'    => 'viveunmundoverde@gmail.com',
+        'password'   => '',                           // viene de config_mail.php
+        'from_email' => 'viveunmundoverde@gmail.com',
+        'from_name'  => 'Mundo Verde',
+    ];
+    if (file_exists($cfgPath)) {
+        $cfg = array_merge($cfg, (array) require $cfgPath);
+    }
+    if ($cfg['password'] === '') {
+        throw new \RuntimeException('Falta la contraseña de aplicación en config_mail.php');
+    }
 
     $mail = new PHPMailer(true);
     $mail->isSMTP();
