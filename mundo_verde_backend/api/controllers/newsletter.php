@@ -4,6 +4,7 @@
  * Cada suscriptor recibe un codigo_mio único. Si se suscribe usando el
  * código de otra persona (cod_ref), esa persona suma un referido exitoso.
  */
+require_once __DIR__ . '/mailer.php';
 
 function newsletter_suscribir(PDO $pdo): void
 {
@@ -53,6 +54,8 @@ function newsletter_suscribir(PDO $pdo): void
             'UPDATE newsletter_suscriptores SET referidos_exitosos = referidos_exitosos + 1 WHERE id = :id'
         )->execute(['id' => $referidoPorId]);
     }
+
+    enviarMailBienvenida($mail, $nombre);
 
     responder([
         'nombre'     => $nombre,
