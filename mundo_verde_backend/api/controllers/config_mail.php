@@ -11,7 +11,7 @@ return [
     'host'       => 'smtp.gmail.com',
     'port'       => 465,                 // 465 = SSL, 587 = STARTTLS
     'usuario'    => 'viveunmundoverde@gmail.com',
-    'password'   => 'PEGAR_CONTRASEÑA_DE_APLICACION',
+    'password'   => 'uagqpswqjfsdgyat', // <--- PONÉ TU CONTRASEÑA DE APLICACIÓN DE GMAIL AQUÍ
     'from_email' => 'viveunmundoverde@gmail.com',
     'from_name'  => 'Mundo Verde',
 ];
