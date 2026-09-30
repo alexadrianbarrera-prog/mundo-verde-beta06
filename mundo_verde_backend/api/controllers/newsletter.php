@@ -55,11 +55,17 @@ function newsletter_suscribir(PDO $pdo): void
         )->execute(['id' => $referidoPorId]);
     }
 
-    enviarMailBienvenida($mail, $nombre);
+    // Si el envío falla no rompe la suscripción: queda registrado en el log.
+    enviarMailNewsletter($mail, $nombre, $codigoMio);
 
     responder([
         'nombre'     => $nombre,
         'codigo_mio' => $codigoMio,
+        // Texto listo para mostrar en el frontend (incluye la nota sobre spam).
+        'mensaje'    => '¡Listo, ya estás suscripto/a! Te enviamos un mail de confirmación con tu código de referido. ' .
+                        'Si no lo ves en unos minutos, revisá la carpeta de Spam o Promociones. ' .
+                        'Si está ahí, marcalo como "No es spam" y agregá viveunmundoverde@gmail.com ' .
+                        'a tus contactos para que los próximos mails lleguen a tu bandeja principal.',
     ], 201);
 }
 
