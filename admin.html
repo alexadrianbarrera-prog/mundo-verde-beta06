@@ -648,7 +648,7 @@ function miniaturaImagen(url) {
 /* ── Productos: columna "Comentarios" (el <p> que se muestra en la tarjeta del
    producto en la tienda), ubicada entre "Nombre" y "Categoria". Requiere que la
    tabla `productos` tenga la columna `comentarios` en la base de datos. ── */
-/*function agregarColumnaComentarios(meta) {
+function agregarColumnaComentarios(meta) {
   const p = meta && meta.productos;
   if (!p) return;
   const cols = p.columnas.filter(c => c !== 'comentarios');
@@ -656,7 +656,7 @@ function miniaturaImagen(url) {
   cols.splice(i >= 0 ? i + 1 : cols.length, 0, 'comentarios');
   p.columnas = cols;
   p.editables = Object.assign({}, p.editables, { comentarios: 'textarea' });
-}*/
+}
 
 let META = null;
 let TABLA_ACTUAL = null;
