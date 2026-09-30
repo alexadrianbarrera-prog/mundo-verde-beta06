@@ -616,11 +616,16 @@ function syncPaginas(chk) {
   const cont = chk.closest('.chk-paginas');
   const todas = cont.querySelector('input[value="todas"]');
   const otros = [...cont.querySelectorAll('input[type=checkbox]')].filter(i => i !== todas);
-  if (todas.checked) otros.forEach(i => { i.checked = false; });
-  else if (!otros.some(i => i.checked)) todas.checked = true; // nunca queda vacío
+
+  if (chk === todas) {
+    if (todas.checked) otros.forEach(i => { i.checked = false; });
+  } else if (!otros.some(i => i.checked)) {
+    todas.checked = true; // nunca queda vacío
+  }
+
   otros.forEach(i => { i.disabled = todas.checked; });
   const vals = todas.checked ? ['todas'] : otros.filter(i => i.checked).map(i => i.value);
-  cont.querySelector('input[type=hidden]').value = vals.join(',');
+  cont.querySelector('input[type=hidden]').value = vals.join(',') || 'todas';
 }
 function etiquetaCol(c) {
   if (c === 'paginas') return 'Aparece en';
@@ -643,7 +648,7 @@ function miniaturaImagen(url) {
 /* ── Productos: columna "Comentarios" (el <p> que se muestra en la tarjeta del
    producto en la tienda), ubicada entre "Nombre" y "Categoria". Requiere que la
    tabla `productos` tenga la columna `comentarios` en la base de datos. ── */
-function agregarColumnaComentarios(meta) {
+/*function agregarColumnaComentarios(meta) {
   const p = meta && meta.productos;
   if (!p) return;
   const cols = p.columnas.filter(c => c !== 'comentarios');
@@ -651,7 +656,7 @@ function agregarColumnaComentarios(meta) {
   cols.splice(i >= 0 ? i + 1 : cols.length, 0, 'comentarios');
   p.columnas = cols;
   p.editables = Object.assign({}, p.editables, { comentarios: 'textarea' });
-}
+}*/
 
 let META = null;
 let TABLA_ACTUAL = null;
@@ -843,17 +848,6 @@ function renderToolbar(tabla) {
     sel.addEventListener('change', () => { FILTROS_ACTIVOS[col] = sel.value; renderVista(tabla); });
     toolbarEl.appendChild(sel);
   });
-
-  // Anuncios: filtro por página donde aparece
-  if (meta.columnas.includes('paginas')) {
-    const sel = document.createElement('select');
-    sel.className = 'toolbar-filter';
-    sel.innerHTML = `<option value="">Aparece en: cualquiera</option>` +
-      PAGINAS_ANUNCIO.filter(([v]) => v !== 'todas').map(([v, et]) => `<option value="${v}">${et}</option>`).join('');
-    sel.value = FILTROS_ACTIVOS.paginas || '';
-    sel.addEventListener('change', () => { FILTROS_ACTIVOS.paginas = sel.value; renderVista(tabla); });
-    toolbarEl.appendChild(sel);
-  }
 
   // Filtro para la columna de estado (Activo/Oculto) si la tabla tiene toggle
   if (meta.toggle_col) {
