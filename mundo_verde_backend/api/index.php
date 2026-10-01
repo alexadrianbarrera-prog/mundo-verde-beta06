@@ -42,9 +42,15 @@ $metodo    = $_SERVER['REQUEST_METHOD'];
 try {
     despachar($pdo, $metodo, $segmentos);
 } catch (Throwable $e) {
-    // Nunca exponer detalles internos del error al cliente.
+    // Nunca exponer detalles internos del error al cliente (en producción).
     error_log('[mundo_verde_backend] ' . $e->getMessage());
-    error('Ocurrió un error inesperado en el servidor.', 500);
+    $mensaje = 'Ocurrió un error inesperado en el servidor.';
+    // Solo en tu PC (localhost): se agrega el detalle técnico para depurar
+    // sin tener que abrir el error.log de Apache.
+    if (in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1'])) {
+        $mensaje .= ' [DEBUG] ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
+    }
+    error($mensaje, 500);
 }
 
 /**
