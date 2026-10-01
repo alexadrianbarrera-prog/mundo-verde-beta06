@@ -290,3 +290,96 @@ function crearTarjetaProducto(prod) {
 
 document.addEventListener('DOMContentLoaded', mvSincronizarPrecios);
 
+/* ── Anuncios del banner superior (administrados desde Admin → Anuncios) ──
+   Todas las hojas .html tienen el mismo banner (.anuncios-track). Este
+   bloque lo rellena con los anuncios cargados en el panel que correspondan
+   a la hoja actual, ordenados por la columna ORDEN.
+
+   · El identificador de la hoja sale de <body data-pagina="..."> si existe;
+     si no, se deduce del nombre del archivo con MV_PAGINA_POR_ARCHIVO.
+     Los valores tienen que coincidir con PAGINAS_ANUNCIO de admin.html.
+   · Requiere el endpoint público GET /anuncios?pagina=<id> en el backend,
+     que devuelva los anuncios activos de esa hoja (los que digan "todas"
+     o incluyan esa hoja). Si el backend devolviera todos, acá se vuelve
+     a filtrar por las dudas.
+   · Si el endpoint falla o no devuelve nada, queda el banner escrito a
+     mano en el HTML (nunca se rompe la página). ── */
+const MV_PAGINA_POR_ARCHIVO = {
+    '': 'inicio',
+    'index.html': 'inicio',
+    '1_0_vivero.html': 'inicio',
+    '1_1_plantas.html': 'plantas',
+    '1_2_arbustos.html': 'arbustos',
+    '1_2_aromaticas.html': 'aromaticas',
+    '1_2_interior.html': 'interior',
+    '1_2_plantines.html': 'plantines',
+    '1_2_productos.html': 'productos',
+    '2_0_talleres.html': 'talleres',
+    '2_1_tall_exc.html': 'excursiones',
+    '2_1_tall_tall.html': 'espacio',
+    '2_1_tall_estcog.html': 'estimulacion',
+    '2_1_tall_cer.html': 'ceramica',
+    '2_1_tall_mos.html': 'mosaiquismo',
+    '3_0_servicios.html': 'servicios',
+    '3_1_serv_dom.html': 'serv_domicilio',
+    '3_1_serv_com.html': 'serv_comercial',
+    '3_1_serv_vir.html': 'serv_virtual',
+    '3_1_serv_jar.html': 'serv_jardineria',
+    '4_0_ramos.html': 'ramos',
+    '5_0_newsletter.html': 'newsletter',
+    'login.html': 'login',
+};
+
+function mvPaginaActual() {
+    const deBody = document.body && document.body.dataset.pagina;
+    if (deBody) return deBody;
+    const archivo = (window.location.pathname.split('/').pop() || '').toLowerCase();
+    return MV_PAGINA_POR_ARCHIVO[archivo] || null;
+}
+
+async function mvCargarAnuncios() {
+    const track = document.querySelector('.anuncios-track');
+    if (!track) return;
+    const pagina = mvPaginaActual();
+    if (!pagina) return;
+
+    let lista;
+    try {
+        lista = await mvApi('/anuncios?pagina=' + encodeURIComponent(pagina));
+    } catch (err) {
+        console.warn('[anuncios] Se deja el banner del HTML:', err.message);
+        return;
+    }
+    if (!Array.isArray(lista)) return;
+
+    const aplica = (a) => {
+        if (a.activo !== undefined && !Number(a.activo)) return false;
+        if (typeof a.paginas !== 'string') return true; // el backend ya filtró
+        const sel = a.paginas.split(',').map(x => x.trim());
+        return sel.includes('todas') || sel.includes(pagina);
+    };
+    const textos = lista
+        .filter(a => a && a.texto && aplica(a))
+        .sort((x, y) => (Number(x.orden) || 0) - (Number(y.orden) || 0))
+        .map(a => String(a.texto).trim())
+        .filter(Boolean);
+
+    if (!textos.length) return; // sin anuncios para esta hoja: queda el del HTML
+
+    // Misma estructura que el HTML original: la lista y una copia oculta a
+    // lectores de pantalla para que el loop de la animación no tenga corte.
+    track.innerHTML = '';
+    [false, true].forEach(copia => {
+        textos.forEach(t => {
+            const p = document.createElement('p');
+            p.className = 'anuncios';
+            if (copia) p.setAttribute('aria-hidden', 'true');
+            p.textContent = t;
+            track.appendChild(p);
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', mvCargarAnuncios);
+
+

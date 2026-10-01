@@ -448,10 +448,11 @@
   .modal-error { color: var(--danger); font-size: .8rem; margin-top: 10px; min-height: 1.1em; }
 
   /* ── Anuncios: casillas de "Aparece en" ── */
-  .chk-paginas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; min-width: 230px; max-height: 132px; overflow-y: auto; padding-right: 4px; text-align: left; }
-  .chk-paginas label { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--text2); text-transform: none; letter-spacing: 0; margin: 0; cursor: pointer; }
-  .chk-paginas label.todas { grid-column: 1 / -1; color: var(--accent2); font-weight: 600; }
-  .chk-paginas input[type=checkbox] { width: auto; margin: 0; accent-color: var(--accent); }
+  .chk-paginas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 14px; min-width: 260px; text-align: left; }
+  .chk-paginas label { display: flex; align-items: center; gap: 7px; font-size: .78rem; color: var(--text2); text-transform: none; letter-spacing: 0; margin: 0; padding: 3px 0; cursor: pointer; user-select: none; }
+  .chk-paginas label:hover { color: var(--text); }
+  .chk-paginas label.todas { grid-column: 1 / -1; color: var(--accent2); font-weight: 600; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 3px; }
+  .chk-paginas input[type=checkbox] { width: 15px; height: 15px; margin: 0; flex-shrink: 0; cursor: pointer; accent-color: var(--accent); }
 
   /* ── Tablas como tarjetas apiladas en mobile ── */
   @media (max-width: 768px) {
@@ -624,6 +625,10 @@ const PAGINAS_ANUNCIO = [
   ['ceramica', 'Cerámica'],
   ['mosaiquismo', 'Mosaiquismo'],
   ['servicios', 'Servicios'],
+  ['serv_domicilio', 'Servicios: asesoría a domicilio'],
+  ['serv_comercial', 'Servicios: locales comerciales'],
+  ['serv_virtual', 'Servicios: asesoría virtual'],
+  ['serv_jardineria', 'Servicios: service de jardinería'],
   ['ramos', 'Ramos'],
   ['newsletter', 'Newsletter'],
   ['login', 'Iniciar sesión'],
@@ -642,7 +647,10 @@ function checksPaginas(valor) {
   const todas = sel.includes('todas');
   const chks = PAGINAS_ANUNCIO.map(([v, et]) => {
     const esTodas = v === 'todas';
-    return `<label class="${esTodas ? 'todas' : ''}"><input type="checkbox" value="${v}" ${sel.includes(v) ? 'checked' : ''} ${!esTodas && todas ? 'disabled' : ''} onchange="syncPaginas(this)">${et}</label>`;
+    // Si el anuncio es "todas", las demás quedan destildadas pero se pueden
+    // tildar igual: al hacerlo, "Todas las páginas" se destilda sola.
+    const marcada = esTodas ? todas : (!todas && sel.includes(v));
+    return `<label class="${esTodas ? 'todas' : ''}"><input type="checkbox" value="${v}" ${marcada ? 'checked' : ''} onchange="syncPaginas(this)">${et}</label>`;
   }).join('');
   return `<div class="chk-paginas">${chks}<input type="hidden" data-col="paginas" value="${todas ? 'todas' : sel.join(',')}"></div>`;
 }
@@ -652,14 +660,16 @@ function syncPaginas(chk) {
   const otros = [...cont.querySelectorAll('input[type=checkbox]')].filter(i => i !== todas);
 
   if (chk === todas) {
+    // Tildar "Todas" limpia las páginas sueltas. Destildarla deja todo vacío
+    // para que se elijan las páginas una por una.
     if (todas.checked) otros.forEach(i => { i.checked = false; });
-  } else if (!otros.some(i => i.checked)) {
-    todas.checked = true; // nunca queda vacío
+  } else if (chk.checked) {
+    // Elegir una página puntual implica que ya no es "todas".
+    todas.checked = false;
   }
 
-  otros.forEach(i => { i.disabled = todas.checked; });
   const vals = todas.checked ? ['todas'] : otros.filter(i => i.checked).map(i => i.value);
-  cont.querySelector('input[type=hidden]').value = vals.join(',') || 'todas';
+  cont.querySelector('input[type=hidden]').value = vals.join(',');
 }
 function etiquetaCol(c) {
   if (c === 'paginas') return 'Aparece en';
@@ -975,6 +985,10 @@ document.getElementById('modal-form').addEventListener('submit', async (e) => {
   const btn = document.getElementById('modal-guardar');
   const datos = {};
   document.querySelectorAll('#modal-form [data-col]').forEach(inp => { datos[inp.dataset.col] = inp.value; });
+  if ('paginas' in datos && !datos.paginas) {
+    err.textContent = 'Elegí al menos una página (o "Todas las páginas").';
+    return;
+  }
 
   btn.disabled = true;
   btn.textContent = 'Guardando...';
@@ -1014,7 +1028,7 @@ const COL_ANCHO_CH = {
   comentarios: 40,
   stock: 8,
   texto: 60,
-  orden: 5,
+  orden: 10,
 };
 function anchoEstilo(c) {
   const ch = COL_ANCHO_CH[c];
@@ -1216,6 +1230,10 @@ async function guardarFila(tabla, pkVal, idx) {
   const fila = document.querySelector(`tr[data-idx="${idx}"]`);
   const cambios = {};
   fila.querySelectorAll('[data-col]').forEach(inp => { cambios[inp.dataset.col] = inp.value; });
+  if ('paginas' in cambios && !cambios.paginas) {
+    showToast('Elegí al menos una página (o "Todas las páginas")', true);
+    return;
+  }
   try {
     await mvAdmin.editar(tabla, pkVal, cambios);
     showToast('Cambio aceptado ✓');

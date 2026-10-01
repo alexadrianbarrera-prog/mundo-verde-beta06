@@ -87,12 +87,14 @@ function tablasWhitelist(): array
         // (.anuncio en script.js/styles.css). "orden" define en qué
         // posición aparece cada mensaje dentro de la cinta; "activo" es
         // el toggle que usa el panel para ocultar un anuncio sin borrarlo.
+        // "paginas" dice en qué hojas .html se muestra (ver anuncios.php).
         'anuncios' => [
             'pk'         => 'id',
-            'columnas'   => ['id', 'texto', 'orden', 'activo'],
+            'columnas'   => ['id', 'texto', 'paginas', 'orden', 'activo'],
             'editables'  => [
-                'texto' => 'text',
-                'orden' => 'number',
+                'texto'   => 'text',
+                'paginas' => 'text', // "todas" o ids de hoja separados por coma (ver anuncios.php)
+                'orden'   => 'number',
             ],
             'toggle_col' => 'activo',
         ],
@@ -258,6 +260,12 @@ function admin_editar(PDO $pdo, string $tabla, string $pk): void
         if ($dup->fetch()) error('Ya existe otra cuenta registrada con ese email.', 409);
     }
 
+    if ($tabla === 'anuncios' && isset($cambios['paginas'])) {
+        $paginas = anuncios_normalizar_paginas($cambios['paginas']);
+        if ($paginas === null) error('Elegí al menos una página para el anuncio.');
+        $cambios['paginas'] = $paginas;
+    }
+
     if ($tabla === 'productos' && (isset($cambios['rubro']) || isset($cambios['categoria']))) {
         $stmtActual = $pdo->prepare('SELECT rubro, categoria FROM productos WHERE id = :pk');
         $stmtActual->execute(['pk' => $pk]);
@@ -333,6 +341,15 @@ function admin_crear(PDO $pdo, string $tabla): void
             }
         }
         $datos[$col] = $valor;
+    }
+
+    if ($tabla === 'anuncios') {
+        // Si no mandan páginas, el anuncio sale en todas (default de la columna).
+        if (isset($datos['paginas'])) {
+            $paginas = anuncios_normalizar_paginas($datos['paginas']);
+            if ($paginas === null) error('Elegí al menos una página para el anuncio.');
+            $datos['paginas'] = $paginas;
+        }
     }
 
     if ($tabla === 'productos') {
