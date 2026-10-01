@@ -1,10 +1,13 @@
 <?php
 /**
- * Envío de mails con PHPMailer por SMTP (Gmail).
+ * Envío de mails con PHPMailer por SMTP (casilla de Hostinger).
  * Las credenciales viven en config_mail.php, NUNCA en este archivo.
  *
  * Requiere PHPMailer en:  controllers/phpmailer/src/{Exception,PHPMailer,SMTP}.php
  * (descargar de https://github.com/PHPMailer/PHPMailer → carpeta "src")
+ *
+ * Todos los mails salen SIEMPRE desde info@vivemundoverde.com y las
+ * respuestas de los usuarios llegan a viveunmundoverde@gmail.com (Reply-To).
  */
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -23,40 +26,44 @@ function crearMailer(): PHPMailer
 
     // Datos NO secretos, ya cargados. config_mail.php puede pisarlos si hace falta.
     $cfg = [
-        'host'       => 'smtp.gmail.com',
+        'host'       => 'smtp.hostinger.com',
         'port'       => 465,                          // 465 = SSL, 587 = STARTTLS
-        'usuario'    => 'viveunmundoverde@gmail.com',
+        'usuario'    => 'info@vivemundoverde.com',
         'password'   => '',                           // viene de config_mail.php
-        'from_email' => 'viveunmundoverde@gmail.com',
+        'from_email' => 'info@vivemundoverde.com',
         'from_name'  => 'Mundo Verde',
+        'reply_to'   => 'viveunmundoverde@gmail.com', // las respuestas llegan a esta casilla
     ];
     if (file_exists($cfgPath)) {
         $cfg = array_merge($cfg, (array) require $cfgPath);
     }
-    if ($cfg['password'] === '') {
-        throw new \RuntimeException('Falta la contraseña de aplicación en config_mail.php');
+
+    $password = trim((string) $cfg['password']);
+    if ($password === '' || strpos($password, 'PEGAR') !== false) {
+        throw new \RuntimeException('Falta la contraseña de la casilla en config_mail.php');
     }
 
     $mail = new PHPMailer(true);
     $mail->isSMTP();
     $mail->Host       = $cfg['host'];
-    $mail->Port       = $cfg['port'];
+    $mail->Port       = (int) $cfg['port'];
     $mail->SMTPAuth   = true;
     $mail->Username   = $cfg['usuario'];
-    $mail->Password   = $cfg['password'];
-    $mail->SMTPSecure = $cfg['port'] === 465
+    $mail->Password   = $password;
+    $mail->SMTPSecure = (int) $cfg['port'] === 465
         ? PHPMailer::ENCRYPTION_SMTPS
         : PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Timeout    = 10;
     $mail->CharSet    = 'UTF-8';
     $mail->setFrom($cfg['from_email'], $cfg['from_name']);
-    $mail->addReplyTo($cfg['from_email'], $cfg['from_name']);
+    $mail->addReplyTo($cfg['reply_to'] ?: $cfg['from_email'], $cfg['from_name']);
     $mail->isHTML(true);
     return $mail;
 }
 
 /**
- * Manda el mail de bienvenida a un usuario recién registrado (cuenta).
+ * Saludo de bienvenida al usuario que acaba de crear su cuenta.
+ * Se envía al mail que dejó en el registro.
  * Nunca lanza excepciones: devuelve true/false y registra el error en el log.
  */
 function enviarMailBienvenida(string $email, string $nombre): bool
@@ -91,7 +98,8 @@ function enviarMailBienvenida(string $email, string $nombre): bool
 }
 
 /**
- * Confirmación de suscripción al newsletter, con su código de referido.
+ * Saludo al suscribirse al newsletter, con su código de referido.
+ * Se envía al mail que dejó en la suscripción.
  * Nunca lanza excepciones: devuelve true/false y registra el error en el log.
  */
 function enviarMailNewsletter(string $email, string $nombre, string $codigo): bool
@@ -102,27 +110,31 @@ function enviarMailNewsletter(string $email, string $nombre, string $codigo): bo
         $n = htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8');
         $c = htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8');
 
-        $mail->Subject = '¡Ya estás suscripto/a al newsletter de Mundo Verde! 🌿';
+        $mail->Subject = '¡Gracias por sumarte a la comunidad de Mundo Verde! 🌱';
         $mail->Body =
-            '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#333;">' .
-            '<h2 style="color:#2e7d32;">¡Hola, ' . $n . '!</h2>' .
-            '<p>Gracias por suscribirte al newsletter de <strong>Mundo Verde</strong>. ' .
-            'Vas a recibir novedades, consejos de cuidado de plantas y promociones.</p>' .
-            '<p>Este es tu código personal de referido. Compartilo con tus amigos: ' .
-            'cada vez que alguien se suscriba con tu código, sumás un referido.</p>' .
-            '<p style="text-align:center;font-size:28px;letter-spacing:4px;font-weight:bold;' .
-            'color:#2e7d32;background:#f1f8e9;padding:14px;border-radius:8px;">' . $c . '</p>' .
-            '<p style="font-size:13px;color:#666;background:#fafafa;padding:10px;border-radius:6px;">' .
-            '💡 <strong>Tip:</strong> agregá <em>viveunmundoverde@gmail.com</em> a tus contactos ' .
-            'y, si este mail llegó a Spam o Promociones, marcalo como "No es spam" ' .
-            'para no perderte nuestras novedades.</p>' .
-            '<p style="margin-top:24px;">🌱 El equipo de Mundo Verde</p></div>';
+            '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#333;text-align:center;">' .
+            '<h2 style="color:#2e7d32;">¡Bienvenido/a a Mundo Verde!</h2>' .
+            '<p>¡Hola, ' . $n . '!</p>' .
+            '<p>Gracias por formar parte de nuestra comunidad. Te alcanzamos tu código de referido ' .
+            'para que refieras a nuevos clientes y obtengas importantes descuentos y vouchers.</p>' .
+            '<p style="margin:24px 0;">' .
+            '<span style="display:inline-block;background:#2e7d32;color:#fff;font-size:24px;' .
+            'font-weight:bold;letter-spacing:4px;padding:12px 28px;border-radius:8px;">' . $c . '</span></p>' .
+            '<p style="font-size:13px;color:#666;">Compartilo con tus amigos y ganá descuentos.</p>' .
+            '<p>Vas a recibir novedades, promos y talleres exclusivos en tu email.</p>' .
+            '<p style="font-size:12px;color:#777;background:#fafafa;padding:10px;border-radius:6px;">' .
+            '💡 Agregá <em>info@vivemundoverde.com</em> a tus contactos y, si este mail llegó a ' .
+            'Spam o Promociones, marcalo como "No es spam" para no perderte nuestras novedades.</p>' .
+            '<p style="margin-top:24px;">🌿 El equipo de Mundo Verde</p>' .
+            '</div>';
         $mail->AltBody =
-            "¡Hola, $nombre!\n\nGracias por suscribirte al newsletter de Mundo Verde.\n\n" .
-            "Tu código personal de referido es: $codigo\n" .
-            "Compartilo: cada persona que se suscriba con tu código suma un referido.\n\n" .
-            "Tip: agregá viveunmundoverde@gmail.com a tus contactos y, si este mail llegó a Spam " .
-            "o Promociones, marcalo como \"No es spam\" para no perderte nuestras novedades.\n\n" .
+            "¡Hola, $nombre!\n\n" .
+            "Gracias por formar parte de nuestra comunidad. Te alcanzamos tu código de referido " .
+            "para que refieras a nuevos clientes y obtengas importantes descuentos y vouchers.\n\n" .
+            "Tu código: $codigo\n\n" .
+            "Vas a recibir novedades, promos y talleres exclusivos en tu email.\n\n" .
+            "Tip: agregá info@vivemundoverde.com a tus contactos y, si este mail llegó a Spam " .
+            "o Promociones, marcalo como \"No es spam\".\n\n" .
             "El equipo de Mundo Verde";
 
         $mail->send();

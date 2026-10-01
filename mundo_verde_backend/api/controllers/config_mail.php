@@ -1,17 +1,17 @@
 <?php
 /**
  * Credenciales de correo. NO subir a GitHub ni compartir.
- * Si podés, guardá este archivo FUERA de public_html y ajustá la ruta en mailer.php.
+ * (ya está en .gitignore: subir este archivo al servidor a mano)
  *
- * La contraseña es una "contraseña de aplicación" de Google
- * (Cuenta de Google → Seguridad → Verificación en 2 pasos → Contraseñas de aplicaciones),
- * NO la contraseña normal de Gmail.
+ * Casilla de correo de Hostinger (hPanel → Correos electrónicos).
+ * La contraseña es la que elegiste al crear la casilla info@vivemundoverde.com.
  */
 return [
-    'host'       => 'smtp.gmail.com',
-    'port'       => 465,                 // 465 = SSL, 587 = STARTTLS
-    'usuario'    => 'viveunmundoverde@gmail.com',
-    'password'   => 'uagq pswq jfsd gyat', // <--- PONÉ TU CONTRASEÑA DE APLICACIÓN DE GMAIL AQUÍ
-    'from_email' => 'viveunmundoverde@gmail.com',
+    'host'       => 'smtp.hostinger.com',
+    'port'       => 465,                          // 465 = SSL, 587 = STARTTLS
+    'usuario'    => 'info@vivemundoverde.com',    // el mail completo
+    'password'   => 'f4C1@#31', // la contraseña de la casilla
+    'from_email' => 'info@vivemundoverde.com',
     'from_name'  => 'Mundo Verde',
+    'reply_to'   => 'viveunmundoverde@gmail.com', // las respuestas llegan acá
 ];
