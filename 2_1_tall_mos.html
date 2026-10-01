@@ -319,7 +319,7 @@
 
             <p class="zona-msg" style="display:block; color:#555; margin-bottom:10px;">
                 Elegí cómo vas a pagar. Por ahora podés completar la compra con
-                <strong>Transferencia</strong> o <strong>Tarjeta</strong>; el resto de las
+                <strong>Transferencia</strong>, <strong>Mercado Pago</strong> o <strong>Tarjeta</strong>; el resto de las
                 opciones va a estar disponible muy pronto.
             </p>
 
@@ -340,17 +340,16 @@
                     <span>Tarjeta de crédito / débito</span>
                 </label>
 
+                <label class="metodo-card">
+                    <input type="radio" name="metodoPago" value="mercadopago">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span>Mercado Pago</span>
+                </label>
+
                 <label class="metodo-card metodo-card--proximamente">
                     <input type="radio" name="metodoPago" value="modo">
                     <i class="fa-solid fa-mobile-screen-button"></i>
                     <span>MODO</span>
-                    <span class="metodo-proximamente-tag">Próximamente</span>
-                </label>
-
-                <label class="metodo-card metodo-card--proximamente">
-                    <input type="radio" name="metodoPago" value="mercadopago">
-                    <i class="fa-solid fa-wallet"></i>
-                    <span>Mercado Pago</span>
                     <span class="metodo-proximamente-tag">Próximamente</span>
                 </label>
 
@@ -429,12 +428,19 @@
                     </p>
                 </div>
 
-                <!-- Mercado Pago (billetera) — todavía sin integración -->
-                <div id="detalle-mercadopago" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
-                    <p class="zona-msg" style="display:block; color:#555;">
-                        Pago con el saldo de tu cuenta de Mercado Pago. Todavía estamos
-                        conectando este medio de pago.
+                <!-- Mercado Pago por alias (FUNCIONAL) -->
+                <div id="detalle-mercadopago" class="metodo-detalle" style="display:none">
+                    <p class="zona-msg" style="display:block; color:#555; line-height:1.7;">
+                        Alias Mercado Pago<br>
+                        <strong>AGUS.MUNDO.VERDE</strong><br>
+                        Agustina Rosselli
                     </p>
+                    <div id="comprobanteBoxMP">
+                        <label class="comprobante-label">
+                            Subí el comprobante de pago * (JPG, PNG o PDF)
+                        </label>
+                        <input type="file" accept="image/*,.pdf" id="comprobante-archivo-mp">
+                    </div>
                 </div>
 
                 <!-- Mercado Crédito — todavía sin integración -->

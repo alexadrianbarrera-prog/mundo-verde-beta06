@@ -796,7 +796,7 @@ function generarQrAlias() {
 // integración real del lado del backend (MODO, Mercado Pago billetera,
 // Mercado Crédito, cuotas sin interés con débito). Se pueden abrir para
 // ver el aviso, pero no dejan continuar el pedido hasta conectarlos.
-const METODOS_PROXIMAMENTE = ['modo', 'mercadopago', 'mercadocredito', 'cuotasdebito'];
+const METODOS_PROXIMAMENTE = ['modo', 'mercadocredito', 'cuotasdebito'];
 
 // Cada método de pago tiene su propio renglón de detalle debajo de la
 // grilla de botones (ver #metodoDetalle en el HTML). Acá se mapea el
@@ -804,8 +804,8 @@ const METODOS_PROXIMAMENTE = ['modo', 'mercadopago', 'mercadocredito', 'cuotasde
 const DETALLE_ID_POR_METODO = {
     transferencia: 'detalle-transferencia',
     tarjeta: 'detalle-tarjeta',
-    modo: 'detalle-modo',
     mercadopago: 'detalle-mercadopago',
+    modo: 'detalle-modo',
     mercadocredito: 'detalle-mercadocredito',
     cuotasdebito: 'detalle-cuotasdebito',
 };
@@ -935,12 +935,14 @@ function avanzarAPaso4() {
     }
 
     if (METODOS_PROXIMAMENTE.includes(metodo.value)) {
-        mostrarToast('⚠️ Ese método todavía no está disponible. Elegí Transferencia o Tarjeta.');
+        mostrarToast('⚠️ Ese método todavía no está disponible. Elegí Transferencia, Mercado Pago o Tarjeta.');
         return;
     }
 
-    if (metodo.value === 'transferencia') {
-        const comprobante = document.getElementById('comprobante-archivo');
+    if (metodo.value === 'transferencia' || metodo.value === 'mercadopago') {
+        const comprobante = document.getElementById(
+            metodo.value === 'mercadopago' ? 'comprobante-archivo-mp' : 'comprobante-archivo'
+        );
         if (!comprobante || comprobante.files.length === 0) {
             mostrarToast('⚠️ Adjuntá el comprobante de pago para continuar');
             return;
@@ -1098,8 +1100,10 @@ async function guardarPedidoEnBackend() {
 
     // Comprobante de pago (solo aplica a transferencia): si está adjunto,
     // el pedido se guarda directamente como "pagado".
-    const comprobanteInput = document.getElementById('comprobante-archivo');
-    const archivoComprobante = (metodo === 'transferencia' && comprobanteInput && comprobanteInput.files.length > 0)
+    const comprobanteInput = document.getElementById(
+        metodo === 'mercadopago' ? 'comprobante-archivo-mp' : 'comprobante-archivo'
+    );
+    const archivoComprobante = ((metodo === 'transferencia' || metodo === 'mercadopago') && comprobanteInput && comprobanteInput.files.length > 0)
         ? comprobanteInput.files[0]
         : null;
 
