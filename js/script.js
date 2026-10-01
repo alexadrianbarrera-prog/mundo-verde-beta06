@@ -1344,12 +1344,17 @@ if (registroForm) {
             errLocalidad.style.display = 'block';
             ok = false;
         }
-        if (password.length < 6) { errPassword.style.display = 'block'; ok = false; }
+        if (password.length < 8) { errPassword.style.display = 'block'; ok = false; }
         if (password !== password2) { errPassword2.style.display = 'block'; ok = false; }
         if (!ok) return;
 
+        const btnSubmit = registroForm.querySelector('button[type="submit"]');
+        if (btnSubmit) btnSubmit.disabled = true;
+
         try {
-            const data = await mvAuth.registro({
+            // El backend crea la cuenta y envía el mail de bienvenida.
+            // No devuelve token: el usuario inicia sesión desde login.html.
+            await mvAuth.registro({
                 nombre, email, telefono,
                 domicilio_completo: domicilioCompleto,
                 localidad,
@@ -1357,18 +1362,23 @@ if (registroForm) {
                 fecha_nacimiento: fechaNacimiento || undefined,
                 password,
             });
-            mvSetSesion(data.token, data.usuario);
-            migrarCarritoGuest();
-            marcarRecordatorioCarrito();
 
+            // Mismo texto que el mail de bienvenida
             registroForm.style.display = 'none';
-            document.getElementById('conf-nombre-texto').textContent = `¡Hola, ${data.usuario.nombre}!`;
+            document.getElementById('conf-titulo').textContent = '¡Cuenta creada!';
+            document.getElementById('conf-nombre-texto').textContent =
+                `¡Hola, ${nombre}! Gracias por crear tu cuenta en Mundo Verde. ` +
+                'Ya podés iniciar sesión para comprar plantas y productos, ' +
+                'reservar talleres y seguir tus pedidos. ' +
+                'Te enviamos este mismo mensaje a tu mail (si no lo ves, revisá Spam o Promociones). ' +
+                'Te llevamos al inicio de sesión…';
             document.getElementById('msg-confirmacion').style.display = 'block';
 
-            setTimeout(() => { window.location.href = '1_0_vivero.html'; }, 1500);
+            setTimeout(() => { window.location.href = 'login.html'; }, 6000);
         } catch (err) {
             errGeneral.textContent = '⚠️ ' + err.message;
             errGeneral.style.display = 'block';
+            if (btnSubmit) btnSubmit.disabled = false;
         }
     });
 }
