@@ -60,6 +60,10 @@ function tablasWhitelist(): array
                 'nombre' => 'text',
                 'origen' => 'text',
             ],
+            // El mail se pide SOLO al crear (es único y no se edita en la grilla).
+            'creables'   => [
+                'mail'   => 'text',
+            ],
             'toggle_col' => 'activo',
         ],
         'pedidos' => [
@@ -244,6 +248,16 @@ function admin_editar(PDO $pdo, string $tabla, string $pk): void
         $cambios[$col] = $valor;
     }
 
+    // Un mail solo puede pertenecer a UN usuario (el del newsletter es otra
+    // tabla y se controla aparte: acá no se cruzan).
+    if ($tabla === 'usuarios' && isset($cambios['email'])) {
+        $cambios['email'] = strtolower($cambios['email']);
+        if (!validarEmail($cambios['email'])) error('Ingresá un email válido.');
+        $dup = $pdo->prepare('SELECT id FROM usuarios WHERE email = :email AND id <> :id');
+        $dup->execute(['email' => $cambios['email'], 'id' => $pk]);
+        if ($dup->fetch()) error('Ya existe otra cuenta registrada con ese email.', 409);
+    }
+
     if ($tabla === 'productos' && (isset($cambios['rubro']) || isset($cambios['categoria']))) {
         $stmtActual = $pdo->prepare('SELECT rubro, categoria FROM productos WHERE id = :pk');
         $stmtActual->execute(['pk' => $pk]);
@@ -259,7 +273,14 @@ function admin_editar(PDO $pdo, string $tabla, string $pk): void
 
     $sql = "UPDATE `$tabla` SET " . implode(', ', $sets) . " WHERE `{$meta['pk']}` = :pk";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
+    try {
+        $stmt->execute($params);
+    } catch (PDOException $e) {
+        if ($tabla === 'usuarios' && esDuplicadoEnClave($e, 'email')) {
+            error('Ya existe otra cuenta registrada con ese email.', 409);
+        }
+        throw $e;
+    }
 
     if ($stmt->rowCount() === 0) {
         error('No se encontró el registro o no hubo cambios.', 404);
@@ -281,6 +302,10 @@ function admin_crear(PDO $pdo, string $tabla): void
 
     if ($tabla === 'usuarios') {
         admin_crear_usuario($pdo, $body);
+        return;
+    }
+    if ($tabla === 'newsletter_suscriptores') {
+        admin_crear_suscriptor($pdo, $body);
         return;
     }
 
@@ -368,23 +393,72 @@ function admin_crear_usuario(PDO $pdo, array $body): void
                                 fecha_nacimiento, password_hash, rol, activo, confirmado)
          VALUES (:nombre, :email, :telefono, :domicilio, :localidad, :cp, :fecha_nac, :hash, :rol, 1, 1)'
     );
-    $stmt->execute([
-        'nombre'    => $nombre,
-        'email'     => $email,
-        'telefono'  => trim($body['telefono'] ?? '') ?: null,
-        'domicilio' => trim($body['domicilio_completo'] ?? '') ?: null,
-        'localidad' => trim($body['localidad'] ?? '') ?: null,
-        'cp'        => trim($body['codigo_postal'] ?? '') ?: null,
-        'fecha_nac' => trim($body['fecha_nacimiento'] ?? '') ?: null,
-        'hash'      => $hash,
-        'rol'       => $rol,
-    ]);
+    try {
+        $stmt->execute([
+            'nombre'    => $nombre,
+            'email'     => $email,
+            'telefono'  => trim($body['telefono'] ?? '') ?: null,
+            'domicilio' => trim($body['domicilio_completo'] ?? '') ?: null,
+            'localidad' => trim($body['localidad'] ?? '') ?: null,
+            'cp'        => trim($body['codigo_postal'] ?? '') ?: null,
+            'fecha_nac' => trim($body['fecha_nacimiento'] ?? '') ?: null,
+            'hash'      => $hash,
+            'rol'       => $rol,
+        ]);
+    } catch (PDOException $e) {
+        if (esDuplicadoEnClave($e, 'email')) {
+            error('Ya existe una cuenta registrada con ese email.', 409);
+        }
+        throw $e;
+    }
 
     responder([
         'mensaje'           => 'Cuenta creada.',
         'id'                => (int)$pdo->lastInsertId(),
         'password_temporal' => $passwordTemporal, // mostrar una sola vez en el panel
     ], 201);
+}
+
+/**
+ * Alta manual de un suscriptor desde el panel. Igual que la suscripción
+ * pública: mail obligatorio, válido y único dentro del newsletter (un mismo
+ * mail SÍ puede estar además como usuario registrado: son listas distintas).
+ * Genera su código de referido; no envía mail de confirmación.
+ */
+function admin_crear_suscriptor(PDO $pdo, array $body): void
+{
+    $nombre = trim($body['nombre'] ?? '');
+    $mail   = trim(strtolower($body['mail'] ?? ''));
+    $origen = trim($body['origen'] ?? '');
+
+    if ($nombre === '') error('El nombre es obligatorio.');
+    if (!validarEmail($mail)) error('Ingresá un email válido.');
+
+    $existe = $pdo->prepare('SELECT id FROM newsletter_suscriptores WHERE mail = :mail');
+    $existe->execute(['mail' => $mail]);
+    if ($existe->fetch()) {
+        error('Ese email ya está suscripto al newsletter.', 409);
+    }
+
+    $stmt = $pdo->prepare(
+        'INSERT INTO newsletter_suscriptores (nombre, mail, origen, codigo_mio, acepta_tyc)
+         VALUES (:nombre, :mail, :origen, :codigo, 1)'
+    );
+    try {
+        $stmt->execute([
+            'nombre' => $nombre,
+            'mail'   => $mail,
+            'origen' => $origen ?: 'admin',
+            'codigo' => generarCodigoReferido($pdo),
+        ]);
+    } catch (PDOException $e) {
+        if (esDuplicadoEnClave($e, 'mail')) {
+            error('Ese email ya está suscripto al newsletter.', 409);
+        }
+        throw $e;
+    }
+
+    responder(['mensaje' => 'Suscriptor creado.', 'id' => (int)$pdo->lastInsertId()], 201);
 }
 
 function admin_toggle(PDO $pdo, string $tabla, string $pk): void

@@ -114,3 +114,17 @@ function validarEmail(?string $email): bool
 {
     return $email && filter_var($email, FILTER_VALIDATE_EMAIL);
 }
+
+/**
+ * true si la excepción es un "Duplicate entry" (MySQL 1062) sobre la clave
+ * UNIQUE indicada (ej.: 'email', 'mail'). Sirve de red de seguridad cuando
+ * dos requests intentan guardar el mismo mail casi al mismo tiempo y el
+ * SELECT previo no alcanza a verlo.
+ * MariaDB informa "for key 'mail'" y MySQL 8 "for key 'tabla.mail'".
+ */
+function esDuplicadoEnClave(Throwable $e, string $clave): bool
+{
+    return $e instanceof PDOException
+        && (int)($e->errorInfo[1] ?? 0) === 1062
+        && preg_match("/for key '(?:[^']*\\.)?" . preg_quote($clave, '/') . "'/", $e->getMessage()) === 1;
+}

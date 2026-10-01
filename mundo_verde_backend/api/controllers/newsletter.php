@@ -41,13 +41,21 @@ function newsletter_suscribir(PDO $pdo): void
         'INSERT INTO newsletter_suscriptores (nombre, mail, origen, codigo_mio, referido_por_id, acepta_tyc)
          VALUES (:nombre, :mail, :origen, :codigo, :referido_por, 1)'
     );
-    $stmt->execute([
-        'nombre'       => $nombre,
-        'mail'         => $mail,
-        'origen'       => $origen ?: null,
-        'codigo'       => $codigoMio,
-        'referido_por' => $referidoPorId,
-    ]);
+    try {
+        $stmt->execute([
+            'nombre'       => $nombre,
+            'mail'         => $mail,
+            'origen'       => $origen ?: null,
+            'codigo'       => $codigoMio,
+            'referido_por' => $referidoPorId,
+        ]);
+    } catch (PDOException $e) {
+        // Dos suscripciones simultáneas con el mismo mail: gana la primera.
+        if (esDuplicadoEnClave($e, 'mail')) {
+            error('Ese email ya está suscripto al newsletter.', 409);
+        }
+        throw $e;
+    }
 
     if ($referidoPorId) {
         $pdo->prepare(

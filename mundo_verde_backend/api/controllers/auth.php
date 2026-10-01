@@ -44,16 +44,24 @@ function auth_registro(PDO $pdo): void
          VALUES (:nombre, :email, :telefono, :domicilio_completo, :localidad, :codigo_postal,
                  :fecha_nacimiento, :hash, "cliente")'
     );
-    $stmt->execute([
-        'nombre'             => $nombre,
-        'email'              => $email,
-        'telefono'           => $telefono ?: null,
-        'domicilio_completo' => $domicilioCompleto,
-        'localidad'          => $localidad,
-        'codigo_postal'      => $codigoPostal ?: null,
-        'fecha_nacimiento'   => $fechaNac,
-        'hash'               => $hash,
-    ]);
+    try {
+        $stmt->execute([
+            'nombre'             => $nombre,
+            'email'              => $email,
+            'telefono'           => $telefono ?: null,
+            'domicilio_completo' => $domicilioCompleto,
+            'localidad'          => $localidad,
+            'codigo_postal'      => $codigoPostal ?: null,
+            'fecha_nacimiento'   => $fechaNac,
+            'hash'               => $hash,
+        ]);
+    } catch (PDOException $e) {
+        // Dos registros simultáneos con el mismo mail: gana el primero.
+        if (esDuplicadoEnClave($e, 'email')) {
+            error('Ya existe una cuenta registrada con ese email.', 409);
+        }
+        throw $e;
+    }
     $usuarioId = (int)$pdo->lastInsertId();
 
     // Ya no se loguea acá: la cuenta queda creada pero sin confirmar

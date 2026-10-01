@@ -202,6 +202,39 @@
     border-radius: var(--radius);
     overflow: auto;
   }
+  /* La caja de la tabla llega justo hasta el borde inferior de la pantalla
+     (el alto exacto lo calcula ajustarAltoTabla() en el JS), así la barra
+     de scroll horizontal queda siempre visible sin bajar hasta el último registro. */
+  @media (min-width: 769px) {
+    .table-wrap { max-height: 70vh; overscroll-behavior: contain; }
+    .main { padding-bottom: 12px; }
+  }
+  /* Barra de desplazamiento horizontal superior (dibujada a mano para que se vea
+     siempre): queda entre la toolbar y el encabezado, sincronizada con .table-wrap. */
+  .top-scroll {
+    display: none;
+    position: relative;
+    height: 12px;
+    margin-top: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    touch-action: none;
+  }
+  .top-scroll-thumb {
+    position: absolute;
+    top: 1px; bottom: 1px; left: 0;
+    min-width: 40px;
+    background: var(--accent);
+    opacity: .75;
+    border-radius: 6px;
+    cursor: grab;
+  }
+  .top-scroll-thumb:hover, .top-scroll.arrastrando .top-scroll-thumb { opacity: 1; }
+  .top-scroll.arrastrando .top-scroll-thumb { cursor: grabbing; }
+  @media (max-width: 768px) { .top-scroll { display: none !important; } }
   table { width: 100%; border-collapse: collapse; font-size: .82rem; }
   thead th {
     text-align: left;
@@ -529,6 +562,7 @@
         <div class="panel-count" id="panel-count"></div>
       </div>
       <div class="toolbar" id="toolbar"></div>
+      <div class="top-scroll" id="top-scroll" aria-hidden="true"><div class="top-scroll-thumb" id="top-scroll-thumb"></div></div>
     </div>
   </div>
 
@@ -778,6 +812,7 @@ function renderVista(tabla, pkAResaltar) {
   } else {
     renderTabla(tabla, filas);
   }
+  ajustarAltoTabla();
   if (pkAResaltar !== undefined) {
     const fila = document.querySelector(`tr[data-pk="${pkAResaltar}"], tr[data-pedido-id="${pkAResaltar}"]`);
     if (fila) {
@@ -1210,6 +1245,87 @@ async function eliminarFila(tabla, pkVal) {
     showToast(ex.message, true);
   }
 }
+
+/* ── Alto de la tabla: hasta el borde inferior de la pantalla ──
+   Así la barra de scroll horizontal queda siempre a la vista. En mobile
+   (≤768px) las tablas son tarjetas apiladas y no se limita el alto. */
+function ajustarAltoTabla() {
+  const wrap = document.querySelector('.table-wrap');
+  const sticky = document.querySelector('.admin-sticky');
+  if (!wrap || !sticky) return;
+  if (window.innerWidth <= 768) { wrap.style.maxHeight = ''; return; }
+  const alto = window.innerHeight - sticky.getBoundingClientRect().bottom - 12;
+  wrap.style.maxHeight = Math.max(alto, 200) + 'px';
+}
+/* ── Barra de scroll horizontal superior sincronizada con la tabla ── */
+function sincronizarBarraSuperior() {
+  const wrap = document.querySelector('.table-wrap');
+  const track = document.getElementById('top-scroll');
+  const thumb = document.getElementById('top-scroll-thumb');
+  if (!wrap || !track || !thumb) return;
+  const overflow = wrap.scrollWidth - wrap.clientWidth;
+  if (window.innerWidth <= 768 || overflow <= 1) { track.style.display = 'none'; return; }
+  track.style.display = 'block';
+  const trackW = track.clientWidth - 2;
+  const thumbW = Math.max(40, trackW * wrap.clientWidth / wrap.scrollWidth);
+  thumb.style.width = thumbW + 'px';
+  thumb.style.left = ((wrap.scrollLeft / overflow) * (trackW - thumbW)) + 'px';
+}
+(function () {
+  const wrap = document.querySelector('.table-wrap');
+  const track = document.getElementById('top-scroll');
+  const thumb = document.getElementById('top-scroll-thumb');
+  const target = document.getElementById('table-target');
+  if (!wrap || !track || !thumb) return;
+
+  wrap.addEventListener('scroll', sincronizarBarraSuperior);
+
+  // Arrastrar el control
+  let drag = null;
+  thumb.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    drag = { x: e.clientX, left: wrap.scrollLeft };
+    track.classList.add('arrastrando');
+    thumb.setPointerCapture(e.pointerId);
+  });
+  thumb.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const overflow = wrap.scrollWidth - wrap.clientWidth;
+    const libre = (track.clientWidth - 2) - thumb.offsetWidth;
+    if (libre <= 0) return;
+    wrap.scrollLeft = drag.left + (e.clientX - drag.x) * (overflow / libre);
+  });
+  const soltar = () => { drag = null; track.classList.remove('arrastrando'); };
+  thumb.addEventListener('pointerup', soltar);
+  thumb.addEventListener('pointercancel', soltar);
+
+  // Clic en el riel: centra el control en ese punto
+  track.addEventListener('pointerdown', (e) => {
+    if (e.target === thumb) return;
+    const overflow = wrap.scrollWidth - wrap.clientWidth;
+    const libre = (track.clientWidth - 2) - thumb.offsetWidth;
+    if (libre <= 0) return;
+    const x = e.clientX - track.getBoundingClientRect().left - thumb.offsetWidth / 2;
+    wrap.scrollLeft = Math.min(Math.max(x / libre, 0), 1) * overflow;
+  });
+
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(sincronizarBarraSuperior);
+    ro.observe(wrap);
+    const observarTabla = () => { const t = wrap.querySelector('table'); if (t) ro.observe(t); sincronizarBarraSuperior(); };
+    if (target) new MutationObserver(observarTabla).observe(target, { childList: true });
+    observarTabla();
+  }
+  window.addEventListener('resize', sincronizarBarraSuperior);
+  window.addEventListener('load', sincronizarBarraSuperior);
+})();
+window.addEventListener('resize', ajustarAltoTabla);
+window.addEventListener('orientationchange', ajustarAltoTabla);
+window.addEventListener('load', ajustarAltoTabla);
+(function () {
+  const sticky = document.querySelector('.admin-sticky');
+  if (window.ResizeObserver && sticky) new ResizeObserver(ajustarAltoTabla).observe(sticky);
+})();
 </script>
 </body>
 </html>
