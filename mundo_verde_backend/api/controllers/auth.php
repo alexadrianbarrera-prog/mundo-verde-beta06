@@ -64,31 +64,30 @@ function auth_registro(PDO $pdo): void
     }
     $usuarioId = (int)$pdo->lastInsertId();
 
-    // Ya no se loguea acá: la cuenta queda creada pero sin confirmar
-    // (columna `confirmado` = 0 por default) hasta que confirme el
-    // código de 6 dígitos que le mandamos al mail.
-    $codigo = generarCodigoConfirmacion();
-    $pdo->prepare(
-        'INSERT INTO confirmaciones_mail (usuario_id, codigo, expira_en)
-         VALUES (:usuario_id, :codigo, DATE_ADD(NOW(), INTERVAL 15 MINUTE))'
-    )->execute(['usuario_id' => $usuarioId, 'codigo' => $codigo]);
+    // Login automático: la sesión se crea acá mismo y el token viaja en la
+    // respuesta, así el frontend deja al usuario logueado sin pasar por login.html.
+    $token = crearSesion($pdo, $usuarioId);
 
     $respuesta = [
-        'mensaje' => 'Cuenta creada. Te mandamos un código para confirmar tu mail.',
-        'email'   => $email,
+        'mensaje' => 'Cuenta creada.',
+        // Nombre sacado del mail (crixus@gmail.com -> "Crixus"): es el mismo
+        // que lleva el mail de bienvenida, para que cartel y mail coincidan.
+        'nombre_saludo' => nombreDesdeEmail($email),
+        'token'   => $token,
+        'usuario' => [
+            'id'     => $usuarioId,
+            'nombre' => $nombre,
+            'email'  => $email,
+            'rol'    => 'cliente',
+        ],
     ];
 
-    // No hay servicio de envío de mails configurado todavía: devolvemos
-    // el código acá mismo para poder probar el flujo completo (modo dev).
-    // Cuando se configure un mailer real, quitar "dev_codigo" de la
-    // respuesta y enviar el código por email en su lugar.
-    $respuesta['dev_codigo'] = $codigo;
-
-    // Mail de bienvenida. Si falla el envío NO se corta el registro:
-    // la cuenta ya está creada, el error queda en el log del servidor.
+    // Se le responde al navegador YA (para que el cartel y el login aparezcan
+    // al instante) y recién después se envía el mail de bienvenida, sin hacer
+    // esperar al usuario por el SMTP. Si el envío falla NO se corta nada:
+    // la cuenta ya está creada y el error queda en el log del servidor.
+    responderYContinuar($respuesta, 201);
     enviarMailBienvenida($email, $nombre);
-
-    responder($respuesta, 201);
 }
 
 function auth_login(PDO $pdo): void

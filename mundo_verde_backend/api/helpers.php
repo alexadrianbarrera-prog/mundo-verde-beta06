@@ -10,6 +10,31 @@ function responder($data, int $codigo = 200): void
     exit;
 }
 
+/**
+ * Igual que responder() pero NO corta el script: cierra la conexión con el
+ * navegador (que recibe la respuesta de inmediato) y deja que el PHP siga
+ * corriendo para tareas lentas, como mandar un mail por SMTP.
+ */
+function responderYContinuar($data, int $codigo = 200): void
+{
+    ignore_user_abort(true);
+    set_time_limit(60);
+    http_response_code($codigo);
+    $json = json_encode($data, JSON_UNESCAPED_UNICODE);
+
+    if (function_exists('fastcgi_finish_request')) {
+        echo $json;
+        fastcgi_finish_request();
+        return;
+    }
+    // Apache + mod_php (XAMPP): se fuerza el cierre con Content-Length.
+    while (ob_get_level() > 0) ob_end_clean();
+    header('Content-Length: ' . strlen($json));
+    header('Connection: close');
+    echo $json;
+    flush();
+}
+
 function error(string $mensaje, int $codigo = 400): void
 {
     responder(['error' => $mensaje], $codigo);

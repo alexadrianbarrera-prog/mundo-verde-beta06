@@ -1304,6 +1304,9 @@ if (loginForm) {
 /*Para celulares LOGIN Logout*/
 
 
+/* Tiempo (ms) que se muestra el cartel de bienvenida antes de entrar al sitio. */
+const MV_CARTEL_MS = 6000;
+
 /* ── Registro ── */
 const registroForm = document.getElementById('registroForm');
 if (registroForm) {
@@ -1352,9 +1355,9 @@ if (registroForm) {
         if (btnSubmit) btnSubmit.disabled = true;
 
         try {
-            // El backend crea la cuenta y envía el mail de bienvenida.
-            // No devuelve token: el usuario inicia sesión desde login.html.
-            await mvAuth.registro({
+            // El backend crea la cuenta, la deja logueada (devuelve token) y manda
+            // el mail de bienvenida en paralelo, sin hacer esperar la respuesta.
+            const data = await mvAuth.registro({
                 nombre, email, telefono,
                 domicilio_completo: domicilioCompleto,
                 localidad,
@@ -1363,18 +1366,30 @@ if (registroForm) {
                 password,
             });
 
-            // Mismo texto que el mail de bienvenida
+            // 1) Queda logueado al instante (el header ya lo muestra logueado
+            //    en la próxima página).
+            mvSetSesion(data.token, data.usuario);
+            migrarCarritoGuest();
+            marcarRecordatorioCarrito();
+
+            // 2) Cartel de bienvenida: mismo texto que el mail.
             registroForm.style.display = 'none';
-            document.getElementById('conf-titulo').textContent = '¡Cuenta creada!';
-            document.getElementById('conf-nombre-texto').textContent =
-                `¡Hola, ${nombre}! Gracias por crear tu cuenta en Mundo Verde. ` +
+            const saludo = data.nombre_saludo || data.usuario.nombre;   // sale del mail cargado
+            document.getElementById('conf-titulo').textContent = `¡Hola, ${saludo}!`;
+            const texto = document.getElementById('conf-nombre-texto');
+            texto.style.whiteSpace = 'pre-line';
+            texto.textContent = '';
+            texto.innerHTML =
+                'Gracias ' + saludo.replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';') +
+                ' por crear tu cuenta en <strong>Mundo Verde</strong>. ' +
                 'Ya podés iniciar sesión para comprar plantas y productos, ' +
-                'reservar talleres y seguir tus pedidos. ' +
-                'Te enviamos este mismo mensaje a tu mail (si no lo ves, revisá Spam o Promociones). ' +
-                'Te llevamos al inicio de sesión…';
+                'reservar talleres y seguir tus pedidos.\n\n' +
+                'Si tenés cualquier duda, respondé este mail y te contestamos.\n\n' +
+                '🌿 El equipo de Mundo Verde';
             document.getElementById('msg-confirmacion').style.display = 'block';
 
-            setTimeout(() => { window.location.href = 'login.html'; }, 6000);
+            // Después del cartel, entra al sitio ya logueado.
+            setTimeout(() => { window.location.href = '1_0_vivero.html'; }, MV_CARTEL_MS);
         } catch (err) {
             errGeneral.textContent = '⚠️ ' + err.message;
             errGeneral.style.display = 'block';

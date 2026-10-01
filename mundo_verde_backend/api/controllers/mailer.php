@@ -62,6 +62,27 @@ function crearMailer(): PHPMailer
 }
 
 /**
+ * Nombre "para saludar" sacado del mail: crixus@gmail.com -> "Crixus",
+ * juan.perez+tienda@x.com -> "Juan Perez", maria_lopez92@x.com -> "Maria Lopez".
+ * Se usa tanto en el mail de bienvenida como en el cartel de pantalla, así los
+ * dos dicen exactamente lo mismo.
+ */
+function nombreDesdeEmail(string $email): string
+{
+    $local = explode('@', trim($email))[0];
+    $local = explode('+', $local)[0];                    // saca etiquetas tipo +tienda
+    $limpio = preg_replace('/\d+$/', '', $local);         // saca números finales (crixus92)
+    $limpio = $limpio !== '' ? $limpio : $local;
+    $partes = preg_split('/[._\-\s]+/', $limpio, -1, PREG_SPLIT_NO_EMPTY);
+    if (!$partes) return 'Cliente';
+    $partes = array_map(
+        fn($p) => mb_strtoupper(mb_substr($p, 0, 1, 'UTF-8'), 'UTF-8') . mb_strtolower(mb_substr($p, 1, null, 'UTF-8'), 'UTF-8'),
+        $partes
+    );
+    return implode(' ', $partes);
+}
+
+/**
  * Saludo de bienvenida al usuario que acaba de crear su cuenta.
  * Se envía al mail que dejó en el registro.
  * Nunca lanza excepciones: devuelve true/false y registra el error en el log.
@@ -71,21 +92,22 @@ function enviarMailBienvenida(string $email, string $nombre): bool
     try {
         $mail = crearMailer();
         $mail->addAddress($email, $nombre);
-        $n = htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8');
+        $saludo = nombreDesdeEmail($email);   // concuerda con el mail cargado
+        $n = htmlspecialchars($saludo, ENT_QUOTES, 'UTF-8');
 
         $mail->Subject = '¡Bienvenido/a a Mundo Verde! 🌱';
         $mail->Body =
             '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#333;">' .
             '<h2 style="color:#2e7d32;">¡Hola, ' . $n . '!</h2>' .
-            '<p>Gracias por crear tu cuenta en <strong>Mundo Verde</strong>. ' .
+            '<p>Gracias ' . $n . ' por crear tu cuenta en <strong>Mundo Verde</strong>. ' .
             'Ya podés iniciar sesión para comprar plantas y productos, ' .
             'reservar talleres y seguir tus pedidos.</p>' .
             '<p>Si tenés cualquier duda, respondé este mail y te contestamos.</p>' .
             '<p style="margin-top:24px;">🌿 El equipo de Mundo Verde</p>' .
             '</div>';
         $mail->AltBody =
-            "¡Hola, $nombre!\n\n" .
-            "Gracias por crear tu cuenta en Mundo Verde. Ya podés iniciar sesión " .
+            "¡Hola, $saludo!\n\n" .
+            "Gracias $saludo por crear tu cuenta en Mundo Verde. Ya podés iniciar sesión " .
             "para comprar plantas y productos, reservar talleres y seguir tus pedidos.\n\n" .
             "Si tenés cualquier duda, respondé este mail.\n\nEl equipo de Mundo Verde";
 
