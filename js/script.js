@@ -757,6 +757,59 @@ function coordinarConVendedor() {
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
 
+/* ── Transferencia al alias: número de pedido + confirmación ─────────────
+   El cliente ve el total y un número de pedido (MV-DDMM-NNNN) para poner en
+   el concepto de la transferencia, y tilda "Ya transferí" para
+   poder continuar. El pedido se guarda "pendiente de verificación" y el
+   número viaja en el mensaje de WhatsApp (el comprobante se manda por ahí). */
+const REF_PEDIDO_KEY = 'mvRefPedido';
+
+function obtenerReferenciaPedido() {
+    let ref = null;
+    try { ref = sessionStorage.getItem(REF_PEDIDO_KEY); } catch (e) {}
+    if (!ref) {
+        const d = new Date();
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const n = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+        ref = `MV-${dd}${mm}-${n}`;
+        try { sessionStorage.setItem(REF_PEDIDO_KEY, ref); } catch (e) {}
+    }
+    return ref;
+}
+
+function reiniciarReferenciaPedido() {
+    try { sessionStorage.removeItem(REF_PEDIDO_KEY); } catch (e) {}
+    document.querySelectorAll('.chk-transferencia').forEach(c => { c.checked = false; });
+}
+
+function transferenciaConfirmada() {
+    const chk = document.querySelector('.chk-transferencia');
+    return !chk || chk.checked;   // si la hoja no tiene la casilla, no se exige
+}
+
+function actualizarPanelTransferencia() {
+    const total = '$' + calcularTotal(cargarCarrito()).toLocaleString('es-AR');
+    const ref = obtenerReferenciaPedido();
+    document.querySelectorAll('.pago-total').forEach(el => { el.textContent = total; });
+    document.querySelectorAll('.pago-numero').forEach(el => { el.textContent = ref; });
+    refrescarBotonTransferencia();
+}
+
+// El botón de continuar queda bloqueado hasta tildar "Ya transferí".
+function refrescarBotonTransferencia() {
+    const metodo = document.querySelector('input[name="metodoPago"]:checked');
+    const btn = document.getElementById('btnContinuarPago');
+    if (!btn || !metodo || metodo.value !== 'transferencia') return;
+    const ok = transferenciaConfirmada();
+    btn.disabled = !ok;
+    btn.textContent = ok ? 'Ver resumen del pedido →' : 'Tildá "Ya transferí" para continuar';
+}
+
+document.addEventListener('change', e => {
+    if (e.target && e.target.matches && e.target.matches('.chk-transferencia')) refrescarBotonTransferencia();
+});
+
 /* ── PASO 3: Forma de pago ───────────────────────────── */
 // Se paga por alias bancario o tarjeta, sea cual sea la forma de entrega
 // (retiro en local o envío a domicilio). El comprobante se envía por WhatsApp.
@@ -835,6 +888,8 @@ function aplicarVisibilidadMetodo(valor) {
             ? 'Método no disponible todavía'
             : 'Ver resumen del pedido →';
     }
+
+    if (valor === 'transferencia') actualizarPanelTransferencia();
 
     if (valor === 'tarjeta') inicializarBrickTarjeta();
 }
@@ -939,6 +994,11 @@ function avanzarAPaso4() {
     }
 
 
+    if (metodo.value === 'transferencia' && !transferenciaConfirmada()) {
+        mostrarToast('⚠️ Tildá "Ya transferí" para continuar');
+        return;
+    }
+
     // Con tarjeta no se llega hasta acá por botón propio (el Brick tiene
     // su propio submit y ya te manda al paso 4 al aprobarse el pago), pero
     // se valida igual por las dudas de que se llame desde otro lado.
@@ -998,6 +1058,15 @@ function renderPaso4Confirmar() {
                 <span>Método</span>
                 <span>${PAGO_LABEL[metodo] || metodo}</span>
             </div>
+            ${metodo === 'transferencia' ? `
+            <div class="confirm-item">
+                <span>Nº de pedido</span>
+                <span><strong>${obtenerReferenciaPedido()}</strong></span>
+            </div>
+            <div class="confirm-item">
+                <span>Estado del pago</span>
+                <span><span class="badge-pendiente-verif">Pendiente de verificación</span></span>
+            </div>` : ''}
         `;
     }
 
@@ -1088,6 +1157,13 @@ async function guardarPedidoEnBackend() {
         };
     }
 
+    // Transferencia al alias: el pedido se crea como "pendiente" (hasta que se
+    // marque como pagado en el admin) y se manda su número de referencia
+    // (el backend debe guardar el campo referencia_pago).
+    if (metodo === 'transferencia') {
+        payload.referencia_pago = obtenerReferenciaPedido();
+    }
+
     // El comprobante de pago ya no se adjunta en la página: el cliente lo
     // envía por WhatsApp.
     try {
@@ -1140,7 +1216,9 @@ async function enviarPedidoWhatsApp() {
         `${lineasProductos}\n\n` +
         `🚚 *Forma de entrega:* ${ENTREGA_LABEL[entrega]}\n` +
         `💳 *Método de pago:* ${PAGO_LABEL[metodo]}\n` +
-        `📎 Adjunto el comprobante de pago` +
+        (metodo === 'transferencia'
+            ? `🔖 *Nº de pedido:* ${obtenerReferenciaPedido()}\n✅ Ya transferí. Te envío el comprobante por este chat.`
+            : `📎 Adjunto el comprobante de pago`) +
         lineasEnvio +
         `\n\n*Total: $${totalFinal.toLocaleString('es-AR')}*`;
 
@@ -1182,6 +1260,7 @@ async function enviarPedidoMail() {
         items.map(i => `${i.nombre} x${i.qty} - $${(i.precio * i.qty).toLocaleString('es-AR')}`).join('\n') +
         `\n\nForma de entrega: ${ENTREGA_LABEL[entrega]}` +
         `\nMétodo de pago: ${PAGO_LABEL[metodo]}` +
+        (metodo === 'transferencia' ? `\nNº de pedido: ${obtenerReferenciaPedido()}` : '') +
         `\n(No olvidar adjuntar el comprobante de pago a este mail)` +
         lineasEnvio +
         `\n\nTotal: $${totalFinal.toLocaleString('es-AR')}`
@@ -1210,6 +1289,17 @@ function mostrarConfirmacionPedido() {
 
         const btnVolver = document.getElementById('checkout-volver');
         if (btnVolver) btnVolver.style.display = 'none';
+
+        // Transferencia: mostrar el número de pedido y que el pago se está verificando
+        const metodoUsado = document.querySelector('input[name="metodoPago"]:checked')?.value;
+        const refFinal = document.querySelector('.pedido-referencia-final');
+        if (refFinal) {
+            const mostrar = metodoUsado === 'transferencia';
+            refFinal.style.display = mostrar ? 'block' : 'none';
+            if (mostrar) {
+                document.querySelectorAll('.pago-numero-final').forEach(el => { el.textContent = obtenerReferenciaPedido(); });
+            }
+        }
     }
 
     // Reset del pago con tarjeta para que el próximo checkout arranque limpio
@@ -1219,6 +1309,7 @@ function mostrarConfirmacionPedido() {
     }
     mpBrickController = null;
 
+    reiniciarReferenciaPedido();
     vaciarCarrito();
 }
 

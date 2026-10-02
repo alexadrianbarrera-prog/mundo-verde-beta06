@@ -16,14 +16,31 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="CharonyPlywrite.css">
     <style>
+        /* ── Pago por alias bancario (paso 3) ──
+           Las reglas globales label{color:white} e input{width:100%...} de styles.css
+           arruinan la casilla, por eso tiene estilos propios. */
+
         /* Alias dentro de la tarjeta "Alias Bancario" */
         .metodo-card span.metodo-alias{display:block;max-width:100%;margin-top:3px;font-size:.78rem;line-height:1.15;font-weight:700;letter-spacing:0;text-align:center;overflow-wrap:normal;word-break:normal}
-        /* Fila de arriba: 2 cuadrados anchos (Alias Bancario y Tarjeta); fila de abajo: 3 */
-        .metodos-grid{display:grid !important;grid-template-columns:repeat(6,1fr) !important}
+
+        /* Fila de arriba: 2 botones largos (Alias Bancario y Tarjeta); abajo: 3 (Mercado Pago, MODO, Cuotas) */
+        .metodos-grid{grid-template-columns:repeat(6,1fr) !important}
         .metodos-grid > .metodo-card:nth-child(-n+2){grid-column:span 3}
         .metodos-grid > .metodo-card:nth-child(n+3){grid-column:span 2}
-        /* Aviso para enviar el comprobante por WhatsApp */
-        .comprobante-aviso{display:block;margin:0;font-size:.9rem;font-weight:700;line-height:1.35;color:#1b5e20;text-align:center}
+
+        /* Total y número de pedido para el concepto de la transferencia */
+        .pago-ref-box{background:#f4f4f4;border-radius:8px;padding:10px 12px;margin:8px 0;font-size:13.5px;line-height:1.6;color:#333}
+        .pago-ref-box p{margin:0 0 6px;color:#333}
+        .pago-ref-box p:last-child{margin-bottom:0}
+        .pago-numero{font-size:16px;color:#1b5e20;letter-spacing:.5px;user-select:all}
+
+        /* Casilla "Ya transferí" */
+        .pago-confirma{display:flex;align-items:center;gap:10px;margin:10px 0;padding:12px 14px;border:2px solid #2e7d32;border-radius:10px;background:#f1f8f1;cursor:pointer;line-height:1.3}
+        .pago-confirma input[type="checkbox"]{width:22px;height:22px;flex-shrink:0;margin:0;padding:0;border:none;box-shadow:none;background:none;accent-color:#2e7d32;cursor:pointer}
+        .pago-confirma span{color:#1b5e20;font-size:15px;font-weight:700}
+
+        /* Etiqueta "Pendiente de verificación" (paso 4) */
+        .badge-pendiente-verif{display:inline-block;background:#fff3cd;color:#7a5b00;border:1px solid #ffe08a;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
     </style>
 </head>
 
@@ -394,10 +411,15 @@
                             <span class="cbu-value">Banco Santander</span>
                         </div>
                     </div>-->
-                    <div id="comprobanteBox">
-                        <p class="comprobante-aviso">NO OLVIDES ENVIARNOS TU COMPROBANTE DE PAGO A NUESTRO WhatsApp</p>
+                    <div class="pago-ref-box">
+                        <p>Total a transferir: <strong class="pago-total">$0</strong></p>
+                        <p>Poné este número de pedido en el <strong>concepto</strong> de la transferencia:<br>
+                        <strong class="pago-numero">MV-----</strong></p>
                     </div>
-                    </div>
+                    <label class="pago-confirma">
+                        <input type="checkbox" class="chk-transferencia">
+                        <span>Ya transferí</span>
+                    </label>
                 </div>
 
                 <!-- Tarjeta vía Mercado Pago Bricks (FUNCIONAL) -->
@@ -437,8 +459,6 @@
                         Pago con el saldo de tu cuenta de Mercado Pago. Todavía estamos
                         conectando este medio de pago.
                     </p>
-                </div>
-                    </div>
                 </div>
 
                 <!-- Mercado Crédito — todavía sin integración -->
@@ -524,6 +544,10 @@
         <h3 style="color:#2e7d32; margin-bottom:8px;">¡Pedido enviado!</h3>
         <p style="color:#555; font-size:14px; line-height:1.6;">
             Te vamos a responder a la brevedad para confirmar y coordinar la entrega.
+        </p>
+        <p class="pedido-referencia-final" style="display:none; margin-top:14px; font-size:14px; color:#333; line-height:1.6;">
+            Tu número de pedido: <strong class="pago-numero-final">MV-----</strong><br>
+            Enviános el comprobante por ese mismo chat de WhatsApp: estamos verificando tu pago y te confirmamos por ahí.
         </p>
         <button class="btn-vaciar" style="margin-top:24px;" onclick="cerrarCarrito()">
             Cerrar

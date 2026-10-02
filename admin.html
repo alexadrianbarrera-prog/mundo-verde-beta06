@@ -1154,7 +1154,9 @@ function renderPedidos(pedidos) {
       <td data-label="Retira">${p.forma_entrega === 'retiro'
             ? `<strong>${p.retiro_nombre || '—'}</strong><span class="cell-mono" style="display:block">DNI ${p.retiro_dni || '—'}</span>`
             : '—'}</td>
-      <td data-label="Pago">${ETIQUETAS_PAGO[p.forma_pago] || p.forma_pago}</td>
+      <td data-label="Pago">${ETIQUETAS_PAGO[p.forma_pago] || p.forma_pago}${p.referencia_pago
+            ? `<span class="cell-mono" style="display:block">Ref. ${p.referencia_pago}</span>`
+            : ''}</td>
       <td data-label="Comprobante">${p.comprobante_url
             ? `<a href="${URL_BASE_ARCHIVOS}${p.comprobante_url}" target="_blank" rel="noopener" class="btn-mini">Ver comprobante</a>`
             : '<span class="cell-mono">—</span>'}</td>
