@@ -15,6 +15,16 @@
     <title>Vivero Mundo Verde</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="CharonyPlywrite.css">
+    <style>
+        /* Alias dentro de la tarjeta "Alias Bancario" */
+        .metodo-card span.metodo-alias{display:block;max-width:100%;margin-top:3px;font-size:.78rem;line-height:1.15;font-weight:700;letter-spacing:0;text-align:center;overflow-wrap:normal;word-break:normal}
+        /* Fila de arriba: 2 cuadrados anchos (Alias Bancario y Tarjeta); fila de abajo: 3 */
+        .metodos-grid{display:grid !important;grid-template-columns:repeat(6,1fr) !important}
+        .metodos-grid > .metodo-card:nth-child(-n+2){grid-column:span 3}
+        .metodos-grid > .metodo-card:nth-child(n+3){grid-column:span 2}
+        /* Aviso para enviar el comprobante por WhatsApp */
+        .comprobante-aviso{display:block;margin:0;font-size:.9rem;font-weight:700;line-height:1.35;color:#1b5e20;text-align:center}
+    </style>
 </head>
 
 <body>
@@ -357,7 +367,7 @@
             <!-- Opción C: coordinar la entrega directamente con un vendedor
                  por WhatsApp (ocupa el ancho de las dos opciones de arriba) -->
             <button type="button" class="btn-coordinar-vendedor" onclick="coordinarConVendedor()">
-                <i class="fab fa-whatsapp"></i> Coordinar compra y entrega con la vendedora.
+                <i class="fab fa-whatsapp"></i> Quiero coordinar compra con la vendedora
             </button>
 
             <!-- Formulario de retiro (visible solo al elegir retiro en local):
@@ -435,7 +445,7 @@
 
             <p class="zona-msg" style="display:block; color:#555; margin-bottom:10px;">
                 Elegí cómo vas a pagar. Por ahora podés completar la compra con
-                <strong>Transferencia</strong> o <strong>Tarjeta</strong>; el resto de las
+                <strong>Alias Bancario</strong> o <strong>Tarjeta</strong>; el resto de las
                 opciones va a estar disponible muy pronto.
             </p>
 
@@ -447,20 +457,14 @@
                 <label class="metodo-card">
                     <input type="radio" name="metodoPago" value="transferencia" checked>
                     <i class="fa-solid fa-building-columns"></i>
-                    <span>Transferencia bancaria</span>
+                    <span>Alias Bancario</span>
+                    <span class="metodo-alias">AGUS.<wbr>MUNDO.<wbr>VERDE</span>
                 </label>
 
                 <label class="metodo-card">
                     <input type="radio" name="metodoPago" value="tarjeta">
                     <i class="fa-solid fa-credit-card"></i>
                     <span>Tarjeta de crédito / débito</span>
-                </label>
-
-                <label class="metodo-card metodo-card--proximamente">
-                    <input type="radio" name="metodoPago" value="modo">
-                    <i class="fa-solid fa-mobile-screen-button"></i>
-                    <span>MODO</span>
-                    <span class="metodo-proximamente-tag">Próximamente</span>
                 </label>
 
                 <label class="metodo-card metodo-card--proximamente">
@@ -471,9 +475,9 @@
                 </label>
 
                 <label class="metodo-card metodo-card--proximamente">
-                    <input type="radio" name="metodoPago" value="mercadocredito">
-                    <i class="fa-solid fa-hand-holding-dollar"></i>
-                    <span>Mercado Crédito</span>
+                    <input type="radio" name="metodoPago" value="modo">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>MODO</span>
                     <span class="metodo-proximamente-tag">Próximamente</span>
                 </label>
 
@@ -507,10 +511,8 @@
                         </div>
                     </div>-->
                     <div id="comprobanteBox">
-                        <label class="comprobante-label">
-                            Subí el comprobante de pago * (JPG, PNG o PDF)
-                        </label>
-                        <input type="file" accept="image/*,.pdf" id="comprobante-archivo">
+                        <p class="comprobante-aviso">NO OLVIDES ENVIARNOS TU COMPROBANTE DE PAGO A NUESTRO WhatsApp</p>
+                    </div>
                     </div>
                 </div>
 
@@ -551,6 +553,8 @@
                         Pago con el saldo de tu cuenta de Mercado Pago. Todavía estamos
                         conectando este medio de pago.
                     </p>
+                </div>
+                    </div>
                 </div>
 
                 <!-- Mercado Crédito — todavía sin integración -->

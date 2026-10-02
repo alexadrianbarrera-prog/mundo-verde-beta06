@@ -458,7 +458,7 @@ document.getElementById('carrito-overlay')?.addEventListener('click', cerrarCarr
 
    <div id="checkout-paso-1">…</div>   ← items + total
    <div id="checkout-paso-2">…</div>   ← forma de entrega (retiro / envío)
-   <div id="checkout-paso-3">…</div>   ← forma de pago (transferencia / tarjeta, con comprobante obligatorio)
+   <div id="checkout-paso-3">…</div>   ← forma de pago (alias bancario / tarjeta; el comprobante se envía por WhatsApp)
    <div id="checkout-paso-4">…</div>   ← confirmación / resumen
    <div id="checkout-paso-5">…</div>   ← pantalla "pedido enviado"
 
@@ -757,146 +757,9 @@ function coordinarConVendedor() {
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
 
-/* ── Alias del Vivero + verificación del importe del comprobante ───────── */
-const ALIAS_VIVERO = 'AGUS.MUNDO.VERDE';
-const TITULAR_ALIAS = 'Agustina Rosselli';
-
-/* >>> funciones puras (se pueden probar sin navegador) */
-// Convierte "12.500,00" / "12,500.00" / "12.500" / "12500" en número.
-function parseMontoAR(str) {
-    let s = String(str).replace(/[^\d.,]/g, '').replace(/^[.,]+|[.,]+$/g, '');
-    if (!s) return NaN;
-    const iSep = Math.max(s.lastIndexOf('.'), s.lastIndexOf(','));
-    if (iSep === -1) return parseFloat(s);
-    const sepChar = s[iSep];
-    const otraSep = sepChar === '.' ? ',' : '.';
-    const dec = s.slice(iSep + 1);
-    const cuenta = s.split(sepChar).length - 1;
-    const hayOtra = s.includes(otraSep);
-    // "12.500" o "1.234.567" → separador de miles
-    if (!hayOtra && (cuenta > 1 || dec.length === 3)) return parseFloat(s.replace(/[.,]/g, ''));
-    // si no, el último separador es el decimal
-    return parseFloat(s.slice(0, iSep).replace(/[.,]/g, '') + '.' + dec);
-}
-
-// Busca importes en el texto de un comprobante.
-//   conSigno: los que vienen pegados a "$" (o "S"/"§", típicos errores del OCR)
-//   sueltos:  números con formato de dinero (12.500 / 12.500,00 / 150,50)
-//   enteros:  cualquier secuencia de dígitos (para importes escritos sin separador)
-function extraerMontosComprobante(texto) {
-    const conSigno = [], sueltos = [], enteros = [];
-    let m;
-    const reSigno = /(?:\$|§|\bS)\s?(\d[\d.,]*\d|\d)/g;
-    while ((m = reSigno.exec(texto)) !== null) { const n = parseMontoAR(m[1]); if (!isNaN(n)) conSigno.push(n); }
-    const reSuelto = /\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{2})?|\d+[.,]\d{2}(?!\d)/g;
-    while ((m = reSuelto.exec(texto)) !== null) { const n = parseMontoAR(m[0]); if (!isNaN(n)) sueltos.push(n); }
-    const reEntero = /\d+/g;
-    while ((m = reEntero.exec(texto)) !== null) enteros.push(parseInt(m[0], 10));
-    return { conSigno, sueltos, enteros };
-}
-
-// 'ok'        → algún importe del comprobante es igual al total
-// 'distinto'  → hay importes con "$" y ninguno es igual al total
-// 'ilegible'  → no se pudo leer ningún importe (también bloquea el pedido)
-function evaluarImporte(texto, total) {
-    const { conSigno, sueltos, enteros } = extraerMontosComprobante(texto);
-    const igual = n => Math.abs(n - total) < 0.01;
-    if (conSigno.some(igual) || sueltos.some(igual) || enteros.some(igual)) return { estado: 'ok' };
-    if (conSigno.length > 0) return { estado: 'distinto' };
-    return { estado: 'ilegible' };
-}
-/* <<< fin funciones puras */
-
-const comprobanteVerif = {}; // id del input → { estado, total, token }
-
-function cargarScriptUnaVez(src) {
-    cargarScriptUnaVez._c = cargarScriptUnaVez._c || {};
-    if (!cargarScriptUnaVez._c[src]) {
-        cargarScriptUnaVez._c[src] = new Promise((resolve, reject) => {
-            const sc = document.createElement('script');
-            sc.src = src;
-            sc.onload = resolve;
-            sc.onerror = () => reject(new Error('No se pudo cargar ' + src));
-            document.head.appendChild(sc);
-        });
-    }
-    return cargarScriptUnaVez._c[src];
-}
-
-// OCR en el navegador (Tesseract.js): se descarga recién cuando se adjunta un comprobante.
-async function ocrImagen(fuente) {
-    await cargarScriptUnaVez('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js');
-    const r = await Tesseract.recognize(fuente, 'eng');
-    return (r && r.data && r.data.text) || '';
-}
-
-// PDF: primero se lee el texto; si es un PDF escaneado, se hace OCR de la primera página.
-async function textoDePdf(file) {
-    const base = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
-    await cargarScriptUnaVez(base + 'pdf.min.js');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.js';
-    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
-    let texto = '';
-    for (let i = 1; i <= Math.min(pdf.numPages, 3); i++) {
-        const page = await pdf.getPage(i);
-        const tc = await page.getTextContent();
-        texto += tc.items.map(it => it.str).join(' ') + '\n';
-    }
-    if (texto.replace(/\s/g, '').length < 10) {
-        const page = await pdf.getPage(1);
-        const vp = page.getViewport({ scale: 2 });
-        const canvas = document.createElement('canvas');
-        canvas.width = vp.width; canvas.height = vp.height;
-        await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
-        texto = await ocrImagen(canvas);
-    }
-    return texto;
-}
-
-async function verificarComprobante(input) {
-    const wrap = input.closest('.comprobante-wrap');
-    const nombreEl = wrap && wrap.querySelector('.comprobante-nombre');
-    const estadoEl = wrap && wrap.querySelector('.comprobante-estado');
-    const mostrar = (clase, msg) => {
-        if (estadoEl) { estadoEl.className = 'comprobante-estado ' + clase; estadoEl.textContent = msg; }
-    };
-    const file = input.files[0];
-    if (nombreEl) nombreEl.textContent = file ? file.name : 'Ningún archivo seleccionado';
-    if (!file) { delete comprobanteVerif[input.id]; mostrar('', ''); return; }
-
-    const total = calcularTotal(cargarCarrito());
-    const token = {};
-    comprobanteVerif[input.id] = { estado: 'pendiente', total, token };
-    mostrar('verificando', 'Verificando el importe del comprobante…');
-
-    let res;
-    try {
-        const esPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
-        const texto = esPdf ? await textoDePdf(file) : await ocrImagen(file);
-        res = total > 0 ? evaluarImporte(texto, total) : { estado: 'ilegible' };
-    } catch (err) {
-        console.warn('No se pudo leer el comprobante:', err);
-        res = { estado: 'ilegible' };
-    }
-    if (!comprobanteVerif[input.id] || comprobanteVerif[input.id].token !== token) return; // cambió el archivo
-
-    comprobanteVerif[input.id] = { estado: res.estado, total, token };
-    const totalTxt = '$' + total.toLocaleString('es-AR');
-    if (res.estado === 'ok') mostrar('ok', '✔ El importe coincide con el total (' + totalTxt + ')');
-    else if (res.estado === 'distinto') mostrar('error', '✖ No encontramos el importe de ' + totalTxt + ' en el comprobante. Revisá que sea el correcto.');
-    else mostrar('error', '✖ No pudimos leer el importe del comprobante. Adjuntá una imagen más nítida o el PDF original.');
-}
-
-document.addEventListener('change', e => {
-    if (e.target && e.target.matches && e.target.matches('#comprobante-archivo, #comprobante-archivo-mp')) {
-        verificarComprobante(e.target);
-    }
-});
-
 /* ── PASO 3: Forma de pago ───────────────────────────── */
-// Se paga por transferencia o tarjeta, sea cual sea la forma de entrega
-// (retiro en local o envío a domicilio), y en ambos casos hay que
-// adjuntar el comprobante de pago antes de poder continuar.
+// Se paga por alias bancario o tarjeta, sea cual sea la forma de entrega
+// (retiro en local o envío a domicilio). El comprobante se envía por WhatsApp.
 function renderPaso3Pago() {
     // Mostrar/ocultar secciones según método seleccionado
     const metodoSeleccionado = document.querySelector('input[name="metodoPago"]:checked');
@@ -905,10 +768,6 @@ function renderPaso3Pago() {
     // Link de Mercado Pago
     const btnMP = document.getElementById('btn-mercadopago');
     if (btnMP) btnMP.href = MERCADOPAGO_LINK;
-
-    // Total a pagar visible junto al alias (para transferir el importe exacto)
-    const totalTxt = '$' + calcularTotal(cargarCarrito()).toLocaleString('es-AR');
-    document.querySelectorAll('.mp-total-pagar').forEach(el => { el.textContent = totalTxt; });
 }
 
 let qrAliasGenerado = false; // el QR se genera una sola vez y se reutiliza
@@ -936,7 +795,7 @@ function generarQrAlias() {
 // integración real del lado del backend (MODO, Mercado Pago billetera,
 // Mercado Crédito, cuotas sin interés con débito). Se pueden abrir para
 // ver el aviso, pero no dejan continuar el pedido hasta conectarlos.
-const METODOS_PROXIMAMENTE = ['modo', 'mercadocredito', 'cuotasdebito'];
+const METODOS_PROXIMAMENTE = ['modo', 'mercadopago', 'mercadocredito', 'cuotasdebito'];
 
 // Cada método de pago tiene su propio renglón de detalle debajo de la
 // grilla de botones (ver #metodoDetalle en el HTML). Acá se mapea el
@@ -1075,40 +934,10 @@ function avanzarAPaso4() {
     }
 
     if (METODOS_PROXIMAMENTE.includes(metodo.value)) {
-        mostrarToast('⚠️ Ese método todavía no está disponible. Elegí Transferencia, Alias del Vivero o Tarjeta.');
+        mostrarToast('⚠️ Ese método todavía no está disponible. Elegí Alias Bancario o Tarjeta.');
         return;
     }
 
-    if (metodo.value === 'transferencia' || metodo.value === 'mercadopago') {
-        const comprobante = document.getElementById(
-            metodo.value === 'mercadopago' ? 'comprobante-archivo-mp' : 'comprobante-archivo'
-        );
-        if (!comprobante || comprobante.files.length === 0) {
-            mostrarToast('⚠️ Adjuntá el comprobante de pago para continuar');
-            return;
-        }
-        // El importe del comprobante tiene que coincidir con el total de la compra.
-        const totalActual = calcularTotal(cargarCarrito());
-        const v = comprobanteVerif[comprobante.id];
-        if (!v || v.total !== totalActual) {      // nunca se verificó, o el carrito cambió
-            verificarComprobante(comprobante);
-            mostrarToast('⏳ Verificando el importe del comprobante…');
-            return;
-        }
-        if (v.estado === 'pendiente') {
-            mostrarToast('⏳ Verificando el importe del comprobante…');
-            return;
-        }
-        if (v.estado === 'distinto') {
-            mostrarToast('❌ El importe del comprobante no coincide con el total ($' +
-                totalActual.toLocaleString('es-AR') + '). Adjuntá el comprobante correcto.');
-            return;
-        }
-        if (v.estado === 'ilegible') {
-            mostrarToast('❌ No pudimos leer el importe del comprobante. Adjuntá una imagen más nítida o el PDF original.');
-            return;
-        }
-    }
 
     // Con tarjeta no se llega hasta acá por botón propio (el Brick tiene
     // su propio submit y ya te manda al paso 4 al aprobarse el pago), pero
@@ -1124,10 +953,10 @@ function avanzarAPaso4() {
 /* ── PASO 4: Confirmar ───────────────────────────────── */
 const ENTREGA_LABEL = { retiro: 'Retiro en local', envio: 'Envío a domicilio' };
 const PAGO_LABEL = {
-    transferencia: 'Transferencia bancaria',
+    transferencia: 'Alias Bancario',
     tarjeta: 'Tarjeta (Mercado Pago)',
     modo: 'MODO',
-    mercadopago: 'Alias del Vivero',
+    mercadopago: 'Mercado Pago',
     mercadocredito: 'Mercado Crédito',
     cuotasdebito: 'Cuotas sin interés con Débito',
 };
@@ -1169,15 +998,6 @@ function renderPaso4Confirmar() {
                 <span>Método</span>
                 <span>${PAGO_LABEL[metodo] || metodo}</span>
             </div>
-            ${metodo === 'mercadopago' ? `
-            <div class="confirm-item">
-                <span>Alias</span>
-                <span><strong>${ALIAS_VIVERO}</strong></span>
-            </div>
-            <div class="confirm-item">
-                <span>Titular</span>
-                <span>${TITULAR_ALIAS}</span>
-            </div>` : ''}
         `;
     }
 
@@ -1268,17 +1088,10 @@ async function guardarPedidoEnBackend() {
         };
     }
 
-    // Comprobante de pago (solo aplica a transferencia): si está adjunto,
-    // el pedido se guarda directamente como "pagado".
-    const comprobanteInput = document.getElementById(
-        metodo === 'mercadopago' ? 'comprobante-archivo-mp' : 'comprobante-archivo'
-    );
-    const archivoComprobante = ((metodo === 'transferencia' || metodo === 'mercadopago') && comprobanteInput && comprobanteInput.files.length > 0)
-        ? comprobanteInput.files[0]
-        : null;
-
+    // El comprobante de pago ya no se adjunta en la página: el cliente lo
+    // envía por WhatsApp.
     try {
-        return await mvPedidos.crear(payload, archivoComprobante);
+        return await mvPedidos.crear(payload);
     } catch (err) {
         console.warn('No se pudo guardar el pedido en el backend:', err.message);
         // ⚠️ Antes esto fallaba en silencio (solo consola): el pedido no
