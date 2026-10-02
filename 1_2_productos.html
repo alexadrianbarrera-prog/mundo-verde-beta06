@@ -330,7 +330,7 @@
 
             <p class="zona-msg" style="display:block; color:#555; margin-bottom:10px;">
                 Elegí cómo vas a pagar. Por ahora podés completar la compra con
-                <strong>Transferencia</strong>, <strong>Alias del Vivero</strong> o <strong>Tarjeta</strong>; el resto de las
+                <strong>Transferencia</strong> o <strong>Tarjeta</strong>; el resto de las
                 opciones va a estar disponible muy pronto.
             </p>
 
@@ -351,16 +351,17 @@
                     <span>Tarjeta de crédito / débito</span>
                 </label>
 
-                <label class="metodo-card">
-                    <input type="radio" name="metodoPago" value="mercadopago">
-                    <i class="fa-solid fa-wallet"></i>
-                    <span>Alias del Vivero</span>
-                </label>
-
                 <label class="metodo-card metodo-card--proximamente">
                     <input type="radio" name="metodoPago" value="modo">
                     <i class="fa-solid fa-mobile-screen-button"></i>
                     <span>MODO</span>
+                    <span class="metodo-proximamente-tag">Próximamente</span>
+                </label>
+
+                <label class="metodo-card metodo-card--proximamente">
+                    <input type="radio" name="metodoPago" value="mercadopago">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span>Mercado Pago</span>
                     <span class="metodo-proximamente-tag">Próximamente</span>
                 </label>
 
@@ -404,15 +405,7 @@
                         <label class="comprobante-label">
                             Subí el comprobante de pago * (JPG, PNG o PDF)
                         </label>
-                        <div class="comprobante-wrap">
-                            <label class="btn-adjuntar-comprobante">
-                                <i class="fa-solid fa-paperclip"></i> Adjuntar comprobante
-                                <input type="file" accept="image/*,.pdf" id="comprobante-archivo" hidden>
-                            </label>
-                            <small class="comprobante-sugerencia">Mejor subí el PDF del comprobante desde la app</small>
-                            <span class="comprobante-nombre">Ningún archivo seleccionado</span>
-                            <div class="comprobante-estado" role="status"></div>
-                        </div>
+                        <input type="file" accept="image/*,.pdf" id="comprobante-archivo">
                     </div>
                 </div>
 
@@ -447,28 +440,12 @@
                     </p>
                 </div>
 
-                <!-- Mercado Pago por alias (FUNCIONAL) -->
-                <div id="detalle-mercadopago" class="metodo-detalle" style="display:none">
-                    <p class="zona-msg" style="display:block; color:#555; line-height:1.7;">
-                        Alias Mercado Pago<br>
-                        <strong>AGUS.MUNDO.VERDE</strong><br>
-                        Agustina Rosselli<br>
-                        Total a pagar: <strong class="mp-total-pagar">$0</strong>
+                <!-- Mercado Pago (billetera) — todavía sin integración -->
+                <div id="detalle-mercadopago" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
+                    <p class="zona-msg" style="display:block; color:#555;">
+                        Pago con el saldo de tu cuenta de Mercado Pago. Todavía estamos
+                        conectando este medio de pago.
                     </p>
-                    <div id="comprobanteBoxMP">
-                        <label class="comprobante-label">
-                            Subí el comprobante de pago * (JPG, PNG o PDF)
-                        </label>
-                        <div class="comprobante-wrap">
-                            <label class="btn-adjuntar-comprobante">
-                                <i class="fa-solid fa-paperclip"></i> Adjuntar comprobante
-                                <input type="file" accept="image/*,.pdf" id="comprobante-archivo-mp" hidden>
-                            </label>
-                            <small class="comprobante-sugerencia">Mejor subí el PDF del comprobante desde la app</small>
-                            <span class="comprobante-nombre">Ningún archivo seleccionado</span>
-                            <div class="comprobante-estado" role="status"></div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Mercado Crédito — todavía sin integración -->
