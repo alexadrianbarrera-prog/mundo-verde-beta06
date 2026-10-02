@@ -15,6 +15,18 @@
     <title>Vivero Mundo Verde</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="CharonyPlywrite.css">
+    <style>
+        /* Botón "Adjuntar comprobante" (reemplaza al "Seleccionar archivo" nativo) */
+        .btn-adjuntar-comprobante{display:inline-block;background:#2e7d32;color:#fff;padding:9px 16px;border-radius:8px;cursor:pointer;font-weight:700;font-size:.95rem}
+        .btn-adjuntar-comprobante:hover{background:#256528}
+        .comprobante-sugerencia{display:block;margin-top:6px;font-size:.8rem;color:#555}
+        .comprobante-nombre{display:block;margin-top:6px;font-size:.85rem;color:#555;word-break:break-all}
+        .comprobante-estado{margin-top:6px;font-size:.85rem;font-weight:600}
+        .comprobante-estado.verificando{color:#555}
+        .comprobante-estado.ok{color:#2e7d32}
+        .comprobante-estado.error{color:#c62828}
+        .comprobante-estado.aviso{color:#b26a00}
+    </style>
 </head>
 
 <body data-pagina="interior">
@@ -324,7 +336,7 @@
 
             <p class="zona-msg" style="display:block; color:#555; margin-bottom:10px;">
                 Elegí cómo vas a pagar. Por ahora podés completar la compra con
-                <strong>Transferencia</strong>, <strong>Mercado Pago</strong> o <strong>Tarjeta</strong>; el resto de las
+                <strong>Transferencia</strong>, <strong>Alias del Vivero</strong> o <strong>Tarjeta</strong>; el resto de las
                 opciones va a estar disponible muy pronto.
             </p>
 
@@ -348,7 +360,7 @@
                 <label class="metodo-card">
                     <input type="radio" name="metodoPago" value="mercadopago">
                     <i class="fa-solid fa-wallet"></i>
-                    <span>Mercado Pago</span>
+                    <span>Alias del Vivero</span>
                 </label>
 
                 <label class="metodo-card metodo-card--proximamente">
@@ -398,7 +410,15 @@
                         <label class="comprobante-label">
                             Subí el comprobante de pago * (JPG, PNG o PDF)
                         </label>
-                        <input type="file" accept="image/*,.pdf" id="comprobante-archivo">
+                        <div class="comprobante-wrap">
+                            <label class="btn-adjuntar-comprobante">
+                                <i class="fa-solid fa-paperclip"></i> Adjuntar comprobante
+                                <input type="file" accept="image/*,.pdf" id="comprobante-archivo" hidden>
+                            </label>
+                            <small class="comprobante-sugerencia">Mejor subí el PDF del comprobante desde la app</small>
+                            <span class="comprobante-nombre">Ningún archivo seleccionado</span>
+                            <div class="comprobante-estado" role="status"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -438,13 +458,22 @@
                     <p class="zona-msg" style="display:block; color:#555; line-height:1.7;">
                         Alias Mercado Pago<br>
                         <strong>AGUS.MUNDO.VERDE</strong><br>
-                        Agustina Rosselli
+                        Agustina Rosselli<br>
+                        Total a pagar: <strong class="mp-total-pagar">$0</strong>
                     </p>
                     <div id="comprobanteBoxMP">
                         <label class="comprobante-label">
                             Subí el comprobante de pago * (JPG, PNG o PDF)
                         </label>
-                        <input type="file" accept="image/*,.pdf" id="comprobante-archivo-mp">
+                        <div class="comprobante-wrap">
+                            <label class="btn-adjuntar-comprobante">
+                                <i class="fa-solid fa-paperclip"></i> Adjuntar comprobante
+                                <input type="file" accept="image/*,.pdf" id="comprobante-archivo-mp" hidden>
+                            </label>
+                            <small class="comprobante-sugerencia">Mejor subí el PDF del comprobante desde la app</small>
+                            <span class="comprobante-nombre">Ningún archivo seleccionado</span>
+                            <div class="comprobante-estado" role="status"></div>
+                        </div>
                     </div>
                 </div>
 
