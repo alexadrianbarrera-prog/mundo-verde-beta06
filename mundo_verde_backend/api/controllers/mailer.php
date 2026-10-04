@@ -137,14 +137,20 @@ function enviarMailNewsletter(string $email, string $nombre, string $codigo): bo
             '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#333;text-align:center;">' .
             '<h2 style="color:#2e7d32;">¡Hola, ' . $n . '!</h2>' .
             '<h2 style="color:#2e7d32;">¡Bienvenidx a Mundo Verde!</h2>' .
-            '<p>🎉Estamos tan contentos de estar on line que te regalamos 10% de descuento en todos nuestros productos! 🎉</p><br>' .
-
-            '<p>Gracias por formar parte de nuestra comunidad. Te alcanzamos tu código de referido ' .
-            'para que refieras a nuevos clientes y obtengas importantes descuentos y vouchers.</p><br>' .
+            '<p>🎉Estamos tan contentos de estar on line que te regalamos 10% de descuento en todos nuestros productos! 🎉</p>' .
+            '<p>Cuando tengas tu carrito armado, ingresá el código q te llegó en este mail y ves a continuacion y obtené tu descuento:</p>' .
             ## El código de referido se muestra en un recuadro verde, centrado y con letra grande. ##
             '<p style="margin:24px 0;">' .
             '<span style="display:inline-block;background:#2e7d32;color:#fff;font-size:24px;' .
             'font-weight:bold;letter-spacing:4px;padding:12px 28px;border-radius:8px;">' . $c . '</span></p>' .
+            ##aviso de que el código es para referidos y que se pueden recibir novedades, promos y talleres.##
+            '<p>🍀Este código es tu <strong>código VERDE</strong> de la suerte!🍀</p>' .
+            '<p>Y GUARDÁ ESTE MAIL 📧.</p>' .
+            '<p>Porque si 3 amigos tuyos se suscriben a nuestro newsletter con tu <strong>código VERDE</strong>, sumas 10% mas de descuento!.</p>' .
+            ##'<p>Gracias por formar parte de nuestra comunidad. Te alcanzamos tu código de referido ' .
+            ##'para que refieras a nuevos clientes y obtengas importantes descuentos y vouchers.</p><br>' .
+            '<p>NO ACUMULABLES: Este código no es acumulable con otras promociones ni descuentos.</p>' .
+            
             '<p style="font-size:13px;color:#666;">Compartilo con tus amigos y ganá descuentos.</p>' .
             '<p>Vas a recibir novedades, promos y talleres exclusivos en tu email.</p>' .
             '<p style="font-size:12px;color:#777;background:#fafafa;padding:10px;border-radius:6px;">' .
