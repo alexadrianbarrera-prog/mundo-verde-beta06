@@ -132,13 +132,16 @@ function enviarMailNewsletter(string $email, string $nombre, string $codigo): bo
         $n = htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8');
         $c = htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8');
 
-        $mail->Subject = '¡Gracias por sumarte a la comunidad de Mundo Verde! 🌱';
+        $mail->Subject = '¡Gracias por sumarte a la comunidad de Vive Mundo Verde! 🌱';
         $mail->Body =
             '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#333;text-align:center;">' .
-            '<h2 style="color:#2e7d32;">¡Bienvenido/a a Mundo Verde!</h2>' .
-            '<p>¡Hola, ' . $n . '!</p>' .
+            '<h2 style="color:#2e7d32;">¡Hola, ' . $n . '!</h2>' .
+            '<h2 style="color:#2e7d32;">¡Bienvenidx a Mundo Verde!</h2>' .
+            '<p>🎉Estamos tan contentos de estar on line que te regalamos 10% de descuento en todos nuestros productos! 🎉</p><br>' .
+
             '<p>Gracias por formar parte de nuestra comunidad. Te alcanzamos tu código de referido ' .
-            'para que refieras a nuevos clientes y obtengas importantes descuentos y vouchers.</p>' .
+            'para que refieras a nuevos clientes y obtengas importantes descuentos y vouchers.</p><br>' .
+            ## El código de referido se muestra en un recuadro verde, centrado y con letra grande. ##
             '<p style="margin:24px 0;">' .
             '<span style="display:inline-block;background:#2e7d32;color:#fff;font-size:24px;' .
             'font-weight:bold;letter-spacing:4px;padding:12px 28px;border-radius:8px;">' . $c . '</span></p>' .
