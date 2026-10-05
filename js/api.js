@@ -328,6 +328,9 @@ const MV_PAGINA_POR_ARCHIVO = {
     '4_0_ramos.html': 'ramos',
     '5_0_newsletter.html': 'newsletter',
     'login.html': 'login',
+    'recuperar.html': 'login',
+    'registro.html': 'login',
+    'restablecer.html': 'login',
 };
 
 function mvPaginaActual() {
