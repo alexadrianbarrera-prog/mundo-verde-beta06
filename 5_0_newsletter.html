@@ -585,7 +585,7 @@
         <!-- Campo de código de referido (aparece solo cuando elige "Referido") -->
         <div class="form_input" id="campo-codigo-ref" style="display:none;">
             <label>Código de referido
-                <input type="text" id="codigo-referido" placeholder="Ej: MV-A3B2C1" maxlength="12"
+                <input type="text" id="codigo-referido" placeholder="Ej: A3B2C1" maxlength="12"
                        style="text-transform:uppercase; letter-spacing:2px;">
             </label>
             <div class="field-error" id="err-ref">Código no encontrado en nuestra base.</div>
@@ -609,8 +609,10 @@
         <div class="icon-ok">🌿</div>
         <h3>¡Bienvenidx a Mundo Verde!</h3>
         <p id="conf-nombre-texto"></p>
-        <p>!Felicitaciones!. Ya tenes acceso al 10% de descuento comprando en nuestro sitio.</p>
-        <p>Tu código de referido personal es:</p>
+        <p>¡Felicitaciones! Ya tenés tu <strong><span id="conf-pct">10</span>% de descuento</strong>: ingresá tu Código Verde en el paso 1 de tu carrito (se usa una sola vez).</p>
+        <p>Tu Código Verde es:</p>
+        <div class="codigo-ref" id="conf-codigo-verde"></div>
+        <p>Y este es tu código personal para referir amigos:</p>
         <div class="codigo-ref" id="conf-codigo"></div>
         <p class="copy-hint">Compartilo y obtené más descuentos</p>
         <p style="margin-top:14px; font-size:.82rem; opacity:.7;">

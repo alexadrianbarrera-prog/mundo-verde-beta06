@@ -21,6 +21,7 @@ require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/controllers/auth.php';
 require_once __DIR__ . '/controllers/productos.php';
 require_once __DIR__ . '/controllers/anuncios.php';
+require_once __DIR__ . '/controllers/descuentos.php';
 require_once __DIR__ . '/controllers/newsletter.php';
 require_once __DIR__ . '/controllers/pedidos.php';
 require_once __DIR__ . '/controllers/admin.php';
@@ -74,6 +75,7 @@ function despachar(PDO $pdo, string $metodo, array $segmentos): void
 
     // ── Newsletter ──────────────────────────────────────────
     if ($r0 === 'newsletter' && $r1 === 'mi-estado' && $metodo === 'GET')             { newsletter_mi_estado($pdo); return; }
+    if ($r0 === 'newsletter' && $r1 === 'validar-codigo' && $metodo === 'GET')        { newsletter_validar_codigo($pdo); return; }
     if ($r0 === 'newsletter' && $r1 !== '' && $r2 === 'toggle' && $metodo === 'PATCH') { newsletter_toggle($pdo, $r1); return; }
     if ($r0 === 'newsletter' && $r1 !== '' && $r2 === '' && $metodo === 'DELETE')      { newsletter_eliminar($pdo, $r1); return; }
     if ($r0 === 'newsletter' && $r1 === '' && $metodo === 'POST')                      { newsletter_suscribir($pdo); return; }
@@ -84,6 +86,9 @@ function despachar(PDO $pdo, string $metodo, array $segmentos): void
 
     // ── Anuncios (banner rotativo, público) ────────────────
     if ($r0 === 'anuncios' && $metodo === 'GET') { anuncios_listar($pdo); return; }
+
+    // ── Descuentos (porcentajes + vencimiento de la inauguración, público) ──
+    if ($r0 === 'descuentos' && $metodo === 'GET') { descuentos_listar($pdo); return; }
 
     // ── Pedidos ─────────────────────────────────────────────
     if ($r0 === 'pedidos' && $metodo === 'POST') { pedidos_crear($pdo); return; }

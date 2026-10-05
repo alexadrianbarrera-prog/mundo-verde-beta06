@@ -223,9 +223,339 @@ function guardarCarrito(items) {
 }
 /*----------------------------------------------------------*/
 
-function calcularTotal(items) {
+/* ══════════════════════════════════════════════════════
+   DESCUENTOS DEL CARRITO
+   ──────────────────────────────────────────────────────
+   1) Inauguración de la web: % automático hasta una fecha de vencimiento, con
+      cuenta regresiva en pantalla. Porcentaje y fecha salen de la tabla `configuracion`
+      (GET /descuentos), la misma que usa el backend para cobrar.
+   2) Newsletter: -10% al ingresar el "Código Verde" (el código
+      personal que recibe el suscriptor). Es de ÚNICO USO: la
+      validación y el "marcado como usado" los hace el backend
+      (ver mvNewsletter.validarCodigo en api.js y el campo
+      codigo_verde que viaja en el pedido).
+   Ambos porcentajes se calculan sobre el SUBTOTAL (acumulables:
+   10% + 10% = 20% sobre el subtotal).
+   calcularTotal() ya devuelve el total CON descuentos, así que
+   el paso 3 (pago), el Brick de Mercado Pago, el paso 4, el
+   WhatsApp y el mail usan automáticamente el monto correcto.
+   ══════════════════════════════════════════════════════ */
+const CODIGO_VERDE_KEY = 'mvCodigoVerde';
+
+/* ── Configuración de descuentos (viene del backend: GET /descuentos) ──
+   Se cachea en localStorage para que el total sea correcto desde que carga
+   la página; en cada carga y al abrir el carrito se refresca.
+   offsetMs = (hora del servidor) − (hora del dispositivo): la cuenta regresiva
+   y el vencimiento usan la hora del servidor, no la del celular del cliente. */
+const CONFIG_DESC_CACHE_KEY = 'mvConfigDescuentos';
+const CONFIG_DESCUENTOS = {
+    inauguracion: { activa: false, pct: 10, hastaMs: null },
+    newsletterPct: 10,
+    offsetMs: 0
+};
+
+function aplicarConfigDescuentos(cfg, offsetMs) {
+    if (!cfg || !cfg.inauguracion) return;
+    const hasta = cfg.inauguracion.hasta ? Date.parse(cfg.inauguracion.hasta) : NaN;
+    CONFIG_DESCUENTOS.inauguracion.activa = !!cfg.inauguracion.activa;
+    CONFIG_DESCUENTOS.inauguracion.pct = Number(cfg.inauguracion.porcentaje) || 0;
+    CONFIG_DESCUENTOS.inauguracion.hastaMs = isNaN(hasta) ? null : hasta;
+    CONFIG_DESCUENTOS.newsletterPct = Number(cfg.newsletter && cfg.newsletter.porcentaje) || 0;
+    CONFIG_DESCUENTOS.offsetMs = Number(offsetMs) || 0;
+}
+
+async function cargarConfigDescuentos() {
+    if (typeof mvApi !== 'function') return; // api.js no está cargado en esta página
+    try {
+        const cfg = await mvApi('/descuentos');
+        const ahora = cfg.ahora ? Date.parse(cfg.ahora) : NaN;
+        const offset = isNaN(ahora) ? 0 : ahora - Date.now();
+        aplicarConfigDescuentos(cfg, offset);
+        try { localStorage.setItem(CONFIG_DESC_CACHE_KEY, JSON.stringify({ cfg, offset })); } catch (e) {}
+    } catch (err) {
+        return; // backend apagado: se sigue con lo cacheado
+    }
+    iniciarCuentaRegresiva();
+    if (document.getElementById('carrito-panel')?.classList.contains('abierto')) renderPaso1();
+}
+
+function ahoraServidorMs() {
+    return Date.now() + CONFIG_DESCUENTOS.offsetMs;
+}
+
+/* Vigente = activa en el backend + fecha de vencimiento cargada + todavía no pasó */
+function inauguracionVigente() {
+    const d = CONFIG_DESCUENTOS.inauguracion;
+    return !!(d.activa && d.pct > 0 && d.hastaMs && ahoraServidorMs() <= d.hastaMs);
+}
+
+function textoTiempoRestante(ms) {
+    const s = Math.max(0, Math.floor(ms / 1000));
+    const dias = Math.floor(s / 86400);
+    const hh = String(Math.floor((s % 86400) / 3600)).padStart(2, '0');
+    const mm = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+    const ss = String(s % 60).padStart(2, '0');
+    return (dias > 0 ? dias + ' d ' : '') + `${hh}:${mm}:${ss}`;
+}
+
+/* Pinta TODOS los elementos con el atributo data-cuenta-inauguracion (en el
+   carrito y en cualquier página donde se agregue <div data-cuenta-inauguracion></div>).
+   Devuelve true si la promo sigue vigente. */
+function pintarCuentaRegresiva() {
+    const vigente = inauguracionVigente();
+    const d = CONFIG_DESCUENTOS.inauguracion;
+    const txt = vigente
+        ? `🎉 Descuento de inauguración −${d.pct}% · termina en ${textoTiempoRestante(d.hastaMs - ahoraServidorMs())}`
+        : '';
+    const els = document.querySelectorAll('[data-cuenta-inauguracion]');
+    if (els.length) inyectarEstilosDescuentos();
+    els.forEach(el => {
+        el.classList.add('cuenta-inauguracion');
+        el.textContent = txt;
+        el.style.display = vigente ? '' : 'none';
+    });
+    return vigente;
+}
+
+let cuentaTimer = null;
+function iniciarCuentaRegresiva() {
+    if (cuentaTimer) { clearInterval(cuentaTimer); cuentaTimer = null; }
+    if (!pintarCuentaRegresiva()) return;
+    cuentaTimer = setInterval(() => {
+        if (pintarCuentaRegresiva()) return;
+        clearInterval(cuentaTimer); cuentaTimer = null;
+        alVencerInauguracion();
+    }, 1000);
+}
+
+/* Al llegar a cero con el carrito abierto: el descuento desaparece del total.
+   Si el cliente estaba en pasos 2-4 (todavía no confirmó) se lo vuelve al paso 1
+   para que no pague un monto desactualizado. */
+function alVencerInauguracion() {
+    if (!document.getElementById('carrito-panel')?.classList.contains('abierto')) return;
+    if (document.getElementById('checkout-paso-5')?.style.display === 'flex') return; // pedido ya enviado
+    mostrarToast('⏰ Venció el descuento de inauguración. Actualizamos el total.');
+    if (typeof pasoActual !== 'undefined' && pasoActual > 1) irAPaso(1);
+    else renderPaso1();
+}
+
+(function () {
+    try {
+        const c = JSON.parse(localStorage.getItem(CONFIG_DESC_CACHE_KEY));
+        if (c && c.cfg) aplicarConfigDescuentos(c.cfg, c.offset);
+    } catch (e) {}
+    document.addEventListener('DOMContentLoaded', () => {
+        iniciarCuentaRegresiva();
+        cargarConfigDescuentos();
+    });
+})();
+
+function formatoPesos(n) {
+    return '$' + Number(n).toLocaleString('es-AR');
+}
+
+function limpiarCodigoVerde(valor) {
+    return String(valor || '').toUpperCase().replace(/[^A-Z0-9-]/g, '');
+}
+
+function obtenerCodigoVerde() {
+    try { return limpiarCodigoVerde(localStorage.getItem(CODIGO_VERDE_KEY)) || null; }
+    catch (e) { return null; }
+}
+
+function guardarCodigoVerde(codigo) {
+    try {
+        if (codigo) localStorage.setItem(CODIGO_VERDE_KEY, codigo);
+        else localStorage.removeItem(CODIGO_VERDE_KEY);
+    } catch (e) { /* storage bloqueado: se ignora */ }
+}
+
+// Base de los descuentos: SOLO productos. El flete (si algún día se cobra) no lleva descuento.
+function calcularSubtotal(items) {
     return items.reduce((s, i) => s + i.precio * i.qty, 0);
 }
+
+function calcularDescuentos(items) {
+    const subtotal = calcularSubtotal(items);
+    const lineas = [];
+    if (subtotal > 0) {
+        if (inauguracionVigente()) {
+            const pct = CONFIG_DESCUENTOS.inauguracion.pct;
+            lineas.push({ id: 'inauguracion', etiqueta: '🎉 Inauguración de la web', pct,
+                          monto: Math.round(subtotal * pct / 100) });
+        }
+        if (obtenerCodigoVerde()) {
+            const pct = CONFIG_DESCUENTOS.newsletterPct;
+            lineas.push({ id: 'newsletter', etiqueta: '🌿 Newsletter (Código Verde)', pct,
+                          monto: Math.round(subtotal * pct / 100) });
+        }
+    }
+    const descuento = lineas.reduce((s, l) => s + l.monto, 0);
+    return { subtotal, lineas, descuento, total: Math.max(0, subtotal - descuento) };
+}
+
+function calcularTotal(items) {
+    return calcularDescuentos(items).total;
+}
+
+/* Texto del detalle de descuentos para WhatsApp (wa=true) o mail */
+function textoDescuentosPedido(desc, wa) {
+    if (!desc.lineas.length) return '';
+    const titulo = wa ? '🏷️ *Descuentos aplicados*' : 'Descuentos aplicados';
+    const cod = obtenerCodigoVerde();
+    return `\n\n${titulo}\nSubtotal: ${formatoPesos(desc.subtotal)}\n` +
+        desc.lineas.map(l => `• ${l.etiqueta.replace(/^\S+\s/, '')} (-${l.pct}%): -${formatoPesos(l.monto)}`).join('\n') +
+        (cod ? `\nCódigo Verde: ${cod}` : '');
+}
+
+/* HTML del detalle de descuentos para el paso 4 (Confirmar) */
+function htmlResumenDescuentos(desc) {
+    if (!desc.lineas.length) return '';
+    return `
+        <div class="confirm-item"><span>Subtotal</span><span>${formatoPesos(desc.subtotal)}</span></div>
+        ${desc.lineas.map(l => `
+        <div class="confirm-item" style="color:#1b5e20;">
+            <span>${l.etiqueta} −${l.pct}%</span><span>−${formatoPesos(l.monto)}</span>
+        </div>`).join('')}
+    `;
+}
+
+/* ── UI del paso 1: caja de Código Verde + renglones de descuento ──
+   Se inyecta por JS dentro de #carrito-footer-p1 (antes del Total),
+   así no hay que tocar el HTML de las 23 páginas que tienen su panel. */
+function inyectarEstilosDescuentos() {
+    if (document.getElementById('estilos-descuentos')) return;
+    const st = document.createElement('style');
+    st.id = 'estilos-descuentos';
+    st.textContent = `
+        .carrito-descuentos{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;font-size:.92rem}
+        .cd-fila{display:flex;justify-content:space-between;gap:8px}
+        .cd-fila.cd-desc{color:#1b5e20;font-weight:600}
+        .cd-codigo{background:#f1f8e9;border:1px dashed #66bb6a;border-radius:10px;padding:10px;margin-bottom:4px}
+        .cd-codigo label{display:block;font-size:.82rem;margin-bottom:6px;line-height:1.3}
+        .cd-codigo-fila{display:flex;gap:6px}
+        .cd-codigo-fila input{flex:1;min-width:0;padding:8px 10px;border:1px solid #a5d6a7;border-radius:8px;
+            text-transform:uppercase;letter-spacing:2px;font-size:.9rem}
+        .cd-codigo-fila button{padding:8px 14px;border:0;border-radius:8px;background:#2e7d32;color:#fff;
+            font-weight:600;cursor:pointer}
+        .cd-codigo-fila button:disabled{opacity:.6;cursor:wait}
+        .cd-codigo-ok{background:#e8f5e9;border-radius:10px;padding:8px 10px;margin-bottom:4px;
+            display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.85rem}
+        .cd-quitar{background:none;border:0;color:#c62828;text-decoration:underline;cursor:pointer;font-size:.8rem}
+        .cuenta-inauguracion{background:linear-gradient(90deg,#2e7d32,#66bb6a);color:#fff;font-weight:600;
+            text-align:center;padding:8px 12px;border-radius:10px;font-size:.9rem;font-variant-numeric:tabular-nums}
+    `;
+    document.head.appendChild(st);
+}
+
+function renderDescuentosCarrito(desc) {
+    const footerEl = document.getElementById('carrito-footer-p1');
+    if (!footerEl) return;
+    inyectarEstilosDescuentos();
+
+    let cont = document.getElementById('carrito-descuentos');
+    if (!cont) {
+        cont = document.createElement('div');
+        cont.id = 'carrito-descuentos';
+        cont.className = 'carrito-descuentos';
+        const filaTotal = footerEl.querySelector('.carrito-total');
+        if (filaTotal && filaTotal.parentNode) filaTotal.parentNode.insertBefore(cont, filaTotal);
+        else footerEl.appendChild(cont);
+    }
+
+    // Conserva lo que el cliente estaba tipeando si se vuelve a renderizar
+    const previo = limpiarCodigoVerde(document.getElementById('codigo-verde-input')?.value);
+    const codigo = obtenerCodigoVerde();
+    let html = inauguracionVigente() ? '<div data-cuenta-inauguracion></div>' : '';
+
+    if (codigo) {
+        html += `<div class="cd-codigo-ok">
+                    <span>✅ Código Verde <strong>${codigo}</strong> aplicado</span>
+                    <button type="button" class="cd-quitar" onclick="quitarCodigoVerde()">Quitar</button>
+                 </div>`;
+    } else {
+        html += `<div class="cd-codigo">
+                    <label for="codigo-verde-input">¿Estás suscripto al newsletter? Ingresá tu <strong>Código Verde</strong> y obtené ${CONFIG_DESCUENTOS.newsletterPct}% OFF (válido una sola vez)</label>
+                    <div class="cd-codigo-fila">
+                        <input type="text" id="codigo-verde-input" maxlength="12" autocomplete="off"
+                               placeholder="Ej: MV-A3B2C1" value="${previo}">
+                        <button type="button" id="codigo-verde-btn" onclick="aplicarCodigoVerde()">Aplicar</button>
+                    </div>
+                 </div>`;
+    }
+
+    if (desc.lineas.length) {
+        html += `<div class="cd-fila"><span>Subtotal</span><span>${formatoPesos(desc.subtotal)}</span></div>`;
+        html += desc.lineas.map(l =>
+            `<div class="cd-fila cd-desc"><span>${l.etiqueta} −${l.pct}%</span><span>−${formatoPesos(l.monto)}</span></div>`
+        ).join('');
+    }
+    cont.innerHTML = html;
+    pintarCuentaRegresiva();
+}
+
+async function aplicarCodigoVerde() {
+    const input = document.getElementById('codigo-verde-input');
+    const btn = document.getElementById('codigo-verde-btn');
+    const codigo = limpiarCodigoVerde(input?.value);
+
+    if (!codigo) { mostrarToast('⚠️ Ingresá tu Código Verde'); return; }
+    if (typeof mvNewsletter === 'undefined' || typeof mvNewsletter.validarCodigo !== 'function') {
+        mostrarToast('⚠️ No se pudo validar el código en esta página');
+        return;
+    }
+
+    if (btn) btn.disabled = true;
+    try {
+        const r = await mvNewsletter.validarCodigo(codigo);
+        if (!r || !r.valido) throw new Error((r && r.error) || 'Código Verde inválido');
+        guardarCodigoVerde(codigo);
+        mostrarToast(`🌿 ¡Código Verde aplicado! ${CONFIG_DESCUENTOS.newsletterPct}% de descuento`);
+    } catch (err) {
+        mostrarToast('⚠️ ' + err.message);
+    }
+    renderPaso1();
+}
+
+function quitarCodigoVerde() {
+    guardarCodigoVerde(null);
+    renderPaso1();
+}
+
+/* Al abrir el carrito se vuelve a chequear el código guardado: si ya se
+   usó (p. ej. en otro dispositivo) se quita. Si el backend no responde,
+   se deja como está (la validación final la hace el backend al crear el pedido). */
+async function revalidarCodigoVerde() {
+    const codigo = obtenerCodigoVerde();
+    if (!codigo || typeof mvNewsletter === 'undefined' || typeof mvNewsletter.validarCodigo !== 'function') return true;
+
+    let r;
+    try {
+        r = await mvNewsletter.validarCodigo(codigo);
+    } catch (err) {
+        return true; // sin conexión o error del servidor: se deja (el backend valida al crear el pedido)
+    }
+    if (r && r.valido === false) {
+        guardarCodigoVerde(null);
+        mostrarToast('⚠️ ' + (r.error || 'Tu Código Verde ya no es válido.') + ' Lo quitamos del carrito.');
+        if (document.getElementById('carrito-panel')?.classList.contains('abierto')) renderPaso1();
+        return false;
+    }
+    return true;
+}
+
+// Código en mayúsculas y sin caracteres raros mientras se tipea; Enter = Aplicar
+document.addEventListener('input', e => {
+    if (e.target && e.target.id === 'codigo-verde-input') {
+        e.target.value = limpiarCodigoVerde(e.target.value);
+    }
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target && e.target.id === 'codigo-verde-input') {
+        e.preventDefault();
+        aplicarCodigoVerde();
+    }
+});
 function actualizarBadge() {
     const total = cargarCarrito().reduce((s, i) => s + i.qty, 0);
     document.querySelectorAll('.carrito-badge').forEach(b => {
@@ -380,6 +710,8 @@ function abrirCarrito() {
     document.getElementById('carrito-panel')?.classList.add('abierto');
     document.getElementById('carrito-overlay')?.classList.add('abierto');
     sincronizarPreciosCarrito(); // refresca precios con los del admin
+    revalidarCodigoVerde();      // chequea que el Código Verde guardado siga vigente
+    cargarConfigDescuentos();    // refresca porcentajes y fecha de vencimiento
 }
 
 /* ------------------------------------------------------
@@ -585,8 +917,12 @@ function renderPaso1() {
         </div>
     `).join('');
 
-    const total = calcularTotal(items);
-    if (totalEl) totalEl.textContent = '$' + total.toLocaleString('es-AR');
+    const desc = calcularDescuentos(items);
+    renderDescuentosCarrito(desc);
+    if (totalEl) totalEl.textContent = formatoPesos(desc.total);
+
+    // El envío gratis se evalúa sobre el subtotal (antes de descuentos)
+    const total = desc.subtotal;
 
     // Mostrar aviso de envío gratis si el total está cerca del umbral
     const avisoEnvio = document.getElementById('aviso-envio-gratis');
@@ -736,7 +1072,7 @@ document.addEventListener('change', e => {
     }
 });
 
-function avanzarAPaso3Pago() {
+async function avanzarAPaso3Pago() {
     const entrega = document.querySelector('input[name="formaEntrega"]:checked');
     if (!entrega) {
         mostrarToast('⚠️ Elegí una forma de entrega');
@@ -744,6 +1080,13 @@ function avanzarAPaso3Pago() {
     }
     if (entrega.value === 'envio' && !validarFormularioEnvio()) return;
     if (entrega.value === 'retiro' && !validarFormularioRetiro()) return;
+
+    // Antes de mostrar el monto a pagar, se confirma que el Código Verde siga
+    // vigente (así no se transfiere / cobra un total que después cambia).
+    if (obtenerCodigoVerde() && !(await revalidarCodigoVerde())) {
+        irAPaso(1);
+        return;
+    }
     irAPaso(3);
 }
 
@@ -1025,8 +1368,8 @@ function renderPaso4Confirmar() {
     const items = cargarCarrito();
     const entrega = document.querySelector('input[name="formaEntrega"]:checked')?.value || 'retiro';
     const metodo = document.querySelector('input[name="metodoPago"]:checked')?.value || 'transferencia';
-    const total = calcularTotal(items);
-    const totalFinal = total;
+    const desc = calcularDescuentos(items);
+    const totalFinal = desc.total;
 
     // Resumen de productos
     const resumenEl = document.getElementById('confirm-productos');
@@ -1036,7 +1379,7 @@ function renderPaso4Confirmar() {
                 <span>${i.nombre} ×${i.qty}</span>
                 <span>$${(i.precio * i.qty).toLocaleString('es-AR')}</span>
             </div>
-        `).join('');
+        `).join('') + htmlResumenDescuentos(desc);
     }
 
     // Resumen de entrega
@@ -1148,6 +1491,18 @@ async function guardarPedidoEnBackend() {
         } : {},
     };
 
+    // Descuentos: el backend DEBE recalcularlos y validar el Código Verde
+    // (existe, es de único uso y no fue usado). Esto viaja solo de referencia.
+    const desc = calcularDescuentos(items);
+    payload.codigo_verde = obtenerCodigoVerde() || '';
+    payload.descuentos = {
+        subtotal: desc.subtotal,
+        inauguracion_pct: desc.lineas.find(l => l.id === 'inauguracion')?.pct || 0,
+        newsletter_pct: desc.lineas.find(l => l.id === 'newsletter')?.pct || 0,
+        descuento: desc.descuento,
+        total: desc.total,
+    };
+
     // Pago con tarjeta ya aprobado por el Brick: se manda el id de pago de
     // Mercado Pago para que el backend lo asocie al pedido (sin comprobante).
     if (metodo === 'tarjeta' && pagoTarjetaAprobado) {
@@ -1170,6 +1525,19 @@ async function guardarPedidoEnBackend() {
         return await mvPedidos.crear(payload);
     } catch (err) {
         console.warn('No se pudo guardar el pedido en el backend:', err.message);
+
+        // Error del Código Verde (ya usado / inválido): el pedido NO se guardó y el
+        // total cambia. Se quita el código y se vuelve al paso 1 en vez de mandar
+        // por WhatsApp un pedido con un monto desactualizado.
+        // También cubre "Venció el descuento de inauguración" (mismo tratamiento).
+        if (/código verde|descuento/i.test(err.message)) {
+            const esCodigo = /código verde/i.test(err.message);
+            if (esCodigo) guardarCodigoVerde(null);
+            cargarConfigDescuentos();
+            mostrarToast('⚠️ ' + err.message + (esCodigo ? ' Lo quitamos del carrito: revisá el nuevo total.' : ''));
+            irAPaso(1);
+            return false;
+        }
         // ⚠️ Antes esto fallaba en silencio (solo consola): el pedido no
         // quedaba en la base pero igual se mostraba "¡Pedido enviado!" y
         // se abría WhatsApp, como si todo hubiera salido bien. Ahora se
@@ -1184,12 +1552,12 @@ async function enviarPedidoWhatsApp() {
     const items = cargarCarrito();
     if (items.length === 0) { mostrarToast('El carrito está vacío'); return; }
 
-    await guardarPedidoEnBackend();
+    if ((await guardarPedidoEnBackend()) === false) return; // false = se canceló por el Código Verde
 
     const entrega = document.querySelector('input[name="formaEntrega"]:checked')?.value || 'retiro';
     const metodo = document.querySelector('input[name="metodoPago"]:checked')?.value || 'transferencia';
-    const total = calcularTotal(items);
-    const totalFinal = total;
+    const desc = calcularDescuentos(items);
+    const totalFinal = desc.total;
 
     // Líneas de productos
     const lineasProductos = items
@@ -1220,6 +1588,7 @@ async function enviarPedidoWhatsApp() {
             ? `🔖 *Nº de pedido:* ${obtenerReferenciaPedido()}\n✅ Ya transferí. Te envío el comprobante por este chat.`
             : `📎 Adjunto el comprobante de pago`) +
         lineasEnvio +
+        textoDescuentosPedido(desc, true) +
         `\n\n*Total: $${totalFinal.toLocaleString('es-AR')}*`;
 
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(mensaje)}`, '_blank');
@@ -1233,12 +1602,12 @@ async function enviarPedidoMail() {
     const items = cargarCarrito();
     if (items.length === 0) { mostrarToast('El carrito está vacío'); return; }
 
-    await guardarPedidoEnBackend();
+    if ((await guardarPedidoEnBackend()) === false) return; // false = se canceló por el Código Verde
 
     const entrega = document.querySelector('input[name="formaEntrega"]:checked')?.value || 'retiro';
     const metodo = document.querySelector('input[name="metodoPago"]:checked')?.value || 'transferencia';
-    const total = calcularTotal(items);
-    const totalFinal = total;
+    const desc = calcularDescuentos(items);
+    const totalFinal = desc.total;
 
     let lineasEnvio = '';
     if (entrega === 'retiro') {
@@ -1263,6 +1632,7 @@ async function enviarPedidoMail() {
         (metodo === 'transferencia' ? `\nNº de pedido: ${obtenerReferenciaPedido()}` : '') +
         `\n(No olvidar adjuntar el comprobante de pago a este mail)` +
         lineasEnvio +
+        textoDescuentosPedido(desc, false) +
         `\n\nTotal: $${totalFinal.toLocaleString('es-AR')}`
     );
 
@@ -1310,6 +1680,7 @@ function mostrarConfirmacionPedido() {
     mpBrickController = null;
 
     reiniciarReferenciaPedido();
+    guardarCodigoVerde(null);   // el Código Verde es de único uso: se descarta al confirmar el pedido
     vaciarCarrito();
 }
 
@@ -1606,11 +1977,20 @@ if (newsletterForm) {
             const conf = document.getElementById('msg-confirmacion');
             document.getElementById('conf-nombre-texto').textContent = `¡Hola, ${data.nombre}!`;
             document.getElementById('conf-codigo').textContent = data.codigo_mio;
+            const elVerde = document.getElementById('conf-codigo-verde');
+            if (elVerde) elVerde.textContent = data.codigo_verde || '';
+            const elPct = document.getElementById('conf-pct');
+            if (elPct) elPct.textContent = CONFIG_DESCUENTOS.newsletterPct;
             conf.style.display = 'block';
 
             document.getElementById('conf-codigo').addEventListener('click', () => {
                 navigator.clipboard.writeText(data.codigo_mio).catch(() => {});
             });
+            if (elVerde) {
+                elVerde.addEventListener('click', () => {
+                    navigator.clipboard.writeText(data.codigo_verde).catch(() => {});
+                });
+            }
         } catch (err) {
             if (err.message.toLowerCase().includes('referido')) {
                 show('err-ref', true);
@@ -1639,9 +2019,11 @@ if (newsletterForm) {
             try {
                 const data = await mvNewsletter.miEstado(mail);
                 resultado.innerHTML =
-                    `Hola ${data.nombre}, tu código es ` +
-                    `<span class="codigo-ref-mini">${data.codigo_mio}</span> ` +
-                    `y ya tenés <strong>${data.referidos_exitosos}</strong> referido(s) que compraron.`;
+                    `Hola ${data.nombre}. Tu <strong>Código Verde</strong> (${CONFIG_DESCUENTOS.newsletterPct}% de descuento, un solo uso): ` +
+                    `<span class="codigo-ref-mini">${data.codigo_verde}</span>` +
+                    (data.codigo_verde_usado ? ' <em>(ya lo usaste)</em>' : '') +
+                    `<br>Tu código para referir amigos: <span class="codigo-ref-mini">${data.codigo_mio}</span> ` +
+                    `— ya tenés <strong>${data.referidos_exitosos}</strong> referido(s) que compraron.`;
             } catch (err) {
                 resultado.textContent = err.message;
             }

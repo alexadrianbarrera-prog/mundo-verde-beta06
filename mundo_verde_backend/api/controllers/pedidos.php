@@ -9,6 +9,9 @@
 const UMBRAL_DESCUENTO_EFECTIVO = 30000;
 const DESCUENTO_EFECTIVO = 0.10;
 
+// Descuentos del carrito (inauguración y Código Verde): porcentajes y vencimiento
+// en la tabla `configuracion` — ver controllers/descuentos.php.
+
 // Comprobante de pago: formatos aceptados (extensión -> mime real esperado)
 // y peso máximo permitido.
 const EXTENSIONES_COMPROBANTE = [
@@ -85,12 +88,42 @@ function pedidos_crear(PDO $pdo): void
         ];
     }
 
-    // Mismo descuento que aplica el front: 10% con efectivo + retiro en local
-    // a partir de $30.000 de subtotal.
-    $descuento = 0.0;
+    // ── Descuentos ──────────────────────────────────────────────
+    // El backend es la autoridad: recalcula todo y NO confía en los montos
+    // que mande el front (solo recibe el codigo_verde en texto).
+    // Base de cálculo: SOLO productos ($subtotal). El flete no lleva descuento.
+
+    // 1) 10% con efectivo + retiro en local a partir de $30.000 de subtotal.
+    $descEfectivo = 0.0;
     if ($formaPago === 'efectivo' && $formaEntrega === 'retiro' && $subtotal >= UMBRAL_DESCUENTO_EFECTIVO) {
-        $descuento = round($subtotal * DESCUENTO_EFECTIVO, 2);
+        $descEfectivo = round($subtotal * DESCUENTO_EFECTIVO, 2);
     }
+
+    // 2) Inauguración de la web: porcentaje y fecha de vencimiento salen de la tabla
+    //    `configuracion`. Vencida o sin fecha cargada = no se aplica.
+    $cfg = descuentos_config($pdo);
+    $descInauguracion = $cfg['inauguracion_activa'] ? round($subtotal * $cfg['inauguracion_pct'] / 100) : 0.0;
+
+    // Si el front mostró este descuento pero ya venció, no se guarda el pedido con un
+    // total distinto al que el cliente vio: se corta para que revise el total nuevo.
+    $inaugFront = (float)($body['descuentos']['inauguracion_pct'] ?? 0);
+    if (!$cfg['inauguracion_activa'] && $inaugFront > 0) {
+        error('Venció el descuento de inauguración. Actualizamos el total de tu pedido.', 409);
+    }
+
+    // 3) Newsletter: 10% con Código Verde (único uso). Acá solo se valida; el
+    //    código se "consume" de forma atómica dentro de la transacción.
+    $descNewsletter = 0.0;
+    $suscriptorId   = null;
+    $codigoVerde    = newsletter_normalizar_codigo((string)($body['codigo_verde'] ?? ''));
+    if ($codigoVerde !== '') {
+        $est = newsletter_estado_codigo_verde($pdo, $codigoVerde);
+        if (!$est['ok']) error($est['error'], 409);
+        $suscriptorId  = $est['id'];
+        $descNewsletter = round($subtotal * $cfg['newsletter_pct'] / 100);
+    }
+
+    $descuento = min($subtotal, $descEfectivo + $descInauguracion + $descNewsletter);
     $total = $subtotal - $descuento;
 
     $pedidoId = 0; // se inicializa acá para que el editor no marque "variable posiblemente indefinida" más abajo
@@ -100,11 +133,13 @@ function pedidos_crear(PDO $pdo): void
             'INSERT INTO pedidos (usuario_id, cliente_nombre, cliente_email, cliente_celular,
                                    forma_entrega, forma_pago, envio_domicilio, envio_localidad, envio_cp,
                                    retiro_nombre, retiro_dni,
-                                   subtotal, descuento, total)
+                                   subtotal, descuento, total,
+                                   codigo_verde, descuento_inauguracion, descuento_newsletter)
              VALUES (:usuario_id, :cliente_nombre, :cliente_email, :cliente_celular,
                      :forma_entrega, :forma_pago, :envio_domicilio, :envio_localidad, :envio_cp,
                      :retiro_nombre, :retiro_dni,
-                     :subtotal, :descuento, :total)'
+                     :subtotal, :descuento, :total,
+                     :codigo_verde, :desc_inauguracion, :desc_newsletter)'
         );
         $stmt->execute([
             'usuario_id'      => $usuario['id'] ?? null,
@@ -121,8 +156,26 @@ function pedidos_crear(PDO $pdo): void
             'subtotal'        => $subtotal,
             'descuento'       => $descuento,
             'total'           => $total,
+            'codigo_verde'      => $suscriptorId !== null ? $codigoVerde : null,
+            'desc_inauguracion' => $descInauguracion,
+            'desc_newsletter'   => $descNewsletter,
         ]);
         $pedidoId = (int)$pdo->lastInsertId();
+
+        // Consumir el Código Verde de forma atómica: el UPDATE solo afecta una
+        // fila si el código sigue activo y sin usar. Si dos pedidos lo usan a
+        // la vez, solo uno gana y el otro hace rollback.
+        if ($suscriptorId !== null) {
+            $claim = $pdo->prepare(
+                'UPDATE newsletter_suscriptores
+                 SET codigo_usado_en = NOW(), codigo_usado_pedido_id = :pid
+                 WHERE id = :id AND activo = 1 AND codigo_usado_en IS NULL'
+            );
+            $claim->execute(['pid' => $pedidoId, 'id' => $suscriptorId]);
+            if ($claim->rowCount() !== 1) {
+                throw new RuntimeException('CODIGO_VERDE_USADO');
+            }
+        }
 
         $stmtItem = $pdo->prepare(
             'INSERT INTO pedido_items (pedido_id, producto_id, codigo, nombre, precio_unitario, cantidad, subtotal)
@@ -143,6 +196,10 @@ function pedidos_crear(PDO $pdo): void
         $pdo->commit();
     } catch (Throwable $e) {
         $pdo->rollBack();
+        if ($e instanceof RuntimeException && $e->getMessage() === 'CODIGO_VERDE_USADO') {
+            error('Ese Código Verde ya fue utilizado.', 409);
+        }
+        error_log('[pedidos_crear] ' . $e->getMessage());
         error('No se pudo registrar el pedido. Intentá de nuevo.', 500);
     }
 
@@ -151,6 +208,9 @@ function pedidos_crear(PDO $pdo): void
         'subtotal'        => $subtotal,
         'descuento'       => $descuento,
         'total'           => $total,
+        'descuento_inauguracion' => $descInauguracion,
+        'descuento_newsletter'   => $descNewsletter,
+        'codigo_verde_aplicado'  => $suscriptorId !== null,
         'estado'          => 'pendiente',
         'comprobante_url' => null,
         'retiro_nombre'   => $formaEntrega === 'retiro' ? trim($retiro['nombre']) : null,
