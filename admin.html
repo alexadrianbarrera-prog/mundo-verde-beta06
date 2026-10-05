@@ -333,6 +333,19 @@
   .btn-detalle:hover { border-color: var(--accent); color: var(--accent2); }
 
   .fila-detalle td { background: var(--surface); padding: 0; }
+
+  /* ── Pedidos agrupados por día ── */
+  tr.fila-dia td {
+    background: var(--surface); padding: 10px 14px; cursor: pointer; user-select: none;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  tr.fila-dia:hover td { background: var(--card); }
+  .dia-flecha { display: inline-block; width: 1.1em; color: var(--muted); transition: transform .15s; }
+  tr.fila-dia.abierto .dia-flecha { transform: rotate(90deg); }
+  .dia-nombre { font-family: var(--serif); color: var(--accent2); font-size: 1rem; }
+  .dia-nombre::first-letter { text-transform: uppercase; }
+  .dia-resumen { float: right; font-family: var(--mono); font-size: .75rem; color: var(--muted); }
+  tr.oculta-dia { display: none !important; }
   .detalle-wrap { padding: 14px 20px; }
   .detalle-titulo { font-size: .72rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 8px; }
   table.detalle-items { width: 100%; border-collapse: collapse; font-size: .8rem; }
@@ -550,6 +563,16 @@
       display: block; text-align: left; padding: 0; border: none;
     }
     table.tabla-principal tr.fila-detalle td::before { content: none; }
+
+    table.tabla-principal tbody tr.fila-dia {
+      background: transparent; border: none; padding: 0; margin: 4px 0 8px;
+    }
+    table.tabla-principal tbody tr.fila-dia td {
+      display: block; text-align: left; border-radius: var(--radius);
+      border: 1px solid var(--border); padding: 10px 14px;
+    }
+    table.tabla-principal tbody tr.fila-dia td::before { content: none; }
+    .dia-resumen { float: none; display: block; margin-top: 4px; }
   }
 </style>
 </head>
@@ -1257,14 +1280,41 @@ function renderPedidos(pedidos) {
     return;
   }
 
+  // Agrupar por día (creado_en = 'YYYY-MM-DD HH:MM:SS'; llegan del más nuevo al más viejo)
+  const grupos = new Map();
+  pedidos.forEach((p, idx) => {
+    const dia = String(p.creado_en || '').slice(0, 10) || 'sin-fecha';
+    if (!grupos.has(dia)) grupos.set(dia, { total: 0, cant: 0 });
+    const g = grupos.get(dia);
+    g.cant++;
+    if (p.estado !== 'cancelado') g.total += Number(p.total || 0);
+    p._dia = dia;
+  });
+  // Primera vez: solo el día más reciente abierto. Después se recuerda lo que abrió/cerró
+  // (así no se cierra todo al guardar un estado y recargar la tabla).
+  if (!diasAbiertos) diasAbiertos = new Set([grupos.keys().next().value]);
+
   let html = stats + '<table class="tabla-principal"><thead><tr>' +
     '<th>ID</th><th>Cliente</th><th>Entrega</th><th>Retira</th><th>Pago</th><th>Comprobante</th><th>Envío</th>' +
     '<th>Subtotal</th><th>Descuento</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th>' +
     '</tr></thead><tbody>';
 
+  let diaActual = null;
   pedidos.forEach((p, idx) => {
     const estadoInfo = ETIQUETAS_ESTADO[p.estado] || { texto: p.estado, clase: 'badge-gris' };
-    html += `<tr data-idx="${idx}" data-pedido-id="${p.id}">
+    const abierto = diasAbiertos.has(p._dia);
+    const ocultar = abierto ? '' : ' oculta-dia';
+    if (p._dia !== diaActual) {
+      diaActual = p._dia;
+      const g = grupos.get(diaActual);
+      html += `<tr class="fila-dia${abierto ? ' abierto' : ''}" data-dia-header="${diaActual}" onclick="toggleDiaPedidos('${diaActual}')">
+        <td colspan="13">
+          <span class="dia-flecha">▸</span><span class="dia-nombre">${etiquetaDia(diaActual)}</span>
+          <span class="dia-resumen">${g.cant} ${g.cant === 1 ? 'pedido' : 'pedidos'} · ${formatMoney(g.total)}</span>
+        </td>
+      </tr>`;
+    }
+    html += `<tr class="${ocultar.trim()}" data-dia="${p._dia}" data-idx="${idx}" data-pedido-id="${p.id}">
       <td class="cell-id" data-label="ID">#${p.id}</td>
       <td class="cell-cliente" data-label="Cliente">
         <strong>${p.cliente_nombre || '—'}</strong>
@@ -1296,7 +1346,7 @@ function renderPedidos(pedidos) {
         <button class="btn-mini danger" onclick="eliminarFila('pedidos', '${p.id}')">Eliminar</button>
       </td>
     </tr>
-    <tr class="fila-detalle" id="detalle-${p.id}" style="display:none">
+    <tr class="fila-detalle${ocultar}" data-dia="${p._dia}" id="detalle-${p.id}" style="display:none">
       <td colspan="13">
         <div class="detalle-wrap">
           <div class="detalle-titulo">Detalle de la compra — Pedido #${p.id}</div>
@@ -1308,6 +1358,26 @@ function renderPedidos(pedidos) {
 
   html += '</tbody></table>';
   target.innerHTML = html;
+}
+
+let diasAbiertos = null; // Set de días ('YYYY-MM-DD') desplegados en la pestaña Pedidos
+
+function etiquetaDia(dia) {
+  if (dia === 'sin-fecha') return 'Sin fecha';
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const d = new Date(dia + 'T00:00:00');
+  const diff = Math.round((hoy - d) / 86400000);
+  const fecha = d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+  if (diff === 0) return 'Hoy · ' + fecha;
+  if (diff === 1) return 'Ayer · ' + fecha;
+  return fecha;
+}
+
+function toggleDiaPedidos(dia) {
+  const abrir = !diasAbiertos.has(dia);
+  if (abrir) diasAbiertos.add(dia); else diasAbiertos.delete(dia);
+  document.querySelector(`tr.fila-dia[data-dia-header="${dia}"]`).classList.toggle('abierto', abrir);
+  document.querySelectorAll(`tr[data-dia="${dia}"]`).forEach(tr => tr.classList.toggle('oculta-dia', !abrir));
 }
 
 function renderItemsPedido(items) {
