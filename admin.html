@@ -447,12 +447,43 @@
   .btn-secundario:hover { border-color: var(--text2); }
   .modal-error { color: var(--danger); font-size: .8rem; margin-top: 10px; min-height: 1.1em; }
 
-  /* ── Anuncios: casillas de "Aparece en" ── */
-  .chk-paginas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 14px; min-width: 260px; text-align: left; }
-  .chk-paginas label { display: flex; align-items: center; gap: 7px; font-size: .78rem; color: var(--text2); text-transform: none; letter-spacing: 0; margin: 0; padding: 3px 0; cursor: pointer; user-select: none; }
-  .chk-paginas label:hover { color: var(--text); }
-  .chk-paginas label.todas { grid-column: 1 / -1; color: var(--accent2); font-weight: 600; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 3px; }
-  .chk-paginas input[type=checkbox] { width: 15px; height: 15px; margin: 0; flex-shrink: 0; cursor: pointer; accent-color: var(--accent); }
+  /* ── Anuncios: selector compacto de "Aparece en" ── */
+  .pag-sel { min-width: 200px; max-width: 320px; text-align: left; }
+  .pag-trigger {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-family: var(--sans); font-size: .8rem;
+    padding: 7px 10px; cursor: pointer; text-align: left;
+  }
+  .pag-trigger:hover, .pag-trigger.abierto { border-color: var(--accent); }
+  .pag-trigger.vacio { color: var(--danger); border-color: var(--danger); }
+  .pag-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pag-n { background: var(--accent); color: #0d1a0f; border-radius: 999px; font-size: .68rem; font-weight: 700; padding: 1px 7px; flex-shrink: 0; }
+  .pag-caret { color: var(--muted); font-size: .7rem; flex-shrink: 0; }
+
+  .pag-pop {
+    position: fixed; z-index: 1200; width: 340px; max-height: min(70vh, 460px); overflow-y: auto;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    box-shadow: 0 18px 60px rgba(0,0,0,.65); padding: 10px 12px 12px;
+    font-family: var(--sans); animation: fadeIn .15s ease;
+  }
+  .pag-pop label {
+    display: flex; align-items: center; gap: 7px; font-size: .78rem; color: var(--text2);
+    text-transform: none; letter-spacing: 0; margin: 0; padding: 4px 0; cursor: pointer; user-select: none;
+  }
+  .pag-pop label:hover { color: var(--text); }
+  .pag-pop input[type=checkbox] { width: 15px; height: 15px; margin: 0; flex-shrink: 0; cursor: pointer; accent-color: var(--accent); }
+  .pag-pop .pag-todas { color: var(--accent2); font-weight: 600; padding: 4px 0 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .pag-grupo-cab { display: flex; justify-content: space-between; align-items: center; margin: 8px 0 2px; }
+  .pag-grupo-tit { font-size: .66rem; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); }
+  .pag-grupo-btn { background: none; border: none; color: var(--accent); font-size: .68rem; cursor: pointer; font-family: var(--sans); padding: 2px 4px; }
+  .pag-grupo-btn:hover { text-decoration: underline; }
+  .pag-grupo-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+  .pag-listo { margin-top: 10px; width: 100%; background: var(--accent); color: #0d1a0f; border: none; border-radius: 8px; padding: 8px; font-weight: 600; font-family: var(--sans); font-size: .8rem; cursor: pointer; }
+  @media (max-width: 768px) {
+    .pag-sel { max-width: none; }
+    .pag-pop { left: 12px !important; right: 12px !important; top: auto !important; bottom: 12px !important; width: auto; max-height: 75vh; }
+  }
 
   /* ── Tablas como tarjetas apiladas en mobile ── */
   @media (max-width: 768px) {
@@ -642,35 +673,117 @@ function agregarColumnaPaginas(meta) {
   a.columnas = cols;
   a.editables = Object.assign({}, a.editables, { paginas: 'paginas' });
 }
+/* Grupos del desplegable "Aparece en". Los ids tienen que existir en
+   PAGINAS_ANUNCIO; los que no figuren acá caen solos en "Otras". */
+const PAGINAS_GRUPOS = [
+  ['Sitio',     ['inicio']],
+  ['Plantas',   ['plantas', 'arbustos', 'aromaticas', 'interior', 'plantines', 'productos']],
+  ['Talleres',  ['talleres', 'excursiones', 'espacio', 'estimulacion', 'ceramica', 'mosaiquismo']],
+  ['Servicios', ['servicios', 'serv_domicilio', 'serv_comercial', 'serv_virtual', 'serv_jardineria']],
+  ['Otras',     ['ramos', 'newsletter', 'login']],
+];
+function etiquetaPagina(v) {
+  const p = PAGINAS_ANUNCIO.find(x => x[0] === v);
+  return p ? p[1] : v;
+}
+function resumenPaginas(valor) {
+  const sel = String(valor || '').split(',').map(x => x.trim()).filter(Boolean);
+  if (!sel.length) return { txt: 'Elegir páginas…', n: 0, vacio: true };
+  if (sel.includes('todas')) return { txt: 'Todas las páginas', n: 0, vacio: false };
+  return { txt: sel.map(etiquetaPagina).join(', '), n: sel.length, vacio: false };
+}
+function triggerPaginasHTML(valor) {
+  const r = resumenPaginas(valor);
+  return `<span class="pag-txt">${r.txt}</span>${r.n > 1 ? `<span class="pag-n">${r.n}</span>` : ''}<span class="pag-caret">▾</span>`;
+}
+/* Mismo contrato de siempre: un input hidden data-col="paginas" con "todas"
+   o ids separados por coma — guardarFila() y el modal lo leen tal cual. */
 function checksPaginas(valor) {
   const sel = String(valor || 'todas').split(',').map(x => x.trim()).filter(Boolean);
-  const todas = sel.includes('todas');
-  const chks = PAGINAS_ANUNCIO.map(([v, et]) => {
-    const esTodas = v === 'todas';
-    // Si el anuncio es "todas", las demás quedan destildadas pero se pueden
-    // tildar igual: al hacerlo, "Todas las páginas" se destilda sola.
-    const marcada = esTodas ? todas : (!todas && sel.includes(v));
-    return `<label class="${esTodas ? 'todas' : ''}"><input type="checkbox" value="${v}" ${marcada ? 'checked' : ''} onchange="syncPaginas(this)">${et}</label>`;
-  }).join('');
-  return `<div class="chk-paginas">${chks}<input type="hidden" data-col="paginas" value="${todas ? 'todas' : sel.join(',')}"></div>`;
+  const val = sel.includes('todas') ? 'todas' : sel.join(',');
+  const r = resumenPaginas(val);
+  return `<div class="pag-sel">
+    <button type="button" class="pag-trigger${r.vacio ? ' vacio' : ''}" onclick="abrirPopPaginas(this)">${triggerPaginasHTML(val)}</button>
+    <input type="hidden" data-col="paginas" value="${val}">
+  </div>`;
 }
-function syncPaginas(chk) {
-  const cont = chk.closest('.chk-paginas');
-  const todas = cont.querySelector('input[value="todas"]');
-  const otros = [...cont.querySelectorAll('input[type=checkbox]')].filter(i => i !== todas);
 
-  if (chk === todas) {
-    // Tildar "Todas" limpia las páginas sueltas. Destildarla deja todo vacío
-    // para que se elijan las páginas una por una.
-    if (todas.checked) otros.forEach(i => { i.checked = false; });
-  } else if (chk.checked) {
-    // Elegir una página puntual implica que ya no es "todas".
-    todas.checked = false;
+let POP_PAG = null; // { pop, cont }
+function cerrarPopPaginas() {
+  if (!POP_PAG) return;
+  POP_PAG.cont.querySelector('.pag-trigger').classList.remove('abierto');
+  POP_PAG.pop.remove();
+  POP_PAG = null;
+}
+function abrirPopPaginas(btn) {
+  const cont = btn.closest('.pag-sel');
+  if (POP_PAG && POP_PAG.cont === cont) { cerrarPopPaginas(); return; }
+  cerrarPopPaginas();
+
+  const hidden = cont.querySelector('input[type=hidden]');
+  const sel = hidden.value.split(',').filter(Boolean);
+  const todas = sel.includes('todas');
+  const enGrupos = new Set(PAGINAS_GRUPOS.flatMap(g => g[1]));
+  const grupos = PAGINAS_GRUPOS.map(g => [g[0], g[1].filter(v => PAGINAS_ANUNCIO.some(p => p[0] === v))]);
+  const sueltas = PAGINAS_ANUNCIO.map(p => p[0]).filter(v => v !== 'todas' && !enGrupos.has(v));
+  if (sueltas.length) {
+    const otras = grupos.find(g => g[0] === 'Otras');
+    if (otras) otras[1].push(...sueltas); else grupos.push(['Otras', sueltas]);
   }
 
-  const vals = todas.checked ? ['todas'] : otros.filter(i => i.checked).map(i => i.value);
-  cont.querySelector('input[type=hidden]').value = vals.join(',');
+  const chk = (v, marcada) => `<label><input type="checkbox" value="${v}" ${marcada ? 'checked' : ''}>${etiquetaPagina(v).replace(/^Servicios: /, '')}</label>`;
+  const pop = document.createElement('div');
+  pop.className = 'pag-pop';
+  pop.innerHTML =
+    `<label class="pag-todas"><input type="checkbox" value="todas" ${todas ? 'checked' : ''}>Todas las páginas</label>` +
+    grupos.filter(g => g[1].length).map(([tit, ids]) =>
+      `<div class="pag-grupo" data-grupo="${tit}">
+         <div class="pag-grupo-cab"><span class="pag-grupo-tit">${tit}</span>${ids.length > 1 ? '<button type="button" class="pag-grupo-btn">marcar todo</button>' : ''}</div>
+         <div class="pag-grupo-items">${ids.map(v => chk(v, !todas && sel.includes(v))).join('')}</div>
+       </div>`).join('') +
+    `<button type="button" class="pag-listo">Listo</button>`;
+  document.body.appendChild(pop);
+  btn.classList.add('abierto');
+  POP_PAG = { pop, cont };
+
+  // Posición: debajo del botón; si no entra, arriba. (En mobile lo fija el CSS abajo de todo.)
+  const r = btn.getBoundingClientRect();
+  const w = pop.offsetWidth, h = pop.offsetHeight;
+  let left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
+  let top = r.bottom + 6;
+  if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+
+  const todasChk = pop.querySelector('input[value="todas"]');
+  const otros = () => [...pop.querySelectorAll('.pag-grupo input[type=checkbox]')];
+  const aplicar = () => {
+    const vals = todasChk.checked ? ['todas'] : otros().filter(i => i.checked).map(i => i.value);
+    hidden.value = vals.join(',');
+    btn.classList.toggle('vacio', vals.length === 0);
+    btn.innerHTML = triggerPaginasHTML(hidden.value);
+  };
+  pop.addEventListener('change', (e) => {
+    if (e.target === todasChk) { if (todasChk.checked) otros().forEach(i => { i.checked = false; }); }
+    else if (e.target.checked) todasChk.checked = false;
+    aplicar();
+  });
+  pop.querySelectorAll('.pag-grupo-btn').forEach(b => b.addEventListener('click', () => {
+    const items = [...b.closest('.pag-grupo').querySelectorAll('input[type=checkbox]')];
+    const marcar = !items.every(i => i.checked);
+    items.forEach(i => { i.checked = marcar; });
+    if (marcar) todasChk.checked = false;
+    b.textContent = marcar ? 'desmarcar todo' : 'marcar todo';
+    aplicar();
+  }));
+  pop.querySelector('.pag-listo').addEventListener('click', cerrarPopPaginas);
 }
+document.addEventListener('mousedown', (e) => {
+  if (POP_PAG && !POP_PAG.pop.contains(e.target) && !POP_PAG.cont.contains(e.target)) cerrarPopPaginas();
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarPopPaginas(); });
+window.addEventListener('resize', cerrarPopPaginas);
+window.addEventListener('scroll', (e) => { if (POP_PAG && !POP_PAG.pop.contains(e.target)) cerrarPopPaginas(); }, true);
 function etiquetaCol(c) {
   if (c === 'paginas') return 'Aparece en';
   return c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -796,15 +909,22 @@ let FILAS_CACHE = [];
 let FILTROS_ACTIVOS = {};
 let BUSQUEDA_ACTUAL = '';
 
+// Cada carga lleva un número: si mientras esperaba la respuesta de una tabla
+// se pidió otra (cambio rápido de pestaña), la respuesta vieja se descarta
+// en vez de pisar la tabla que se está viendo.
+let CARGA_ID = 0;
 async function cargarTabla(tabla, pkAResaltar) {
+  const miCarga = ++CARGA_ID;
   const target = document.getElementById('table-target');
   target.innerHTML = '<div class="loading-state">Cargando...</div>';
   try {
     const filas = await mvAdmin.listar(tabla);
+    if (miCarga !== CARGA_ID) return;
     FILAS_CACHE = filas;
     renderToolbar(tabla);
     renderVista(tabla, pkAResaltar);
   } catch (ex) {
+    if (miCarga !== CARGA_ID) return;
     target.innerHTML = `<div class="empty-state">Error al cargar: ${ex.message}</div>`;
   }
 }
