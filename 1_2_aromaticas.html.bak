@@ -1,28 +1,68 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-   <meta charset="utf-8"/>
+    <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta name="description" content="Recuperá el acceso a tu cuenta de Vivero Mundo Verde"/>
-    <meta name="robots" content="noindex, follow">
+    <meta name="description" content="Vivero mundo verde, Plantas de interior, paisajimo, countries, huerta, organica. Berazategui, Hudson, Sourigues, Quilmes Centro, Nuevo Quilmes, "/><!-- Meta tags para SEO -->
+    <meta name="keywords" content="vivero berazategui, plantas zona sur, paisajismo hudson, mundo verde, Vivero mundo verde, Plantas de interior, paisajimo, countries, huerta, organica. Berazategui, Hudson, Sourigues, Quilmes Centro, Nuevo Quilmes"/><!--Meta tags para SEO -->
+    <meta name="robots" content="index, follow">
     <meta name="language" content="Spanish">
     <meta name="author" content="Alex Barrera">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="img/varios/fab.White.64x64.webp">
     <link rel="apple-touch-icon" sizes="180x180" href="img/varios/fab.White.64x64.webp">
-    <title>Recuperar contraseña — Mundo Verde</title>
-    <link rel="stylesheet" href="css/styles.css"/>
+    <title>Vivero Mundo Verde</title>
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="CharonyPlywrite.css">
+    <style>
+        /* ── Pago por alias bancario (paso 3) ──
+           Las reglas globales label{color:white} e input{width:100%...} de styles.css
+           arruinan la casilla, por eso tiene estilos propios. */
+
+        /* Alias dentro de la tarjeta "Alias Bancario" */
+        .metodo-card span.metodo-alias{display:block;max-width:100%;margin-top:3px;font-size:.78rem;line-height:1.15;font-weight:700;letter-spacing:0;text-align:center;overflow-wrap:normal;word-break:normal}
+
+        /* Fila de arriba: 2 botones largos (Alias Bancario y Tarjeta); abajo: 3 (Mercado Pago, MODO, Cuotas) */
+        .metodos-grid{grid-template-columns:repeat(6,1fr) !important}
+        .metodos-grid > .metodo-card:nth-child(-n+2){grid-column:span 3}
+        .metodos-grid > .metodo-card:nth-child(n+3){grid-column:span 2}
+
+        /* Total y número de pedido para el concepto de la transferencia */
+        .pago-ref-box{background:#f4f4f4;border-radius:8px;padding:10px 12px;margin:8px 0;font-size:13.5px;line-height:1.6;color:#333}
+        .pago-ref-box p{margin:0 0 6px;color:#333}
+        .pago-ref-box p:last-child{margin-bottom:0}
+        .pago-numero{font-size:16px;color:#1b5e20;letter-spacing:.5px;user-select:all}
+
+        /* Casilla "Ya transferí" */
+        .pago-confirma{display:flex;align-items:center;gap:10px;margin:10px 0;padding:12px 14px;border:2px solid #2e7d32;border-radius:10px;background:#f1f8f1;cursor:pointer;line-height:1.3}
+        .pago-confirma input[type="checkbox"]{width:22px;height:22px;flex-shrink:0;margin:0;padding:0;border:none;box-shadow:none;background:none;accent-color:#2e7d32;cursor:pointer}
+        .pago-confirma span{color:#1b5e20;font-size:15px;font-weight:700}
+
+        /* Etiqueta "Pendiente de verificación" (paso 4) */
+        .badge-pendiente-verif{display:inline-block;background:#fff3cd;color:#7a5b00;border:1px solid #ffe08a;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+    </style>
 </head>
-<body>
+
+<body data-pagina="aromaticas">
+<!--Banner con anucios y ofertas movil-->
 <div class="header-nav-fijo">
         <div class="anuncios-rotador">
             <div class="anuncios-track">
-<!-- anuncios: se cargan desde Admin → Anuncios (js/api.js) -->
-</div>
+                <p class="anuncios">🪴 Todas las plantas publicadas podes pedirlas MÁS GRANDES 🌳, consulta tarifas por Whatsapp</p>
+                <p class="anuncios">🔍 Buscas alguna planta que no está en nuestro catalogo?; Seguro la conseguimos 💚, avisanos</p>
+                <p class="anuncios">💻 Seguimos cargando nuestros productos 📲</p>
+                <p class="anuncios">🎁 Todos las compras en el local traen sorpresas</p>
+                <!-- misma lista repetida, oculta a lectores de pantalla: hace que el loop no tenga corte -->
+                <p class="anuncios" aria-hidden="true">🪴 Todas las plantas publicadas podes pedirlas MÁS GRANDES 🌳, consulta tarifas por Whatsapp
+                </p>
+                <p class="anuncios" aria-hidden="true">🔍 Buscas alguna planta que no está en nuestro catalogo?; Seguro la conseguimos 💚, avisanos</p>
+                <p class="anuncios" aria-hidden="true">💻 Seguimos cargando nuestros productos 📲</p>
+                <p class="anuncios" aria-hidden="true">🎁 Todos las compras en el local traen sorpresas</p>
+            </div>
         </div>
 
-
+<!-- HEADER PARA TODOS LOS HOJAS.HTML -->
 <!--Buscador, Logotipo, Carrito-->
 <header class="header">
     <!--Izquierda-->
@@ -127,7 +167,163 @@
     </ul>
     </nav>
 </div>
+
+<!--<p class="fondo-TipPlantas">-->
+    <p class="TipPlantas"> <a href="1_2_interior.html">Interior</a> <a href="1_2_plantines.html">Plantines florales</a> <a href="1_2_arbustos.html">Arbustos</a> <a href="1_2_aromaticas.html" class="activo">Aromáticas</a> </p>
+</div>
 </div><!-- /.header-nav-fijo -->
+
+
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Botón flotante WhatsApp -->
+<a href="https://wa.me/5491168316730?text=Hola%20quiero%20consultar" class="whatsapp-float" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+</a>
+
+<div class="catalogo" id="catalogo" data-categoria="aromaticas">
+    <div class="producto" data-id="aro-01">
+        <img src="img/aromaticas/Albahaca.jpg" loading="lazy" alt="Albahaca">
+        <h3><a target="_blank">Albahaca</a></h3>
+        <p class="precio">$5,000</p>    
+        <button onclick="agregarCarrito('Albahaca', 5000, 'img/aromaticas/Albahaca.jpg', 'aro-01')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-02">
+        <img src="img/aromaticas/Burrito.webp" loading="lazy" alt="Burrito">
+        <h3><a target="_blank">Burrito</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Burrito', 2000, 'img/aromaticas/Burrito.webp', 'aro-02')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-03">
+        <img src="img/aromaticas/Cedron.webp" loading="lazy" alt="Cedron">
+        <h3><a target="_blank">Cedrón</a></h3>
+        <p class="precio">$3,000</p>
+        <button onclick="agregarCarrito('Cedrón', 3000, 'img/aromaticas/Cedron.webp', 'aro-03')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-04">
+        <img src="img/aromaticas/Ciboulette.webp" loading="lazy" alt="Ciboulette">
+        <h3><a target="_blank">Ciboulette</a></h3>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('Ciboulette', 5000, 'img/aromaticas/Ciboulette.webp', 'aro-04')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-05">
+        <img src="img/aromaticas/Cilantro.webp" loading="lazy" alt="Cilantro">
+        <h3><a target="_blank">Cilantro</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Cilantro', 2000, 'img/aromaticas/Cilantro.webp', 'aro-05')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-06">
+        <img src="img/aromaticas/Citricos.jpg" loading="lazy" alt="Citricos">
+        <h3><a target="_blank">Citricos</a></h3>
+        <p class="precio">$3,000</p>
+        <button onclick="agregarCarrito('Citricos', 3000, 'img/aromaticas/Citricos.jpg', 'aro-06')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-07">
+        <img src="img/aromaticas/Citronela.webp" loading="lazy" alt="Citronella">
+        <h3><a target="_blank">Citronella</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Curry', 2000, 'img/aromaticas/Citronela.webp', 'aro-07')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-08">
+        <img src="img/aromaticas/Frutillas.jpg" loading="lazy" alt="Frutillas">
+        <h3><a target="_blank">Frutillas</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Frutillas', 2000, 'img/aromaticas/Frutillas.jpg', 'aro-08')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-09">
+        <img src="img/aromaticas/HierbaBuena.webp" loading="lazy" alt="HierbaBuena">
+        <h3><a target="_blank">Hierba Buena</a></h3>
+        <p class="precio">$3,000</p>
+        <button onclick="agregarCarrito('Hierba Buena', 3000, 'img/aromaticas/HierbaBuena.webp', 'aro-09')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-10">
+        <img src="img/aromaticas/Hortalizas.jpg" loading="lazy" alt="Hortalizas">
+        <h3>Hortalizas</h3>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Hortalizas', 4000, 'img/aromaticas/Hortalizas.jpg', 'aro-10')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-11">
+        <img src="img/aromaticas/Incienso.webp" loading="lazy" alt="Incienso">
+        <h3>Incienso</h3>
+        <p class="precio">$3,000</p>
+        <button onclick="agregarCarrito('Incienso', 3000, 'img/aromaticas/Incienso.webp', 'aro-11')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-12">
+        <img src="img/aromaticas/Lavanda.webp" loading="lazy" alt="Lavanda">
+        <h3>Lavanda</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Lavanda', 2000, 'img/aromaticas/Lavanda.webp', 'aro-12')">Agregar al carrito</button>
+    </div>
+     <div class="producto" data-id="aro-13">
+        <img src="img/aromaticas/MentaMarina.webp" loading="lazy" alt="MentaMarina">
+        <h3>Menta Marina</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Menta Marina', 2000, 'img/aromaticas/MentaMarina.webp', 'aro-13')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-14">
+        <img src="img/aromaticas/MentaMelissa.webp" loading="lazy" alt="MentaMelissa">
+        <h3>Menta Melissa</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Menta Melissa', 2000, 'img/aromaticas/MentaMelissa.webp', 'aro-14')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-15">
+        <img src="img/aromaticas/MentaNegra.webp" loading="lazy" alt="MentaNegra">
+        <h3>Menta Negra</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Menta Negra', 2000, 'img/aromaticas/MentaNegra.webp', 'aro-15')">Agregar al carrito</button>
+    </div>
+     <div class="producto" data-id="aro-16">
+        <img src="img/aromaticas/Oregano.webp" loading="lazy" alt="Oregano">
+        <h3>Orégano</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Orégano', 2000, 'img/aromaticas/Oregano.webp', 'aro-16')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-17">
+        <img src="img/aromaticas/Perejil.webp" loading="lazy" alt="Perejil">
+        <h3>Perejil</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Perejil', 2000, 'img/aromaticas/Perejil.webp', 'aro-17')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-18">
+        <img src="img/aromaticas/Romero.webp" loading="lazy" alt="Romero">
+        <h3>Romero</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Perejil', 2000, 'img/aromaticas/Romero.webp', 'aro-18')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-19">
+        <img src="img/aromaticas/RudaHembra.webp" loading="lazy" alt="RudaHembra">
+        <h3>Ruda Hembra</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Ruda Hembra', 2000, 'img/aromaticas/RudaHembra.webp', 'aro-19')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-20">
+        <img src="img/aromaticas/Salvia.webp" loading="lazy" alt="Salvia">
+        <h3>Salvia</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Salvia', 2000, 'img/aromaticas/Salvia.webp', 'aro-20')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-21">
+        <img src="img/aromaticas/Santolina.jpg" loading="lazy" alt="Santolina">
+        <h3>Santolina</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Santolina', 2000, 'img/aromaticas/Santolina.jpg', 'aro-21')">Agregar al carrito</button>
+    </div>
+     <div class="producto" data-id="aro-22">
+        <img src="img/aromaticas/TomateYMmorron_Hue.jpg" loading="lazy" alt="">
+        <h3>Tomate y Morrón</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Tomate y Morrón', 2000, 'img/aromaticas/TomateYMmorron_Hue.jpg', 'aro-22')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="aro-23">
+        <img src="img/aromaticas/Tomillo.webp" loading="lazy" alt="Tomillo">
+        <h3>Tomillo</h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Tomillo', 2000, 'img/aromaticas/Tomillo.webp', 'aro-23')">Agregar al carrito</button>
+    </div>
+    
+</div>
 
 <!-- ═══════════════════════════════════════
    CHECKOUT / FINALIZAR COMPRA
@@ -307,7 +503,7 @@
 
             <p class="zona-msg" style="display:block; color:#555; margin-bottom:10px;">
                 Elegí cómo vas a pagar. Por ahora podés completar la compra con
-                <strong>Transferencia</strong> o <strong>Tarjeta</strong>; el resto de las
+                <strong>Alias Bancario</strong> o <strong>Tarjeta</strong>; el resto de las
                 opciones va a estar disponible muy pronto.
             </p>
 
@@ -319,20 +515,14 @@
                 <label class="metodo-card">
                     <input type="radio" name="metodoPago" value="transferencia" checked>
                     <i class="fa-solid fa-building-columns"></i>
-                    <span>Transferencia bancaria</span>
+                    <span>Alias Bancario</span>
+                    <span class="metodo-alias">AGUS.<wbr>MUNDO.<wbr>VERDE</span>
                 </label>
 
                 <label class="metodo-card">
                     <input type="radio" name="metodoPago" value="tarjeta">
                     <i class="fa-solid fa-credit-card"></i>
                     <span>Tarjeta de crédito / débito</span>
-                </label>
-
-                <label class="metodo-card metodo-card--proximamente">
-                    <input type="radio" name="metodoPago" value="modo">
-                    <i class="fa-solid fa-mobile-screen-button"></i>
-                    <span>MODO</span>
-                    <span class="metodo-proximamente-tag">Próximamente</span>
                 </label>
 
                 <label class="metodo-card metodo-card--proximamente">
@@ -343,9 +533,9 @@
                 </label>
 
                 <label class="metodo-card metodo-card--proximamente">
-                    <input type="radio" name="metodoPago" value="mercadocredito">
-                    <i class="fa-solid fa-hand-holding-dollar"></i>
-                    <span>Mercado Crédito</span>
+                    <input type="radio" name="metodoPago" value="modo">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>MODO</span>
                     <span class="metodo-proximamente-tag">Próximamente</span>
                 </label>
 
@@ -378,12 +568,15 @@
                             <span class="cbu-value">Banco Santander</span>
                         </div>
                     </div>-->
-                    <div id="comprobanteBox">
-                        <label class="comprobante-label">
-                            Subí el comprobante de pago * (JPG, PNG o PDF)
-                        </label>
-                        <input type="file" accept="image/*,.pdf" id="comprobante-archivo">
+                    <div class="pago-ref-box">
+                        <p>Total a transferir: <strong class="pago-total">$0</strong></p>
+                        <p>Poné este número de pedido en el <strong>concepto</strong> de la transferencia:<br>
+                        <strong class="pago-numero">MV-----</strong></p>
                     </div>
+                    <label class="pago-confirma">
+                        <input type="checkbox" class="chk-transferencia">
+                        <span>Ya transferí</span>
+                    </label>
                 </div>
 
                 <!-- Tarjeta vía Mercado Pago Bricks (FUNCIONAL) -->
@@ -509,57 +702,98 @@
         <p style="color:#555; font-size:14px; line-height:1.6;">
             Te vamos a responder a la brevedad para confirmar y coordinar la entrega.
         </p>
+        <p class="pedido-referencia-final" style="display:none; margin-top:14px; font-size:14px; color:#333; line-height:1.6;">
+            Tu número de pedido: <strong class="pago-numero-final">MV-----</strong><br>
+            Enviános el comprobante por ese mismo chat de WhatsApp: estamos verificando tu pago y te confirmamos por ahí.
+        </p>
         <button class="btn-vaciar" style="margin-top:24px;" onclick="cerrarCarrito()">
             Cerrar
         </button>
     </div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+<!--═══════════════════════════════════════════
+   FOOTER
+   ════════════════════════════════════════ -->
+<footer class="footer-natural">
+    <div class="footer-natural-grid">
+        <!-- Marca -->
+        <div class="footer-brand">
+            <img src="img/varios/logo-300x315.webp" alt="Logo" class="footer-logo">
+        
+        <p class="pfot">Vendemos plantas y experiencias</p>
+        <p class="pfot">alrededor del mundo botánico</p></div>
 
-<div class="hero-ns">
-    <video autoplay muted loop playsinline class="bg-video">
-        <source src="videos/v-pf_29s.mp4" type="video/mp4">
-    </video>
-
-    <form id="recuperarForm" novalidate>
-        <h2 class="tit_news">Recuperar contraseña</h2>
-        <p class="pf"><strong>Te mandamos un link para crear una nueva</strong></p>
-
-        <div class="form_input">
-            <label>Email
-                <input type="email" id="rec-email" placeholder="Tu correo electrónico" required>
-            </label>
-            <div class="field-error" id="err-email"></div>
+        <!-- Redes -->
+        <div class="footer-social-box">
+            <h3>Sigamos conectados</h3>
+            <div class="footer-social-natural">
+                <a href="https://www.instagram.com/vivemundoverde/" target="_blank">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://www.youtube.com/channel/UCkcuwAC_tYU88KkIiRyHY1g" target="_blank">
+                    <i class="fab fa-youtube"></i>
+                </a>
+                   <a href="https://www.facebook.com/profile.php?id=100079284327539" target="_blank">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                
+            </div>
+            <div class="footer-social-natural">
+                <a href="https://wa.me/5491168316730" target="_blank">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="https://www.tiktok.com/@vmundo_verde" target="_blank">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+                <a href="https://open.spotify.com/playlist/5FSLNFP9xzJtlwApkQbwHi?si=YKLybuptTK2RkuFqI5971w&pi=c_k0108ySGOS5" target="_blank">
+                    <i class="fab fa-spotify"></i>
+                </a>
+            </div>
         </div>
 
-        <div class="field-error" id="err-general" style="display:none;"></div>
-
-        <div class="btn-container">
-            <button type="submit" class="btn-suscribirme">Enviar link 🌱</button>
+        <!-- Navegación -->
+        <div class="footer-links">
+            <h3>Categorías</h3>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="1.0.vivero.html">Vivero</a></li>
+                <li><a href="2.0.talleres.html">Talleres</a></li>
+                <li><a href="3.0.servicios.html">Servicios</a></li>
+                <li><a href="4.0.ramos.html">Ramos</a></li>
+            </ul>
+        </div>
+        <!-- Contacto -->
+        <div class="footer-contact">
+        <h3>Contactános</h3>
+            <ul class="contacto-lista">
+            <li>📱 11 6831-6730</li>
+            <li>
+                <i class="fa-solid fa-envelope"></i>
+                <a target="_blank" href="mailto:viveunmundoverde@gmail.com">viveunmundoverde@gmail.com</a>
+            </li>
+            <li>📍 Camino General Belgrano 4470</li>
+            <li>📌 Berazategui</li>
+        </ul>
+          
         </div>
 
-        <p style="text-align:center; margin-top:16px; font-size:.9rem;">
-            <a href="login.html" style="color:#a5d6a7; font-weight:bold;">Volver a iniciar sesión</a>
-        </p>
-    </form>
-
-    <!-- Mensaje de confirmación post-login -->
-    <div id="msg-confirmacion">
-        <div class="icon-ok">🌿</div>
-        <h3 id="conf-titulo">¡Listo!</h3>
-        <p id="conf-nombre-texto"></p>
+        <!-- Mapa-->
+        <div class="mapa">
+            <h3>Visitanos</h3>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3282.441086419203!2d-58.22444198476909!3d-34.83108658047395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95a32e9c8b1c9d7%3A0x1c8e7b9a5c8e4f!2sCamino%20General%20Belgrano%204470%2C%20Berazategui%2C%20Provincia%20de%20Buenos%20Aires%2C%20Argentina!5e0!3m2!1ses-419!2sar!4v1700000000000!5m2!1ses-419!2sar" width="100%" height="200" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
     </div>
 
-</div><!-- /hero-ns -->
+    <div class="footer-natural-copy">
+        © 2021 Mundo Verde · Todos los derechos reservados
+    </div>
+</footer>
 
-<a href="https://wa.me/5491168316730?text=Hola%20quiero%20consultar" class="whatsapp-float" target="_blank">
-    <i class="fab fa-whatsapp"></i>
-</a>
-
+<script src="js/anuncios.js"></script>
 <script src="js/script.js"></script>
 <script src="js/api.js"></script>
+<script src="js/anuncios-banner.js"></script>
 <script src="js/catalogo.js"></script>
 <script src="js/buscador-global.js"></script>
 

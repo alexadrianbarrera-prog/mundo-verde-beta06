@@ -44,14 +44,25 @@
     </style>
 </head>
 
-<body>
+<body data-pagina="plantines">
 <!--Banner con anucios y ofertas movil-->
 <div class="header-nav-fijo">
         <div class="anuncios-rotador">
             <div class="anuncios-track">
-<!-- anuncios: se cargan desde Admin → Anuncios (js/api.js) -->
-</div>
+                <p class="anuncios">🪴 Todas las plantas publicadas podes pedirlas MÁS GRANDES 🌳, consulta tarifas por Whatsapp</p>
+                <p class="anuncios">🔍 Buscas alguna planta que no está en nuestro catalogo?; Seguro la conseguimos 💚, avisanos</p>
+                <p class="anuncios">💻 Seguimos cargando nuestros productos 📲</p>
+                <p class="anuncios">🎁 Todos las compras en el local traen sorpresas</p>
+                <!-- misma lista repetida, oculta a lectores de pantalla: hace que el loop no tenga corte -->
+                <p class="anuncios" aria-hidden="true">🪴 Todas las plantas publicadas podes pedirlas MÁS GRANDES 🌳, consulta tarifas por Whatsapp
+                </p>
+                <p class="anuncios" aria-hidden="true">🔍 Buscas alguna planta que no está en nuestro catalogo?; Seguro la conseguimos 💚, avisanos</p>
+                <p class="anuncios" aria-hidden="true">💻 Seguimos cargando nuestros productos 📲</p>
+                <p class="anuncios" aria-hidden="true">🎁 Todos las compras en el local traen sorpresas</p>
+            </div>
         </div>
+
+<!-- HEADER PARA TODOS LOS HOJAS.HTML -->
 <!--Buscador, Logotipo, Carrito-->
 <header class="header">
     <!--Izquierda-->
@@ -72,11 +83,8 @@
         <input 
             type="text" 
             id="searchInput"
-            placeholder="Buscar..."
-        >
-
+            placeholder="Buscar...">
     </div>
-
 </div>
     <!--Centro-->
 <div class="header-center">
@@ -88,15 +96,20 @@
 </div>
     <!--Derecha-->
     <div class="header-right">
-        <button class="btn-login" onclick="window.location.href='login.html'" title="Iniciar sesión">👤</button>
-        <button class="btn-carrito" onclick="abrirCarrito()">
-            🛒
-            <span class="carrito-badge">0</span>
-        </button>
-    </div>
+
+    <button class="btn-login" onclick="window.location.href='login.html'" title="Iniciar sesión">
+        👤
+    </button>
+
+    <button class="btn-carrito" onclick="abrirCarrito()">
+        🛒
+        <span class="carrito-badge">0</span>
+    </button>
+
+</div>
 </header>
 
-<!-- BARRA DE NAVEGACIÓN PRINCIPAL -->
+<!-- /.barra de navegacion -->
 <nav class="nav">
     <ul class="nav_list" id="navList">
         <li class="nav_item"><a href="1_0_vivero.html" class="nav_link">VIVERO</a></li>
@@ -110,7 +123,7 @@
             </div>
             <ul class="nav_submenu">
                 <li><a href="1_2_interior.html" class="nav_link nav_sublink">Interior</a></li>
-                <li><a href="1_2_plantines.html" class="nav_link nav_sublink">Plantines Florales</a></li>
+                <li><a href="1_2_plantines.html" class="nav_link nav_sublink">Plantines florales</a></li>
                 <li><a href="1_2_arbustos.html" class="nav_link nav_sublink">Arbustos</a></li>
                 <li><a href="1_2_aromaticas.html" class="nav_link nav_sublink">Aromáticas</a></li>
                 <li><a href="1_2_productos.html" class="nav_link nav_sublink">Productos</a></li>
@@ -154,8 +167,302 @@
     </ul>
     </nav>
 </div>
-
+<!--<p class="fondo-TipPlantas">-->
+    <p class="TipPlantas"> <a href="1_2_interior.html">Interior</a> <a href="1_2_plantines.html" class="activo">Plantines florales</a> <a href="1_2_arbustos.html">Arbustos</a> <a href="1_2_aromaticas.html">Aromáticas</a> </p>
+</div>
 </div><!-- /.header-nav-fijo -->
+
+
+
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Botón flotante WhatsApp -->
+<a href="https://wa.me/5491168316730?text=Hola%20quiero%20consultar" class="whatsapp-float" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+</a>
+
+<div class="catalogo" id="catalogo" data-categoria="plantines">
+    <div class="producto" data-id="PLT-01">
+        <img src="img/plantines/AlegríasDelHogar.webp" loading="lazy" alt="AlegríasDelHogar">
+        <h3><a target="_blank">Alegrías del hogar</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('AlegríasDelHogar', 2000, 'img/plantines/AlegríasDelHogar.webp', 'PLT-01')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-02">
+        <img src="img/plantines/Aleli.webp" loading="lazy" alt="Aleli">
+        <h3><a target="_blank">Alelí</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Aleli', 2000, 'img/plantines/Aleli.webp', 'PLT-02')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-03">
+        <img src="img/plantines/AzaleaDoble.webp" loading="lazy" alt="AzaleaDoble">
+        <h3><a target="_blank">Azalea Doble</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('AzaleaDoble', 2000, 'img/plantines/AzaleaDoble.webp', 'PLT-03')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-04">
+        <img src="img/plantines/Calendula.webp" alt="Caléndula">
+        <h3><a target="_blank">Caléndula</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Caléndula', 2000, 'img/plantines/Calendula.webp', 'PLT-04')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-05">
+        <img src="img/plantines/CinerariaDeFlor.webp" loading="lazy" alt="CinerariaDeFlor">
+        <h3><a target="_blank">Cineraria De Flor</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Cineraria De Flor', 2000, 'img/plantines/CinerariaDeFlor.webp', 'PLT-05')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-06">
+        <img src="img/plantines/Clavelina.webp" loading="lazy" alt="Clavelinas">
+        <h3><a target="_blank">Clavelina</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Clavelinas', 2000, 'img/plantines/Clavelina.webp', 'PLT-06')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-07">
+        <img src="img/plantines/Clavelinas.jpg" loading="lazy" alt="Clavelinas">
+        <h3><a target="_blank">Clavelinas x 15 un.</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Clavelinas x 15 un.', 2000, 'img/plantines/Clavelinas.jpg', 'PLT-07')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-08">
+        <img src="img/plantines/Conejito.jpeg" loading="lazy" alt="Conejito">
+        <h3><a target="_blank">Conejito</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Conejito', 2000, 'img/plantines/Conejito.jpeg', 'PLT-08')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-09">
+        <img src="img/plantines/Conejitos.jpg" loading="lazy" alt="Conejitos">
+        <h3><a target="_blank">Conejitos x 15 un.</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Conejitos x 15 un.', 2000, 'img/plantines/Conejitos.jpg', 'PLT-09')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-10">
+        <img src="img/plantines/Copetes.webp" loading="lazy" alt="Copetes">
+        <h3><a target="_blank">Copetes</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Copetes', 2000, 'img/plantines/Copetes.webp', 'PLT-10')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-11">
+        <img src="img/plantines/Copetito.webp" loading="lazy" alt="Copetito">
+        <h3><a target="_blank">Copetitos</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Copetitos', 2000, 'img/plantines/Copetito.webp', 'PLT-11')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-12">
+        <img src="img/plantines/Coquetas.webp" loading="lazy" alt="Coquetas">
+        <h3><a target="_blank">Coquetas</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Coquetas', 2000, 'img/plantines/Coquetas.webp', 'PLT-12')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-13">
+        <img src="img/plantines/Cretonas.webp" loading="lazy" alt="Cretonas">
+        <h3><a target="_blank">Cretonas</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Cretonas', 2000, 'img/plantines/Cretonas.webp', 'PLT-13')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-14">
+        <img src="img/plantines/Crisantemo.webp" loading="lazy" alt="Crisantemo">
+        <h3><a target="_blank">Crisantemo</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Crisantemo', 2000, 'img/plantines/Crisantemo.webp', 'PLT-14')">Agregar al carrito</button>
+    </div>
+    
+    <div class="producto" data-id="PLT-15">
+        <img src="img/plantines/Dimarphoteca.webp" loading="lazy" alt="Dimarphoteca">
+        <h3><a target="_blank">Dimarphoteca</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Dimarphoteca', 2000, 'img/plantines/Dimarphoteca.webp', 'PLT-15')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-16">
+        <img src="img/plantines/DolarAmarillo.webp" loading="lazy" alt="DolarAmarillo">
+        <h3><a target="_blank">Dólar Amarillo</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Dólar Amarillo', 2000, 'img/plantines/DolarAmarillo.webp', 'PLT-16')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-17">
+        <img src="img/plantines/DolarNegro.webp" loading="lazy" alt="DolarNegro">
+        <h3><a target="_blank">Dólar Negro</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Zephyranthus', 2000, 'img/plantines/DolarNegro.webp', 'PLT-17')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-18">
+        <img src="img/plantines/DolarVerde.webp" loading="lazy" alt="DolarVerde">
+        <h3><a target="_blank">Dólar Verde</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Dólar Verde', 2000, 'img/plantines/DolarVerde.webp', 'PLT-18')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-19">
+        <img src="img/plantines/Erika.webp" loading="lazy" alt="Erika">
+        <h3><a target="_blank">Erika</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Erika', 2000, 'img/plantines/Erika.webp', 'PLT-19')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-20">
+        <img src="img/plantines/Europs.webp" loading="lazy" alt="Europs">
+        <h3><a target="_blank">Europs</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Europs', 2000, 'img/plantines/Europs.webp', 'PLT-20')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-21">
+        <img src="img/plantines/FlorDeAzucar.webp" loading="lazy" alt="FlorDeAzucar">
+        <h3><a target="_blank">Flor de azúcar</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Flor de azúcar', 2000, 'img/plantines/FlorDeAzucar.webp', 'PLT-21')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-22">
+        <img src="img/plantines/FloresDeAzucar.webp" loading="lazy" alt="FloresDeAzucar">
+        <h3><a target="_blank">Flores de azúcar x 15 un.</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Flores de azúcar x 15 un.', 2000, 'img/plantines/FloresDeAzucar.webp', 'PLT-22')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-23">
+        <img src="img/plantines/Fresias.webp" loading="lazy" alt="Fresias">
+        <h3><a target="_blank">Fresias</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Paleta de pinoe', 2000, 'img/plantines/Fresias.webp', 'PLT-23')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-24">
+        <img src="img/plantines/Geranio.webp" loading="lazy" alt="Geranio">
+        <h3><a target="_blank">Geranio</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Geranio', 2000, 'img/plantines/Geranio.webp', 'PLT-24')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-25">
+        <img src="img/plantines/Gerbera.webp" loading="lazy" alt="Gerbera">
+        <h3><a target="_blank">Gerbera</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Clavelinas', 2000, 'img/plantines/Gerbera.webp', 'PLT-25')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-26">
+        <img src="img/plantines/Hiedra.webp" loading="lazy" alt="Hiedra">
+        <h3><a target="_blank">Hiedra</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Erika', 2000, 'img/plantines/Hiedra.webp', 'PLT-26')">Agregar al carrito</button>
+    </div>
+        <div class="producto" data-id="PLT-27">
+        <img src="img/plantines/Kalanchoe.webp" loading="lazy" alt="Kalanchoe">
+        <h3><a target="_blank">Kalanchoe</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Kalanchoe', 2000, 'img/plantines/Kalanchoe.webp', 'PLT-27')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-28">
+        <img src="img/plantines/Lantana.webp" loading="lazy" alt="Lantana">
+        <h3><a target="_blank">Lantana</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Lantana', 2000, 'img/plantines/Lantana.webp', 'PLT-28')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-29">
+        <img src="img/plantines/LazoDeAmor.webp" loading="lazy" alt="LazoDeAmor">
+        <h3><a target="_blank">Lazo de amor</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Lazo de amor', 2000, 'img/plantines/LazoDeAmor.webp', 'PLT-29')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-30">
+        <img src="img/plantines/Lilium.webp" loading="lazy" alt="Lilium">
+        <h3><a target="_blank">Lilium</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Lilium', 2000, 'img/plantines/Lilium.webp', 'PLT-30')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-31">
+        <img src="img/plantines/Margaritas.webp" loading="lazy" alt="Margaritas">
+        <h3><a target="_blank">Margaritas</a></h3>
+        <p class="precio">$25,000</p>
+        <button onclick="agregarCarrito('Margaritas', 25000, 'img/plantines/Margaritas.webp', 'PLT-31')">Agregar al carrito</button>
+    </div>  
+    <div class="producto" data-id="PLT-32">
+        <img src="img/plantines/Malvon.webp" loading="lazy" alt="Malvon">
+        <h3><a target="_blank">Malvón</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Malvon', 2000, 'img/plantines/Malvon.webp', 'PLT-32')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-33">
+        <img src="img/plantines/MantoDeVirgen.webp" loading="lazy" alt="MantoDeVirgen">
+        <h3><a target="_blank">Manto de virgen</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Manto de virgen', 2000, 'img/plantines/MantoDeVirgen.webp', 'PLT-33')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-34">
+        <img src="img/plantines/Marimonias.webp" loading="lazy" alt="Marimonias">
+        <h3><a target="_blank">Marimonias</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Marimonias', 2000, 'img/plantines/Marimonias.webp', 'PLT-34')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-35">
+        <img src="img/plantines/MiniRosas.webp" loading="lazy" alt="MiniRosas">
+        <h3><a target="_blank">Mini Rosas</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Mini rosas', 2000, 'img/plantines/MiniRosas.webp', 'PLT-35')">Agregar al carrito</button>
+    </div>
+    
+    <div class="producto" data-id="PLT-36">
+        <img src="img/plantines/Oxalis.webp" loading="lazy" alt="Oxalis">
+        <h3><a target="_blank">Oxalis</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Oxalis', 2000, 'img/plantines/Oxalis.webp', 'PLT-36')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-37">
+        <img src="img/plantines/Pallidosum.webp" loading="lazy" alt="Pallidosum">
+        <h3><a target="_blank">Pallidosum</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Pallidosum', 2000, 'img/plantines/Pallidosum.webp', 'PLT-37')">Agregar al carrito</button>
+    </div>
+        <div class="producto" data-id="PLT-38">
+        <img src="img/plantines/PensamientosYViolas.webp" loading="lazy" alt="PensamientosYViolas">
+        <h3><a target="_blank">Pensamientos y Violas</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Pensamientos y violas', 2000, 'img/plantines/PensamientosYViolas.webp', 'PLT-38')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-39">
+        <img src="img/plantines/Petunia.webp" loading="lazy" alt="Petunia">
+        <h3><a target="_blank">Petunia</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Petunia', 2000, 'img/plantines/Petunia.webp', 'PLT-39')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-40">
+        <img src="img/plantines/Pilea.webp" loading="lazy" alt="Pilea">
+        <h3><a target="_blank">Pilea</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Pilea', 2000, 'img/plantines/Pilea.webp', 'PLT-40')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-41">
+        <img src="img/plantines/Primavera.webp" loading="lazy" alt="Primavera">
+        <h3><a target="_blank">Primavera</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Primavera', 2000, 'img/plantines/Primavera.webp', 'PLT-41')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-42">
+        <img src="img/plantines/Primula.webp" loading="lazy" alt="Primula">
+        <h3><a target="_blank">Primula</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Primula', 2000, 'img/plantines/Primula.webp', 'PLT-42')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-43">
+        <img src="img/plantines/Primulas.jpg" loading="lazy" alt="Primulas">
+        <h3><a target="_blank">Primulas</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Primulas', 2000, 'img/plantines/Primulas.jpg', 'PLT-43')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-44">
+        <img src="img/plantines/SantaJulia.webp" loading="lazy" alt="SantaJulia">
+        <h3><a target="_blank">Santa Julia</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Santa Julia', 2000, 'img/plantines/SantaJulia.webp', 'PLT-44')">Agregar al carrito</button>
+    </div>
+    <div class="producto" data-id="PLT-45">
+        <img src="img/plantines/Verbena.webp" loading="lazy" alt="Verbena">
+        <h3><a target="_blank">Verbena</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Verbena', 2000, 'img/plantines/Verbena.webp', 'PLT-45')">Agregar al carrito</button>
+    </div>    
+    <div class="producto" data-id="PLT-46">
+        <img src="img/plantines/VioletaDeLosAlpes.webp" loading="lazy" alt="VioletaDeLosAlpes">
+        <h3><a target="_blank">Violeta de los Alpes</a></h3>
+        <p class="precio">$2,000</p>
+        <button onclick="agregarCarrito('Violeta de los Alpes', 2000, 'img/plantines/VioletaDeLosAlpes.webp', 'PLT-46')">Agregar al carrito</button>
+    </div>
+</div>
 
 <!-- ═══════════════════════════════════════
    CHECKOUT / FINALIZAR COMPRA
@@ -544,60 +851,6 @@
     </div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
-<a href="https://wa.me/5491168316730?text=Hola%20quiero%20consultar" class="whatsapp-float" target="_blank">
-    <i class="fab fa-whatsapp"></i>
-</a>
-
-<!-- ── GALERÍA DE SERVICIOS ─────────────────────────────── -->
-<div class="container">
-    <main class="foto">
-        <img src="img/servicios/3-asesoria-locales-comerciales/DentroLocal.webp" alt="Asesoría a Locales Comerciales" loading="lazy">
-        <!-- TODO Alex: precio real de Asesoría a Locales Comerciales (el $9.999 anterior era un valor de prueba) -->
-<div class="catalogo" id="catalogo">
-    <div class="producto" data-id="serv-com">
-        <h3 class="precio">$ 840.000</h3>
-        <button onclick="agregarCarrito('Servicio de Asesoría a Locales Comerciales', 840000, 'img/servicios/3-asesoria-locales-comerciales/DentroLocal.webp', 'serv-com')">Agregar al carrito</button>
-    </div>
-</div>
-    </main>
-
-    <aside>
-        <p class="fondo"><a href="1_0_vivero.html">VIVERO</a> . <a href="3_0_servicios.html">SERVICIO</a> . <a>ASESORAMIENTOS A COMERCIOS</a></p>
-        <br>
-        <p class="parr_tall">
-        <strong>Verde que transforma y potencia tu negocio</strong><br>
-        <br>    
-    ¿Tenés un local comercial, un restaurante, un estudio o una expansión sobre la calle y querés incorporar verde para hacerlo más cálido, atractivo y único?<br>
-    <br>
-    En <strong>Mundo Verde</strong> diseñamos propuestas de paisajismo pensadas especialmente para espacios comerciales, buscando que las plantas se integren con la arquitectura y acompañen la identidad de cada lugar.<br>
-    <br>                
-    <strong>DISEÑAMOS TU ESPACIO A MEDIDA</strong><br><br>
-    Vamos a tu local para conocerlo, entender sus características y escuchar tus necesidades, ideas y objetivos (primera visita sin cargo)
-    A partir de este encuentro, analizamos la orientación, exposición a la luz, viento, características del ambiente y necesidades de mantenimiento, para seleccionar cuidadosamente las plantas y macetas más adecuadas.
-    Desarrollamos una propuesta personalizada que puede incluir nuevos espacios verdes, renovación de los existentes o incorporación de nuevos elementos, siempre buscando un equilibrio entre estética, funcionalidad y arquitectura.<br>
-    <br>
-    <strong>El servicio incluye:</strong><br>
-    <br>
-    •	Visita y asesoramiento en el espacio.<br>
-    •	Selección de plantas y macetas.<br>
-    •	Propuesta de diseño y recomendaciones estéticas.<br>
-    •	Informe detallado.<br>
-    •	Presupuesto.<br>
-    <br>
-    Creamos espacios comerciales con identidad, donde el verde se convierte en parte de la experiencia y le da vida al lugar.<br>
-    <br>
-    El informe y presupuesto se entrega dentro de los 10 días posteriores a la visita.<br>
-   
-    Nuestro team de pondrá en contacto dentro de las 72hs para coordinar día y horario de visita.<br>
-    <br>
-    Para reservar una visita escribinos por Whatsapp o envianos un mail a <a target="_blank" href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox">viveunmundoverde@gmail.com</a>
-        </p>
-    </aside>
-</div>
-
 <!--═══════════════════════════════════════════
    FOOTER
    ════════════════════════════════════════ -->
@@ -676,8 +929,10 @@
     </div>
 </footer>
 
+<script src="js/anuncios.js"></script>
 <script src="js/script.js"></script>
 <script src="js/api.js"></script>
+<script src="js/anuncios-banner.js"></script>
 <script src="js/catalogo.js"></script>
 <script src="js/buscador-global.js"></script>
 

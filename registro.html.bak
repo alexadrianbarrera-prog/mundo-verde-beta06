@@ -3,25 +3,37 @@
 <head>
    <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta name="description" content="Recuperá el acceso a tu cuenta de Vivero Mundo Verde"/>
+    <meta name="description" content="Creá tu cuenta en Vivero Mundo Verde"/>
     <meta name="robots" content="noindex, follow">
     <meta name="language" content="Spanish">
     <meta name="author" content="Alex Barrera">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="img/varios/fab.White.64x64.webp">
     <link rel="apple-touch-icon" sizes="180x180" href="img/varios/fab.White.64x64.webp">
-    <title>Recuperar contraseña — Mundo Verde</title>
+    <title>Crear cuenta — Mundo Verde</title>
     <link rel="stylesheet" href="css/styles.css"/>
     <link rel="stylesheet" href="CharonyPlywrite.css">
 </head>
 <body>
+<!--Banner con anucios y ofertas movil-->
 <div class="header-nav-fijo">
         <div class="anuncios-rotador">
             <div class="anuncios-track">
-<!-- anuncios: se cargan desde Admin → Anuncios (js/api.js) -->
-</div>
+                <p class="anuncios">
+                    💐 21 de septiembre: No te olvides de reservar tu ramo de flores para el Día de la Primavera.
+                </p>
+                <p class="anuncios">🌐 Inauguramos nuestra página web con un 10% extra en todas las compras </p>
+                <p class="anuncios">🛻 Envios gratis en compras superiores a $150.000 a Quilmes y Berazategui</p>
+                <p class="anuncios">🎁 Todos las compras en el local traen sorpresas</p>
+                <!-- misma lista repetida, oculta a lectores de pantalla: hace que el loop no tenga corte -->
+                <p class="anuncios" aria-hidden="true">
+                    💐 21 de septiembre: No te olvides de reservar tu ramo de flores para el Día de la Primavera.
+                </p>
+                <p class="anuncios" aria-hidden="true">🌐 Inauguramos nuestra página web con un 10% extra en todas las compras </p>
+                <p class="anuncios" aria-hidden="true">🛻 Envios gratis en compras superiores a $150.000 a Quilmes y Berazategui</p>
+                <p class="anuncios" aria-hidden="true">🎁 Todos las compras en el local traen sorpresas</p>
+            </div>
         </div>
-
 
 <!--Buscador, Logotipo, Carrito-->
 <header class="header">
@@ -69,7 +81,7 @@
 </div>
 </header>
 
-<!-- /.barra de navegacion -->
+<!-- BARRA DE NAVEGACIÓN PRINCIPAL -->
 <nav class="nav">
     <ul class="nav_list" id="navList">
         <li class="nav_item"><a href="1_0_vivero.html" class="nav_link">VIVERO</a></li>
@@ -83,7 +95,7 @@
             </div>
             <ul class="nav_submenu">
                 <li><a href="1_2_interior.html" class="nav_link nav_sublink">Interior</a></li>
-                <li><a href="1_2_plantines.html" class="nav_link nav_sublink">Plantines florales</a></li>
+                <li><a href="1_2_plantines.html" class="nav_link nav_sublink">Plantines Florales</a></li>
                 <li><a href="1_2_arbustos.html" class="nav_link nav_sublink">Arbustos</a></li>
                 <li><a href="1_2_aromaticas.html" class="nav_link nav_sublink">Aromáticas</a></li>
                 <li><a href="1_2_productos.html" class="nav_link nav_sublink">Productos</a></li>
@@ -523,36 +535,89 @@
         <source src="videos/v-pf_29s.mp4" type="video/mp4">
     </video>
 
-    <form id="recuperarForm" novalidate>
-        <h2 class="tit_news">Recuperar contraseña</h2>
-        <p class="pf"><strong>Te mandamos un link para crear una nueva</strong></p>
+    <form id="registroForm" novalidate>
+        <h2 class="tit_news">Creá tu cuenta</h2>
+        <p class="pf"><strong>Sumate a la comunidad Mundo Verde</strong></p>
+
+        <div class="form_input">
+            <label>Nombre completo
+                <input type="text" id="reg-nombre" placeholder="Tu nombre" required>
+            </label>
+            <div class="field-error" id="err-nombre"></div>
+        </div>
 
         <div class="form_input">
             <label>Email
-                <input type="email" id="rec-email" placeholder="Tu correo electrónico" required>
+                <input type="email" id="reg-email" placeholder="Tu correo electrónico" required>
             </label>
-            <div class="field-error" id="err-email"></div>
+            <div class="field-error" id="err-email">Ingresá un email válido.</div>
+        </div>
+
+        <div class="form_input">
+            <label>Teléfono
+                <input type="tel" id="reg-telefono" placeholder="Tu celular" inputmode="numeric" pattern="[0-9]*" maxlength="15">
+            </label>
+        </div>
+
+        <div class="form_input">
+            <label>Domicilio completo
+                <input type="text" id="reg-dom-completo" placeholder="domicilio" required>
+            </label>
+            <div class="field-error" id="err-dom-completo"></div>
+        </div>
+
+        <div class="form_input">
+            <label>Localidad - Partido / Piso y Departamento
+                <input type="text" id="reg-localidad" placeholder="Localidad" required>
+            </label>
+            <div class="field-error" id="err-localidad"></div>
+        </div>
+
+        <div class="form_input">
+            <label>Codigo Postal
+                <input type="tel" id="reg-cp" placeholder="Código postal" inputmode="numeric" pattern="[0-9]*" maxlength="4">
+            </label>
+        </div>
+
+        <div class="form_input">
+            <label>Fecha de nacimiento
+                <input type="date" id="reg-fecha-nacimiento">
+            </label>
+        </div>
+
+        <div class="form_input">
+            <label>Contraseña
+                <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres" required>
+            </label>
+            <div class="field-error" id="err-password">La contraseña debe tener al menos 8 caracteres.</div>
+        </div>
+
+        <div class="form_input">
+            <label>Confirmar contraseña
+                <input type="password" id="reg-password2" placeholder="Repetí tu contraseña" required>
+            </label>
+            <div class="field-error" id="err-password2">Las contraseñas no coinciden.</div>
         </div>
 
         <div class="field-error" id="err-general" style="display:none;"></div>
 
         <div class="btn-container">
-            <button type="submit" class="btn-suscribirme">Enviar link 🌱</button>
+            <button type="submit" class="btn-suscribirme">Crear cuenta 🌱</button>
         </div>
 
         <p style="text-align:center; margin-top:16px; font-size:.9rem;">
-            <a href="login.html" style="color:#a5d6a7; font-weight:bold;">Volver a iniciar sesión</a>
+            ¿Ya tenés cuenta? <a href="login.html" style="color:#a5d6a7; font-weight:bold;">Iniciá sesión</a>
         </p>
     </form>
 
-    <!-- Mensaje de confirmación post-login -->
+    <!-- Mensaje de confirmación post-registro -->
     <div id="msg-confirmacion">
         <div class="icon-ok">🌿</div>
-        <h3 id="conf-titulo">¡Listo!</h3>
+        <h3 id="conf-titulo">¡Cuenta creada!</h3>
         <p id="conf-nombre-texto"></p>
     </div>
 
-</div><!-- /hero-ns -->
+</div>
 
 <a href="https://wa.me/5491168316730?text=Hola%20quiero%20consultar" class="whatsapp-float" target="_blank">
     <i class="fab fa-whatsapp"></i>

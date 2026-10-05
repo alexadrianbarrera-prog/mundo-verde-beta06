@@ -3,25 +3,37 @@
 <head>
    <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta name="description" content="Recuperá el acceso a tu cuenta de Vivero Mundo Verde"/>
+    <meta name="description" content="Iniciá sesión en tu cuenta de Vivero Mundo Verde"/>
     <meta name="robots" content="noindex, follow">
     <meta name="language" content="Spanish">
     <meta name="author" content="Alex Barrera">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="img/varios/fab.White.64x64.webp">
     <link rel="apple-touch-icon" sizes="180x180" href="img/varios/fab.White.64x64.webp">
-    <title>Recuperar contraseña — Mundo Verde</title>
+    <title>Iniciar sesión — Mundo Verde</title>
     <link rel="stylesheet" href="css/styles.css"/>
     <link rel="stylesheet" href="CharonyPlywrite.css">
 </head>
-<body>
+<body data-pagina="login">
+<!--Banner con anucios y ofertas movil-->
 <div class="header-nav-fijo">
         <div class="anuncios-rotador">
             <div class="anuncios-track">
-<!-- anuncios: se cargan desde Admin → Anuncios (js/api.js) -->
-</div>
+                <p class="anuncios">
+                    💐 21 de septiembre: No te olvides de reservar tu ramo de flores para el Día de la Primavera.
+                </p>
+                <p class="anuncios">🌐 Inauguramos nuestra página web con un 10% extra en todas las compras </p>
+                <p class="anuncios">🛻 Envios gratis en compras superiores a $150.000 a Quilmes y Berazategui</p>
+                <p class="anuncios">🎁 Todos las compras en el local traen sorpresas</p>
+                <!-- misma lista repetida, oculta a lectores de pantalla: hace que el loop no tenga corte -->
+                <p class="anuncios" aria-hidden="true">
+                    💐 21 de septiembre: No te olvides de reservar tu ramo de flores para el Día de la Primavera.
+                </p>
+                <p class="anuncios" aria-hidden="true">🌐 Inauguramos nuestra página web con un 10% extra en todas las compras </p>
+                <p class="anuncios" aria-hidden="true">🛻 Envios gratis en compras superiores a $150.000 a Quilmes y Berazategui</p>
+                <p class="anuncios" aria-hidden="true">🎁 Todos las compras en el local traen sorpresas</p>
+            </div>
         </div>
-
 
 <!--Buscador, Logotipo, Carrito-->
 <header class="header">
@@ -69,7 +81,7 @@
 </div>
 </header>
 
-<!-- /.barra de navegacion -->
+<!-- BARRA DE NAVEGACIÓN PRINCIPAL -->
 <nav class="nav">
     <ul class="nav_list" id="navList">
         <li class="nav_item"><a href="1_0_vivero.html" class="nav_link">VIVERO</a></li>
@@ -83,7 +95,7 @@
             </div>
             <ul class="nav_submenu">
                 <li><a href="1_2_interior.html" class="nav_link nav_sublink">Interior</a></li>
-                <li><a href="1_2_plantines.html" class="nav_link nav_sublink">Plantines florales</a></li>
+                <li><a href="1_2_plantines.html" class="nav_link nav_sublink">Plantines Florales</a></li>
                 <li><a href="1_2_arbustos.html" class="nav_link nav_sublink">Arbustos</a></li>
                 <li><a href="1_2_aromaticas.html" class="nav_link nav_sublink">Aromáticas</a></li>
                 <li><a href="1_2_productos.html" class="nav_link nav_sublink">Productos</a></li>
@@ -523,32 +535,43 @@
         <source src="videos/v-pf_29s.mp4" type="video/mp4">
     </video>
 
-    <form id="recuperarForm" novalidate>
-        <h2 class="tit_news">Recuperar contraseña</h2>
-        <p class="pf"><strong>Te mandamos un link para crear una nueva</strong></p>
+    <form id="loginForm" novalidate>
+        <h2 class="tit_news">Iniciar sesión</h2>
+        <p class="pf"><strong>Accedé a tu cuenta de Mundo Verde</strong></p>
 
         <div class="form_input">
             <label>Email
-                <input type="email" id="rec-email" placeholder="Tu correo electrónico" required>
+                <input type="email" id="login-email" placeholder="Tu correo electrónico" required>
             </label>
             <div class="field-error" id="err-email"></div>
         </div>
 
-        <div class="field-error" id="err-general" style="display:none;"></div>
-
-        <div class="btn-container">
-            <button type="submit" class="btn-suscribirme">Enviar link 🌱</button>
+        <div class="form_input">
+            <label>Contraseña
+                <input type="password" id="login-password" placeholder="Tu contraseña" required>
+            </label>
+            <div class="field-error" id="err-password"></div>
         </div>
 
+        <div class="field-error" id="err-general" style="display:none;"></div>
+        <br>
         <p style="text-align:center; margin-top:16px; font-size:.9rem;">
-            <a href="login.html" style="color:#a5d6a7; font-weight:bold;">Volver a iniciar sesión</a>
+            <a href="recuperar.html" style="color:#a5d6a7;">¿Olvidaste tu contraseña?</a>
         </p>
+
+        <div class="btn-container">
+            <button type="submit" class="btn-suscribirme">Ingresar 🌱</button>
+        </div>
+        
+        <p style="text-align:center; margin-top:16px; font-size:.9rem;">
+            ¿No tenés cuenta? <a href="registro.html" style="color:#a5d6a7; font-weight:bold;">Registrate acá</a>
+        </p>    
     </form>
 
     <!-- Mensaje de confirmación post-login -->
     <div id="msg-confirmacion">
         <div class="icon-ok">🌿</div>
-        <h3 id="conf-titulo">¡Listo!</h3>
+        <h3 id="conf-titulo">¡Bienvenido/a de nuevo!</h3>
         <p id="conf-nombre-texto"></p>
     </div>
 
@@ -560,6 +583,7 @@
 
 <script src="js/script.js"></script>
 <script src="js/api.js"></script>
+<script src="js/anuncios-banner.js"></script>
 <script src="js/catalogo.js"></script>
 <script src="js/buscador-global.js"></script>
 

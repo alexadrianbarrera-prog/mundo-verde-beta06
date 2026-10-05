@@ -44,14 +44,28 @@
     </style>
 </head>
 
-<body>
+<body data-pagina="productos">
 <!--Banner con anucios y ofertas movil-->
 <div class="header-nav-fijo">
         <div class="anuncios-rotador">
             <div class="anuncios-track">
-<!-- anuncios: se cargan desde Admin → Anuncios (js/api.js) -->
-</div>
+                <p class="anuncios">
+                    💐 21 de septiembre: No te olvides de reservar tu ramo de flores para el Día de la Primavera.
+                </p>
+                <p class="anuncios">🌐 Inauguramos nuestra página web con un 10% extra en todas las compras </p>
+                <p class="anuncios">🛻 Envios gratis en compras superiores a $150.000 a Quilmes y Berazategui</p>
+                <p class="anuncios">🎁 Todos las compras en el local traen sorpresas</p>
+                <!-- misma lista repetida, oculta a lectores de pantalla: hace que el loop no tenga corte -->
+                <p class="anuncios" aria-hidden="true">
+                    💐 21 de septiembre: No te olvides de reservar tu ramo de flores para el Día de la Primavera.
+                </p>
+                <p class="anuncios" aria-hidden="true">🌐 Inauguramos nuestra página web con un 10% extra en todas las compras </p>
+                <p class="anuncios" aria-hidden="true">🛻 Envios gratis en compras superiores a $150.000 a Quilmes y Berazategui</p>
+                <p class="anuncios" aria-hidden="true">🎁 Todos las compras en el local traen sorpresas</p>
+            </div>
         </div>
+    
+
 <!--Buscador, Logotipo, Carrito-->
 <header class="header">
     <!--Izquierda-->
@@ -72,9 +86,7 @@
         <input 
             type="text" 
             id="searchInput"
-            placeholder="Buscar..."
-        >
-
+            placeholder="Buscar...">
     </div>
 
 </div>
@@ -110,10 +122,9 @@
             </div>
             <ul class="nav_submenu">
                 <li><a href="1_2_interior.html" class="nav_link nav_sublink">Interior</a></li>
-                <li><a href="1_2_plantines.html" class="nav_link nav_sublink">Plantines Florales</a></li>
+                <li><a href="1_2_plantines.html" class="nav_link nav_sublink">Plantines florales</a></li>
                 <li><a href="1_2_arbustos.html" class="nav_link nav_sublink">Arbustos</a></li>
                 <li><a href="1_2_aromaticas.html" class="nav_link nav_sublink">Aromáticas</a></li>
-                <li><a href="1_2_productos.html" class="nav_link nav_sublink">Productos</a></li>
             </ul>
         </li>
 
@@ -154,7 +165,6 @@
     </ul>
     </nav>
 </div>
-
 </div><!-- /.header-nav-fijo -->
 
 <!-- ═══════════════════════════════════════
@@ -547,57 +557,350 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<!-- Botón flotante WhatsApp -->
 <a href="https://wa.me/5491168316730?text=Hola%20quiero%20consultar" class="whatsapp-float" target="_blank">
     <i class="fab fa-whatsapp"></i>
 </a>
 
-<!-- ── GALERÍA DE SERVICIOS ─────────────────────────────── -->
-<div class="container">
-    <main class="foto">
-        <img src="img/servicios/3-asesoria-locales-comerciales/DentroLocal.webp" alt="Asesoría a Locales Comerciales" loading="lazy">
-        <!-- TODO Alex: precio real de Asesoría a Locales Comerciales (el $9.999 anterior era un valor de prueba) -->
-<div class="catalogo" id="catalogo">
-    <div class="producto" data-id="serv-com">
-        <h3 class="precio">$ 840.000</h3>
-        <button onclick="agregarCarrito('Servicio de Asesoría a Locales Comerciales', 840000, 'img/servicios/3-asesoria-locales-comerciales/DentroLocal.webp', 'serv-com')">Agregar al carrito</button>
+<div class="ramos1"></div>
+        <h3 class="nacer-subt">INSECTICIDAS y FERTILIZANTES</h3> 
+    </div>    
+</div>
+<div class="catalogo" id="catalogo" data-categoria="venenos">    
+    <div class="producto" id="VEN-01">
+        <img src="img/venenos/HuagroX1kg.webp" alt="HuagroX1kg">
+        <h3>Huagro Babotox x 1 kg</h3>
+        <p>Mata babosas y caracoles en huertas y jardines</p>
+        <p class="precio">$39,000</p>
+        <button onclick="agregarCarrito('Huagro Babotox x 1kg', 39000, 'img/venenos/HuagroX1kg.webp', 'VEN-01')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-02">
+        <img src="img/venenos/HuagroBabotox250g.webp" alt="HuagroBabotox250g">
+        <h3>Huagro Babotox x 250gr</h3>
+        <p>Mata babosas y caracoles en huertas y jardines</p>
+        <p class="precio">$10,000</p>
+        <button onclick="agregarCarrito('Huagro Babotox x 250gr', 10000, 'img/venenos/HuagroBabotox250g.webp', 'VEN-02')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-03">
+        <img src="img/venenos/HuagroBabotox100g.webp" alt="HuagroBabotox100g">
+        <h3>Huagro Babotox x 100gr</h3>
+        <p>Mata babosas y caracoles en huertas y jardines</p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('Perlita', 5000, 'img/venenos/HuagroBabotox100g.webp', 'VEN-03')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-04">
+        <img src="img/venenos/VeloxanMosq.webp" alt="VeloxanMosq">
+        <h3>VeloXan Mosquitos x 250cc</h3>
+        <p>Mata mosquitos, moscas e insectos restreros</p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('VeloXan Mosq x 250cc', 5000, 'img/venenos/VeloxanMosq.webp', 'VEN-04')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-05">
+        <img src="img/venenos/VeneAcarConcex30cc.webp" alt="VeneAcarConcex30cc">
+        <h3>GlacoXAN IMIDA</h3>
+        <p>Mata masca blanca, cochillas y minador. 30cc</p>
+        <p class="precio">$12,000</p>
+        <button onclick="agregarCarrito('GlacoXAN IMIDA x 30cc', 12000, 'img/venenos/VeneAcarConcex30cc.webp', 'VEN-05')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-06">
+        <img src="img/venenos/VeneAcarx30cc.webp" alt="VeneAcarx30cc">
+        <h3>GlacoXAN D-SIST</h3>
+        <p>Mata pulgón, cochinilla, araña y mosca de la fruta. 30cc</p>
+        <p class="precio">$7,500</p>
+        <button onclick="agregarCarrito('GlacoXAN D-SIST x 30cc', 7500 , 'img/venenos/VeneAcarx30cc.webp', 'VEN-06')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-07">
+        <img src="img/venenos/VeneAntgusx30cc.webp" alt="VeneAntgusx30cc">
+        <h3>GlacoXAN CIPER</h3>
+        <p>Mata gusanos, bichos de cesto y vaquita del olmo. 30cc</p>
+        <p class="precio">$9,500</p>
+        <button onclick="agregarCarrito('GlacoXAN Ciper x 30cc', 9500, 'img/venenos/VeneAntgusx30cc.webp', 'VEN-07')">Agregar al carrito</button>
+    </div>
+   
+    <div class="producto" id="VEN-08">
+        <img src="img/venenos/VeneHormx250g.webp" alt="VeneHormx250g">
+        <h3>HORTAL Hormigas</h3>
+        <p>Mata insectos y hormigas. Polvo seco. 250g</p>
+        <p class="precio">$7,000</p>
+        <button onclick="agregarCarrito('HORTAL Hormigas', 7000, 'img/venenos/VeneHormx250g.webp', 'VEN-08')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-09">
+        <img src="img/venenos/VeneHormx60cc.webp" alt="VeneHormx60cc">
+        <h3>GlacoXAN E</h3>
+        <p>Insecticida. Mata hormigas y grillotopo. 60cc</p>
+        <p class="precio">$8,500</p>
+        <button onclick="agregarCarrito('GlacoXAN E x 60cc', 8500, 'img/venenos/VeneHormx60cc.webp', 'VEN-09')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-10">
+        <img src="img/venenos/VeneInsecCapsx15cap.webp" alt="VeneInsecCapsx15cap">
+        <h3>CapXAN I</h3>
+        <p>Mata cochinilla, pulgón y vaquita del olmo. 15 Cáp</p>
+        <p class="precio">$19,000</p>
+        <button onclick="agregarCarrito('CapXAN I', 19000, 'img/venenos/VeneInsecCapsx15cap.webp', 'VEN-10')">Agregar al carrito</button>
+    </div>
+    
+    <div class="producto" id="VEN-11">
+        <img src="img/venenos/VeneInsectHormx750gr.webp" alt="VeneInsectHormx750gr">
+        <h3>MYRMEC Homigas</h3>
+        <p>Cebo en pellets (GRUPO 1B). Hormiguicida, 750gr</p>
+        <p class="precio">$12,500</p>
+        <button onclick="agregarCarrito('MYRMEC Homigas', 12500, 'img/venenos/VeneInsectHormx750gr.webp', 'VEN-11')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-12">
+        <img src="img/venenos/GlacHerbicidax100cc.webp" alt="Terrafertil Cactus">
+        <h3>GlacoXan TOTAL</h3>
+        <p>Herbicida, elimina maleza ancha y angosta. 100cc</p>
+        <p class="precio">$13,500</p>
+        <button onclick="agregarCarrito('GlacoXan TOTAL', 13500 , 'img/venenos/GlacHerbicidax100cc.webp', 'VEN-12')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-13">
+        <img src="img/venenos/VeneJabonPotasicox100cc.webp" alt="VeneJabonPotasicox100cc">
+        <h3>ECOmambo Jabón Potásico</h3>
+        <p>Concentrado Soluble. 100cc</p>
+        <p class="precio">$9,500</p>
+        <button onclick="agregarCarrito('ECOmambo Jabón Potásico', 9500, 'img/venenos/VeneJabonPotasicox100cc.webp', 'VEN-13')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-14">
+        <img src="img/venenos/EcoMam_TrinX100cc.webp" alt="AcoBiol100cc">
+        <h3>ECOmambo Acondicionador</h3>
+        <p>Acondicionador Biologico. 100cc</p>
+        <p class="precio">$16,000</p>
+        <button onclick="agregarCarrito('ECOmambo Acondicionador', 16000, 'img/venenos/EcoMam_TrinX100cc.webp', 'VEN-14')">Agregar al carrito</button>
+    </div>
+    
+    <div class="producto" id="VEN-15">
+        <img src="img/venenos/EcoMam_MicoX100cc.webp" alt="EnrNatx100cc">
+        <h3>Ecomambo Enraizante</h3>
+        <p>Eco Bambo Enraizante natural. 100cc</p>
+        <p class="precio">$12,500</p>
+        <button onclick="agregarCarrito('Ecomambo Enraizante', 12500, 'img/venenos/EcoMam_MicoX100cc.webp', 'VEN-15')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-16">
+        <img src="img/venenos/Ferti_ActiX200cc.webp" alt="Fertix200cc">
+        <h3>Fertifox</h3>
+        <p>Activador de follaje. 200cc</p>
+        <p class="precio">$10,500</p>
+        <button onclick="agregarCarrito('Fertifox x 200cc', 10500, 'img/venenos/Ferti_ActiX200cc.webp', 'VEN-16')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-17">
+        <img src="img/venenos/BaboLiquix100cc.webp" alt="Babosilx100cc">
+        <h3>Babosil</h3>
+        <p>Mata babosas y caracoles.<br> 100cc</p>
+        <p class="precio">$10,000</p>
+        <button onclick="agregarCarrito('Babosil 100cc', 10000, 'img/venenos/BaboLiquix100cc.webp', 'VEN-17')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="VEN-18">
+        <img src="img/venenos/VeneInsecx1kg.webp" alt="VeneInsecx1kg">
+        <h3>DiatomiD</h3>
+        <p>Insecticida, Mineral natural x 1kg</p>
+        <p class="precio">$13,000</p>
+        <button onclick="agregarCarrito('DiatomiD x 1kg', 13000, 'img/venenos/VeneInsecx1kg.webp', 'VEN-18')">Agregar al carrito</button>
     </div>
 </div>
-    </main>
 
-    <aside>
-        <p class="fondo"><a href="1_0_vivero.html">VIVERO</a> . <a href="3_0_servicios.html">SERVICIO</a> . <a>ASESORAMIENTOS A COMERCIOS</a></p>
-        <br>
-        <p class="parr_tall">
-        <strong>Verde que transforma y potencia tu negocio</strong><br>
-        <br>    
-    ¿Tenés un local comercial, un restaurante, un estudio o una expansión sobre la calle y querés incorporar verde para hacerlo más cálido, atractivo y único?<br>
-    <br>
-    En <strong>Mundo Verde</strong> diseñamos propuestas de paisajismo pensadas especialmente para espacios comerciales, buscando que las plantas se integren con la arquitectura y acompañen la identidad de cada lugar.<br>
-    <br>                
-    <strong>DISEÑAMOS TU ESPACIO A MEDIDA</strong><br><br>
-    Vamos a tu local para conocerlo, entender sus características y escuchar tus necesidades, ideas y objetivos (primera visita sin cargo)
-    A partir de este encuentro, analizamos la orientación, exposición a la luz, viento, características del ambiente y necesidades de mantenimiento, para seleccionar cuidadosamente las plantas y macetas más adecuadas.
-    Desarrollamos una propuesta personalizada que puede incluir nuevos espacios verdes, renovación de los existentes o incorporación de nuevos elementos, siempre buscando un equilibrio entre estética, funcionalidad y arquitectura.<br>
-    <br>
-    <strong>El servicio incluye:</strong><br>
-    <br>
-    •	Visita y asesoramiento en el espacio.<br>
-    •	Selección de plantas y macetas.<br>
-    •	Propuesta de diseño y recomendaciones estéticas.<br>
-    •	Informe detallado.<br>
-    •	Presupuesto.<br>
-    <br>
-    Creamos espacios comerciales con identidad, donde el verde se convierte en parte de la experiencia y le da vida al lugar.<br>
-    <br>
-    El informe y presupuesto se entrega dentro de los 10 días posteriores a la visita.<br>
-   
-    Nuestro team de pondrá en contacto dentro de las 72hs para coordinar día y horario de visita.<br>
-    <br>
-    Para reservar una visita escribinos por Whatsapp o envianos un mail a <a target="_blank" href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox">viveunmundoverde@gmail.com</a>
-        </p>
-    </aside>
+<!--===Titulos de rubros-->
+<div class="ramos1"></div>
+        <h3 class="nacer-subt">TIERRA y SUSTRATOS</h3> 
+    </div>    
+</div>
+<div class="catalogo" id="catalogo" data-categoria="suplementos">
+    <div class="producto" id="SPL-01">
+        <img src="img/suplementos/GrowSustrCulProfx80lts.webp" alt="MejoSuelx5lts">
+        <h3>Growmix</h3>
+        <p>Sustrato para cultivo. 80lts</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Sustrato para cultivo. 80lts', 4000, 'img/suplementos/GrowSustrCulProfx80lts.webp', 'SPL-01')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-02">
+        <img src="img/suplementos/GrowSustrProfx20Lts.webp" alt="MejoSuelx5lts">
+        <h3>Growmix Pro</h3>
+        <p>Sustrato profesional. 20lts</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Sustrato profesional. 20lts', 4000, 'img/suplementos/GrowSustrProfx20Lts.webp', 'SPL-02')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-03">
+        <img src="img/suplementos/MontTmx5kg.webp" alt="Mont_tmx5kg">
+        <h3>Monte Fertil 5</h3>
+        <p>Tierra Mejorada x 5kg</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Tierra Mejorada x 5kg', 4000, 'img/suplementos/MontTmx5kg.webp', 'SPL-03')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-04">
+        <img src="img/suplementos/MontTmx10kg.webp" alt="Mont_tmx10kg">
+        <h3>Monte Fertil 10</h3>
+        <p>Tierra Mejorada x 10kg</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Tierra Mejorada x 10kg', 4000, 'img/suplementos/MontTmx10kg.webp', 'SPL-04')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-05">
+        <img src="img/suplementos/MontTmx25kg.webp" alt="Mont_tmx25kg">
+        <h3>Monte Fertil 25</h3>
+        <p>Tierra Mejorada x 25kg</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Tierra Mejorada x 25kg', 4000, 'img/suplementos/MontTmx25kg.webp', 'SPL-05')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-06">
+        <img src="img/suplementos/MontTmx40kg.webp" alt="Mont_tmx40kg">
+        <h3>Monte Fertil 40</h3>
+        <p>Tierra Mejorada x 40kg</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Tierra Mejorada x 40kg', 4000, 'img/suplementos/MontTmx40kg.webp', 'SPL-06')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-07">
+        <img src="img/suplementos/TerrCacYSucx5lts.webp" alt="Terr_AcoSuelos5lts">
+        <h3>Sustrato para Cáctus</h3>
+        <p>Terrafertil 5Lts</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Sustrato para Cáctus', 4000, 'img/suplementos/TerrCacYSucx5lts.webp', 'SPL-07')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-08">
+        <img src="img/suplementos/TerrLombrix5lts.webp" alt="TerrLombrix5lts">
+        <h3>Lombri compuesto</h3>
+        <p>Terrafertil 5Lts</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Fertilizante líquido', 4000, 'img/suplementos/TerrLombrix5lts.webp', 'SPL-08')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-09">
+        <img src="img/suplementos/TerrOrquix5lts.webp" alt="Terr_Orquix5lts">
+        <h3>Sustrato para Orquídeas</h3>
+        <p>Terrafertil 5Lts</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Fertilizante líquido', 4000, 'img/suplementos/TerrOrquix5lts.webp', 'SPL-09')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-10">
+        <img src="img/suplementos/TerrPerlitax5lts.webp" alt="Terr_Perlitax5lts">
+        <h3>Perlita</h3>
+        <p>Terrafertil 5Lts</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Fertilizante líquido', 4000, 'img/suplementos/TerrPerlitax5lts.webp', 'SPL-10')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-11">
+        <img src="img/suplementos/TerrVermic5lts.webp" alt="TerrVermic5lts">
+        <h3>Vermiculita</h3>
+        <p>Terrafertil 5Lts</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Fertilizante líquido', 4000, 'img/suplementos/TerrVermic5lts.webp', 'SPL-11')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SPL-12">
+        <img src="img/suplementos/TerrPlanIntx10lts.webp" alt="TerrPlanIntx10lts">
+        <h3>Sustrato plantas de Interior</h3>
+        <p>Terrafertil 5Lts</p>
+        <p class="precio">$4,000</p>
+        <button onclick="agregarCarrito('Fertilizante líquido', 4000, 'img/suplementos/TerrPlanIntx10lts.webp', 'SPL-12')">Agregar al carrito</button>
+    </div>
 </div>
 
+<!--<div class="ramos1"></div>
+        <h3 class="nacer-subt">Macetas</h3> 
+    </div>    
+</div>
+<div class="catalogo">    
+    <div class="producto" id="MAC-01">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'MAC-01')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="MAC-02">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'MAC-02')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="MAC-03">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'MAC-03')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="MAC-04">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'MAC-04')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="MAC-05">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'MAC-05')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="MAC-06">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'MAC-06')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="MAC-07">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'MAC-07')">Agregar al carrito</button>
+    </div>
+</div>-->
+
+<!--<div class="ramos1"></div>
+        <h3 class="nacer-subt">Saumerios</h3> 
+    </div>    
+</div>
+<div class="catalogo">    
+    <div class="producto" id="SAU-01">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'SAU-01')">Agregar al carrito</button>
+    </div>   
+    <div class="producto" id="SAU-02">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'SAU-02')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SAU-03">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'SAU-03')">Agregar al carrito</button>
+    </div>   
+    <div class="producto" id="SAU-04">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'SAU-04')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SAU-05">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'SAU-05')">Agregar al carrito</button>
+    </div>   
+    <div class="producto" id="SAU-06">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'SAU-06')">Agregar al carrito</button>
+    </div>
+    <div class="producto" id="SAU-07">
+        <img src="img/" alt="">
+        <h3></h3>
+        <p></p>
+        <p class="precio">$5,000</p>
+        <button onclick="agregarCarrito('', 5000, 'img/', 'SAU-07')">Agregar al carrito</button>
+    </div>   
+</div>-->
 <!--═══════════════════════════════════════════
    FOOTER
    ════════════════════════════════════════ -->
@@ -644,6 +947,7 @@
             <ul>
                 <li><a href="1_0_vivero.html">Vivero</a></li>
                 <li><a href="1_1_plantas.html">Plantas</a></li>
+                <li><a href="1_2_productos.html">Productos</a></li>
                 <li><a href="2_0_talleres.html">Talleres</a></li>
                 <li><a href="3_0_servicios.html">Servicios</a></li>
                 <li><a href="4_0_ramos.html">Ramos</a></li>
@@ -678,6 +982,7 @@
 
 <script src="js/script.js"></script>
 <script src="js/api.js"></script>
+<script src="js/anuncios-banner.js"></script>
 <script src="js/catalogo.js"></script>
 <script src="js/buscador-global.js"></script>
 
