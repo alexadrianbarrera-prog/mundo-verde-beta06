@@ -344,7 +344,12 @@
   tr.fila-dia.abierto .dia-flecha { transform: rotate(90deg); }
   .dia-nombre { font-family: var(--serif); color: var(--accent2); font-size: 1rem; }
   .dia-nombre::first-letter { text-transform: uppercase; }
-  .dia-resumen { float: right; font-family: var(--mono); font-size: .75rem; color: var(--muted); }
+  .dia-contenido { position: sticky; left: 14px; display: inline-flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .dia-resumen { font-family: var(--mono); font-size: .75rem; color: var(--muted); }
+  .dia-resumen strong { color: #81c784; font-size: .85rem; }
+  .dia-resumen .por-cobrar { color: #ffb74d; }
+  .stat-sub { font-size: .72rem; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+  .stat-sub .por-cobrar { color: #ffb74d; }
   tr.oculta-dia { display: none !important; }
   .detalle-wrap { padding: 14px 20px; }
   .detalle-titulo { font-size: .72rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 8px; }
@@ -572,7 +577,8 @@
       border: 1px solid var(--border); padding: 10px 14px;
     }
     table.tabla-principal tbody tr.fila-dia td::before { content: none; }
-    .dia-resumen { float: none; display: block; margin-top: 4px; }
+    .dia-contenido { position: static; display: block; }
+    .dia-resumen { display: block; margin-top: 4px; }
   }
 </style>
 </head>
@@ -1254,6 +1260,9 @@ const ETIQUETAS_ESTADO = {
   entregado: { texto: 'Entregado', clase: 'badge-verde' },
   cancelado: { texto: 'Cancelado', clase: 'badge-rojo' },
 };
+// Una venta se considera "concretada" cuando ya está pagada o más adelante en el flujo.
+// Pendiente = por cobrar (se muestra aparte). Cancelado = no cuenta.
+const ESTADOS_CONCRETADOS = ['pagado', 'confirmado', 'entregado'];
 const ETIQUETAS_ENTREGA = { retiro: 'Retiro en local', envio: 'Envío a domicilio' };
 const ETIQUETAS_PAGO = { efectivo: 'Efectivo', transferencia: 'Transferencia', tarjeta: 'Tarjeta' };
 
@@ -1262,13 +1271,30 @@ function renderPedidos(pedidos) {
   const target = document.getElementById('table-target');
 
   // Resumen arriba de la tabla
-  const totalVentas = pedidos.reduce((acc, p) => acc + Number(p.total || 0), 0);
+  const ahora = new Date();
+  const claveAnio = String(ahora.getFullYear());
+  const claveMes = claveAnio + '-' + String(ahora.getMonth() + 1).padStart(2, '0');
+  const nombreMes = ahora.toLocaleDateString('es-AR', { month: 'long' });
+  const acum = { mes: { total: 0, cant: 0, pend: 0 }, anio: { total: 0, cant: 0, pend: 0 } };
+  pedidos.forEach(p => {
+    const concretada = ESTADOS_CONCRETADOS.includes(p.estado);
+    if (!concretada && p.estado !== 'pendiente') return; // cancelados no suman
+    const fecha = String(p.creado_en || '');
+    const t = Number(p.total || 0);
+    [['mes', claveMes], ['anio', claveAnio]].forEach(([k, clave]) => {
+      if (!fecha.startsWith(clave)) return;
+      if (concretada) { acum[k].total += t; acum[k].cant++; } else { acum[k].pend += t; }
+    });
+  });
+  const subVentas = a => `${a.cant} ${a.cant === 1 ? 'venta' : 'ventas'}` +
+    (a.pend > 0 ? ` · <span class="por-cobrar">${formatMoney(a.pend)} por cobrar</span>` : '');
   const pendientes = pedidos.filter(p => p.estado === 'pendiente').length;
   const pagados = pedidos.filter(p => p.estado === 'pagado').length;
   const cancelados = pedidos.filter(p => p.estado === 'cancelado').length;
   const stats = `
     <div class="stats-strip">
-      <div class="stat-card"><div class="stat-label">Total vendido</div><div class="stat-value">${formatMoney(totalVentas)}</div></div>
+      <div class="stat-card"><div class="stat-label">Vendido en ${nombreMes}</div><div class="stat-value">${formatMoney(acum.mes.total)}</div><div class="stat-sub">${subVentas(acum.mes)}</div></div>
+      <div class="stat-card"><div class="stat-label">Vendido en ${claveAnio}</div><div class="stat-value">${formatMoney(acum.anio.total)}</div><div class="stat-sub">${subVentas(acum.anio)}</div></div>
       <div class="stat-card"><div class="stat-label">Pedidos</div><div class="stat-value">${pedidos.length}</div></div>
       <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value ambar">${pendientes}</div></div>
       <div class="stat-card"><div class="stat-label">Pagados</div><div class="stat-value verde">${pagados}</div></div>
@@ -1284,10 +1310,11 @@ function renderPedidos(pedidos) {
   const grupos = new Map();
   pedidos.forEach((p, idx) => {
     const dia = String(p.creado_en || '').slice(0, 10) || 'sin-fecha';
-    if (!grupos.has(dia)) grupos.set(dia, { total: 0, cant: 0 });
+    if (!grupos.has(dia)) grupos.set(dia, { total: 0, pend: 0, cant: 0 });
     const g = grupos.get(dia);
     g.cant++;
-    if (p.estado !== 'cancelado') g.total += Number(p.total || 0);
+    if (ESTADOS_CONCRETADOS.includes(p.estado)) g.total += Number(p.total || 0);
+    else if (p.estado === 'pendiente') g.pend += Number(p.total || 0);
     p._dia = dia;
   });
   // Primera vez: solo el día más reciente abierto. Después se recuerda lo que abrió/cerró
@@ -1309,8 +1336,10 @@ function renderPedidos(pedidos) {
       const g = grupos.get(diaActual);
       html += `<tr class="fila-dia${abierto ? ' abierto' : ''}" data-dia-header="${diaActual}" onclick="toggleDiaPedidos('${diaActual}')">
         <td colspan="13">
-          <span class="dia-flecha">▸</span><span class="dia-nombre">${etiquetaDia(diaActual)}</span>
-          <span class="dia-resumen">${g.cant} ${g.cant === 1 ? 'pedido' : 'pedidos'} · ${formatMoney(g.total)}</span>
+          <div class="dia-contenido">
+            <span><span class="dia-flecha">▸</span><span class="dia-nombre">${etiquetaDia(diaActual)}</span></span>
+            <span class="dia-resumen">${g.cant} ${g.cant === 1 ? 'pedido' : 'pedidos'} · vendido <strong>${formatMoney(g.total)}</strong>${g.pend > 0 ? ` · <span class="por-cobrar">${formatMoney(g.pend)} por cobrar</span>` : ''}</span>
+          </div>
         </td>
       </tr>`;
     }
