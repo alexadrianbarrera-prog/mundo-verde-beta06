@@ -25,6 +25,11 @@ function mvUsuarioActual() {
     try { return JSON.parse(localStorage.getItem('mv_usuario')) || null; }
     catch { return null; }
 }
+// true si la cuenta se creó con el registro corto (newsletter) y todavía
+// le faltan datos. El backend manda usuario.perfil_completo (0/1).
+function mvPerfilIncompleto(usuario) {
+    return !!usuario && usuario.perfil_completo !== undefined && !Number(usuario.perfil_completo);
+}
 
 async function mvApi(path, { method = 'GET', body, auth = false } = {}) {
     // FormData (usado para mandar el comprobante de pago junto con el
@@ -47,12 +52,16 @@ async function mvApi(path, { method = 'GET', body, auth = false } = {}) {
         });
     } catch (err) {
         // El backend no está corriendo / no responde
-        throw new Error('No se pudo conectar con el servidor. ¿Está corriendo el backend?');
+        const errRed = new Error('No se pudo conectar con el servidor. ¿Está corriendo el backend?');
+        errRed.status = 0;
+        throw errRed;
     }
     let data = null;
     try { data = await res.json(); } catch { /* respuesta vacía o no-JSON */ }
     if (!res.ok) {
-        throw new Error((data && data.error) || 'Ocurrió un error inesperado');
+        const errHttp = new Error((data && data.error) || 'Ocurrió un error inesperado');
+        errHttp.status = res.status;   // permite distinguir un 404 real de un servidor caído
+        throw errHttp;
     }
     if (data === null) {
         throw new Error('El servidor respondió algo inesperado. Probá de nuevo en unos segundos.');
@@ -71,6 +80,9 @@ const mvAuth = {
 
     me: () => mvApi('/usuario/me', { auth: true }),
 
+    // Completa los datos pendientes del registro corto (PATCH /usuario/me).
+    completarPerfil: (datos) => mvApi('/usuario/me', { method: 'PATCH', body: datos, auth: true }),
+
     recuperar: (email) => mvApi('/recuperar', { method: 'POST', body: { email } }),
 
     restablecer: (token, password) =>
@@ -84,6 +96,9 @@ const mvNewsletter = {
     toggle: (id) => mvApi(`/newsletter/${id}/toggle`, { method: 'PATCH', auth: true }),
     eliminar: (id) => mvApi(`/newsletter/${id}`, { method: 'DELETE', auth: true }),
     miEstado: (mail) => mvApi(`/newsletter/mi-estado?mail=${encodeURIComponent(mail)}`),
+    // Chequea que un Código Verde exista y no se haya usado (script.js → carrito).
+    // Responde { valido: true } o { valido: false, error: '...' } (GET, ver newsletter_validar_codigo).
+    validarCodigo: (codigo) => mvApi('/newsletter/validar-codigo?codigo=' + encodeURIComponent(codigo)),
 };
 
 /* ── Productos ────────────────────────────────────────── */
@@ -156,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dropdown.className = 'user-dropdown';
         dropdown.innerHTML =
             (usuario.rol === 'admin' ? '<a href="admin.html">Panel Superadmin</a>' : '') +
+            (mvPerfilIncompleto(usuario) ? '<a href="registro.html?completar=1">Completar mi registro</a>' : '') +
             '<a href="#" id="mv-btn-logout">Cerrar sesión</a>';
         wrapper.appendChild(dropdown);
 
@@ -169,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             try { await mvAuth.logout(); } catch (err) { /* token vencido: no importa, igual cerramos local */ }
             mvCerrarSesion();
+            if (typeof guardarCodigoVerde === 'function') guardarCodigoVerde(null);
 
             // Importante: NO se borra el carrito del usuario (mvCarrito_<email>).
             // Solo "cerramos" lo que se ve: el panel y el contador vuelven al

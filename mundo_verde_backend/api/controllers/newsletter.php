@@ -66,14 +66,16 @@ function newsletter_suscribir(PDO $pdo): void
     }
 
     // Si el envío falla no rompe la suscripción: queda registrado en el log.
-    enviarMailNewsletter($mail, $nombre, $codigoMio, $codigoVerde);
+    // Salen dos mails: 1) Código Verde (descuento) y 2) código para referir amigos.
+    // Orden de parámetros: (mail, nombre, CÓDIGO VERDE, código de referidos).
+    enviarMailNewsletter($mail, $nombre, $codigoVerde, $codigoMio);
 
     responder([
         'nombre'     => $nombre,
         'codigo_mio' => $codigoMio,
         'codigo_verde' => $codigoVerde,
         // Texto listo para mostrar en el frontend (incluye la nota sobre spam).
-        'mensaje'    => '¡Listo, ya estás suscripto/a! Te enviamos un mail de confirmación con tu código de referido. ' .
+        'mensaje'    => '¡Listo, ya estás suscripto/a! Te enviamos dos mails: uno con tu Código Verde (10% de descuento) y otro con tu código para referir amigos. ' .
                         'Si no lo ves en unos minutos, revisá la carpeta de Spam o Promociones. ' .
                         'Si está ahí, marcalo como "No es spam" y agregá viveunmundoverde@gmail.com ' .
                         'a tus contactos para que los próximos mails lleguen a tu bandeja principal.',

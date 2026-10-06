@@ -87,32 +87,50 @@ window.addEventListener('load', () => {
 const promoPopup = document.getElementById('promoPopup');
 const closePromo = document.getElementById('closePromo');
 
-// Devuelve true si hay que mostrar el popup, false si el mail ya figura
-// en la tabla de newsletter. Se ignora por completo el mail de la
-// cuenta/login: son cosas distintas (loguearse no es estar suscripto),
-// así que solo se consulta contra la columna de newsletter en la base.
+// Devuelve true si hay que mostrar el popup y false si la persona ya está
+// inscripta en el newsletter (tabla newsletter_suscriptores). Una inscripta NO
+// debe volver a verlo nunca; por eso, ante cualquier duda, NO se muestra.
+//
+// Se consulta el mail con el que se suscribió desde este navegador y, si hay
+// sesión iniciada, el mail de la cuenta (así tampoco reaparece al entrar desde
+// otro dispositivo o después de borrar los datos del navegador). Solo un 404
+// confirma que NO está inscripta; un servidor caído o un timeout no cuentan.
 async function mvDebeMostrarPopup() {
-    // Mail que usó este visitante la última vez que se suscribió desde
-    // este navegador (lo guardamos nosotros al mandar el formulario).
-    const mail = localStorage.getItem('mv_newsletter_mail');
-    if (!mail) return true; // nunca se suscribió desde acá: mostrar popup
+    const candidatos = [];
+    const guardado = localStorage.getItem('mv_newsletter_mail');
+    if (guardado) candidatos.push(guardado);
+    const usuario = (typeof mvUsuarioActual === 'function') ? mvUsuarioActual() : null;
+    if (usuario && usuario.email && !candidatos.includes(usuario.email)) candidatos.push(usuario.email);
 
-    try {
-        // Pregunta directo a la tabla de newsletter si ese mail sigue ahí.
-        await mvNewsletter.miEstado(mail);
-        return false; // figura en la base: no mostrar
-    } catch (err) {
-        // Ya no figura (lo borró el admin, etc.): se limpia el localStorage
-        // guardado y se vuelve a mostrar el popup.
-        localStorage.removeItem('mv_newsletter_mail');
-        return true;
+    if (candidatos.length === 0) return true; // visitante anónimo: mostrar popup
+
+    let hayDuda = false;
+    for (const mail of candidatos) {
+        try {
+            await mvNewsletter.miEstado(mail);
+            localStorage.setItem('mv_newsletter_mail', mail); // inscripta: queda recordado
+            return false;
+        } catch (err) {
+            if (err.status !== 404) hayDuda = true;
+        }
     }
+    if (hayDuda) return false;
+
+    // 404 en todos los mails: ya no figura (por ejemplo, la borró el admin).
+    localStorage.removeItem('mv_newsletter_mail');
+    return true;
 }
 
-if (promoPopup) {
+// api.js se carga DESPUÉS de este archivo (mvNewsletter y mvUsuarioActual todavía
+// no existen acá), así que se espera a que la página termine de cargar.
+function mvIniciarPopup() {
     mvDebeMostrarPopup().then((mostrar) => {
         if (mostrar) setTimeout(() => promoPopup.classList.add('show'), 1000);
     });
+}
+if (promoPopup) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mvIniciarPopup);
+    else mvIniciarPopup();
 }
 if (closePromo) {
     closePromo.addEventListener('click', () => promoPopup.classList.remove('show'));
@@ -1736,6 +1754,8 @@ if (loginForm) {
             mvSetSesion(data.token, data.usuario);
             migrarCarritoGuest();
             marcarRecordatorioCarrito();
+            // Suscriptor con 10% sin usar: queda aplicado en el carrito
+            if (data.codigo_verde_pendiente) guardarCodigoVerde(limpiarCodigoVerde(data.codigo_verde_pendiente));
 
             loginForm.style.display = 'none';
             document.getElementById('conf-nombre-texto').textContent = `¡Hola, ${data.usuario.nombre}!`;
@@ -1759,8 +1779,86 @@ const MV_CARTEL_MS = 6000;
 /* ── Registro ── */
 const registroForm = document.getElementById('registroForm');
 if (registroForm) {
+    /* ── Modo "completar registro" ──
+       registro.html?completar=1, con sesión iniciada. Es para quien se sumó por
+       el newsletter (registro corto): nombre y email ya están, no se pide
+       contraseña y solo se cargan los datos pendientes. */
+    const modoCompletar = new URLSearchParams(window.location.search).get('completar') === '1';
+
+    if (modoCompletar) {
+        document.addEventListener('DOMContentLoaded', () => {
+            const usuario = mvUsuarioActual();
+            if (!usuario) { window.location.href = 'login.html'; return; }
+
+            const nom = document.getElementById('reg-nombre');
+            const mai = document.getElementById('reg-email');
+            nom.value = usuario.nombre || ''; nom.readOnly = true;
+            mai.value = usuario.email || '';  mai.readOnly = true;
+
+            ['reg-password', 'reg-password2'].forEach(id => {
+                const bloque = document.getElementById(id)?.closest('.form_input');
+                if (bloque) bloque.style.display = 'none';
+            });
+            const titulo = registroForm.querySelector('.tit_news');
+            if (titulo) titulo.textContent = 'Completá tu registro';
+            const sub = registroForm.querySelector('.pf');
+            if (sub) sub.innerHTML = '<strong>Ya sos parte de Mundo Verde: sumá tus datos para comprar más rápido</strong>';
+            const btn = registroForm.querySelector('button[type="submit"]');
+            if (btn) btn.textContent = 'Guardar mis datos 🌱';
+            const pie = registroForm.lastElementChild;
+            if (pie && pie.tagName === 'P') pie.style.display = 'none';   // "¿Ya tenés cuenta?"
+        });
+    }
+
+    const completarRegistroCorto = async function () {
+        const telefono = document.getElementById('reg-telefono').value.trim();
+        const domicilioCompleto = document.getElementById('reg-dom-completo').value.trim();
+        const localidad = document.getElementById('reg-localidad').value.trim();
+        const cp = document.getElementById('reg-cp').value.trim();
+        const fechaNacimiento = document.getElementById('reg-fecha-nacimiento').value;
+
+        const errDom = document.getElementById('err-dom-completo');
+        const errLoc = document.getElementById('err-localidad');
+        const errGeneral = document.getElementById('err-general');
+        [errDom, errLoc, errGeneral].forEach(el => el.style.display = 'none');
+
+        let ok = true;
+        if (!domicilioCompleto) { errDom.textContent = 'Ingresá tu domicilio completo.'; errDom.style.display = 'block'; ok = false; }
+        if (!localidad) { errLoc.textContent = 'Ingresá tu localidad.'; errLoc.style.display = 'block'; ok = false; }
+        if (!ok) return;
+
+        const btnSubmit = registroForm.querySelector('button[type="submit"]');
+        if (btnSubmit) btnSubmit.disabled = true;
+
+        try {
+            const data = await mvAuth.completarPerfil({
+                telefono: telefono || undefined,
+                domicilio_completo: domicilioCompleto,
+                localidad,
+                codigo_postal: cp || undefined,
+                fecha_nacimiento: fechaNacimiento || undefined,
+            });
+
+            // Se actualiza la sesión guardada (ya no figura como incompleta).
+            const usuario = data.usuario || Object.assign({}, mvUsuarioActual(), { perfil_completo: 1 });
+            mvSetSesion(mvGetToken(), usuario);
+
+            registroForm.style.display = 'none';
+            document.getElementById('conf-titulo').textContent = '¡Registro completo!';
+            document.getElementById('conf-nombre-texto').textContent =
+                `Gracias, ${usuario.nombre}. Ya tenés tus datos cargados: tu próxima compra va a ser más rápida. 🌿`;
+            document.getElementById('msg-confirmacion').style.display = 'block';
+            setTimeout(() => { window.location.href = '1_0_vivero.html'; }, MV_CARTEL_MS);
+        } catch (err) {
+            errGeneral.textContent = '⚠️ ' + err.message;
+            errGeneral.style.display = 'block';
+            if (btnSubmit) btnSubmit.disabled = false;
+        }
+    };
+
     registroForm.addEventListener('submit', async function (e) {
         e.preventDefault();
+        if (modoCompletar) { await completarRegistroCorto(); return; }
 
         const nombre = document.getElementById('reg-nombre').value.trim();
         const email = document.getElementById('reg-email').value.trim();
@@ -1942,6 +2040,37 @@ if (newsletterForm) {
         });
     }
 
+    /* La suscripción al newsletter ahora crea la cuenta: pide contraseña.
+       Si el HTML todavía no tiene los campos (#nl-password / #nl-password2),
+       se agregan solos justo antes del botón de enviar. Si ya hay sesión
+       iniciada no hacen falta y se ocultan. */
+    function asegurarCamposPasswordNewsletter() {
+        let wrap = document.getElementById('nl-password-wrap');
+        if (!wrap) {
+            wrap = document.createElement('div');
+            wrap.id = 'nl-password-wrap';
+            wrap.innerHTML = `
+                <div class="form_input">
+                    <label>Contraseña
+                        <input type="password" id="nl-password" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+                    </label>
+                    <div class="field-error" id="err-nl-password">La contraseña debe tener al menos 8 caracteres.</div>
+                </div>
+                <div class="form_input">
+                    <label>Confirmar contraseña
+                        <input type="password" id="nl-password2" placeholder="Repetí tu contraseña" autocomplete="new-password">
+                    </label>
+                    <div class="field-error" id="err-nl-password2">Las contraseñas no coinciden.</div>
+                </div>`;
+            const boton = newsletterForm.querySelector('button[type="submit"]');
+            const destino = boton ? (boton.closest('.btn-container') || boton) : null;
+            if (destino && destino.parentNode) destino.parentNode.insertBefore(wrap, destino);
+            else newsletterForm.appendChild(wrap);
+        }
+        wrap.style.display = mvUsuarioActual() ? 'none' : '';
+    }
+    document.addEventListener('DOMContentLoaded', asegurarCamposPasswordNewsletter);
+
     newsletterForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
@@ -1950,6 +2079,9 @@ if (newsletterForm) {
         const origen  = document.getElementById('origen').value;
         const codRef  = document.getElementById('codigo-referido').value.trim().toUpperCase();
         const tyc     = document.getElementById('acepta-tyc').checked;
+        const yaLogueado = !!mvUsuarioActual();
+        const password  = yaLogueado ? '' : document.getElementById('nl-password').value;
+        const password2 = yaLogueado ? '' : document.getElementById('nl-password2').value;
 
         let ok = true;
         const show = (id, mostrar) => {
@@ -1960,8 +2092,15 @@ if (newsletterForm) {
         show('err-mail', !mail.includes('@'));  if (!mail.includes('@')) ok = false;
         show('err-tyc', !tyc);         if (!tyc) ok = false;
         show('err-ref', false);
+        if (!yaLogueado) {
+            show('err-nl-password', password.length < 8);   if (password.length < 8) ok = false;
+            show('err-nl-password2', password !== password2); if (password !== password2) ok = false;
+        }
 
         if (!ok) return;
+
+        const btnSubmit = this.querySelector('button[type="submit"]');
+        if (btnSubmit) btnSubmit.disabled = true;
 
         try {
             const data = await mvNewsletter.suscribir({
@@ -1969,9 +2108,20 @@ if (newsletterForm) {
                 mail,
                 origen,
                 cod_ref: origen === 'Referido' ? codRef : '',
+                password: yaLogueado ? undefined : password,
             });
 
             localStorage.setItem('mv_newsletter_mail', mail);
+
+            // Cuenta creada = queda logueado al instante, igual que en el registro.
+            // La ÚNICA diferencia con un registro común: el Código Verde (10%, un
+            // solo uso) ya queda cargado en el carrito, sin tener que tipearlo.
+            if (data.token && data.usuario) {
+                mvSetSesion(data.token, data.usuario);
+                migrarCarritoGuest();
+                marcarRecordatorioCarrito();
+            }
+            if (data.codigo_verde) guardarCodigoVerde(limpiarCodigoVerde(data.codigo_verde));
 
             this.style.display = 'none';
             const conf = document.getElementById('msg-confirmacion');
@@ -1991,7 +2141,21 @@ if (newsletterForm) {
                     navigator.clipboard.writeText(data.codigo_verde).catch(() => {});
                 });
             }
+
+            // No se redirige solo: la pantalla ofrece "Completar mi registro" e
+            // "Ir a comprar" (ya logueado y con el 10% aplicado). El botón de
+            // completar solo se muestra si a la cuenta le faltan datos.
+            // Si el servidor no creó cuenta (no devolvió token), no se dice que hay sesión.
+            const txtCuenta = document.getElementById('conf-cuenta-texto');
+            if (txtCuenta && !data.token) txtCuenta.textContent = '¡Felicitaciones, ya estás suscripto/a!';
+            const txtCompletar = document.getElementById('conf-completar-texto');
+            if (txtCompletar && !data.token) txtCompletar.style.display = 'none';
+            const btnCompletar = document.getElementById('btn-completar-registro');
+            if (btnCompletar) btnCompletar.style.display = mvPerfilIncompleto(mvUsuarioActual()) ? '' : 'none';
         } catch (err) {
+            if (btnSubmit) btnSubmit.disabled = false;
+            // "Ese email ya está suscripto": se recuerda para que el popup no reaparezca.
+            if (err.status === 409 && /suscript/i.test(err.message)) localStorage.setItem('mv_newsletter_mail', mail);
             if (err.message.toLowerCase().includes('referido')) {
                 show('err-ref', true);
             } else {

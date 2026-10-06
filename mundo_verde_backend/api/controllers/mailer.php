@@ -119,53 +119,65 @@ function enviarMailBienvenida(string $email, string $nombre): bool
     }
 }
 
+
 /**
- * Saludo al suscribirse al newsletter, con su código de referido.
- * Se envía al mail que dejó en la suscripción.
+ * Envuelve el contenido de un mail con el estilo común de Mundo Verde
+ * (caja centrada, texto verde, pie con el tip anti-spam y la firma).
+ */
+function envolverMailMV(string $contenidoHtml): string
+{
+    return
+        '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#333;text-align:center;">' .
+        $contenidoHtml .
+        '<p style="font-size:12px;color:#777;background:#fafafa;padding:10px;border-radius:6px;">' .
+        '💡 Agregá <em>info@vivemundoverde.com</em> a tus contactos y si este mail llegó a ' .
+        'Spam o Promociones, marcalo como "No es spam" para no perderte nuestras novedades.</p>' .
+        '<p style="margin-top:24px;">🌿 El equipo de Mundo Verde</p>' .
+        '</div>';
+}
+
+/** Recuadro verde grande con un código (mismo estilo que usaba el mail original). */
+function recuadroCodigoMV(string $codigo): string
+{
+    $c = htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8');
+    return
+        '<p style="margin:24px 0;">' .
+        '<span style="display:inline-block;background:#2e7d32;color:#fff;font-size:24px;' .
+        'font-weight:bold;letter-spacing:4px;padding:12px 28px;border-radius:8px;">' . $c . '</span></p>';
+}
+
+/**
+ * MAIL 1 — Bienvenida + CÓDIGO VERDE (el 10% de descuento, de un solo uso).
+ * Es el código que se ingresa en el paso 1 del carrito.
  * Nunca lanza excepciones: devuelve true/false y registra el error en el log.
  */
-function enviarMailNewsletter(string $email, string $nombre, string $codigo): bool
+function enviarMailCodigoVerde(string $email, string $nombre, string $codigoVerde): bool
 {
     try {
         $mail = crearMailer();
         $mail->addAddress($email, $nombre);
         $n = htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8');
-        $c = htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8');
 
-        $mail->Subject = '¡Gracias por sumarte a la comunidad de Vive Mundo Verde! 🌱';
-        $mail->Body =
-            '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#333;text-align:center;">' .
+        $mail->Subject = '¡Bienvenidx a Mundo Verde! Acá está tu 10% de descuento 🌱';
+        $mail->Body = envolverMailMV(
             '<h2 style="color:#2e7d32;">¡Hola, ' . $n . '!</h2>' .
             '<h2 style="color:#2e7d32;">¡Bienvenidx a Mundo Verde!</h2>' .
-            '<p>🎉Estamos tan contentos de estar on line que te regalamos 10% de descuento en todos nuestros productos! 🎉</p>' .
-            '<p>Cuando tengas tu 🛒 carrito armado, ingresá el código que te llegó en este mail y obtené tu descuento:</p>' .
-            ## El código de referido se muestra en un recuadro verde, centrado y con letra grande. ##
-            '<p style="margin:24px 0;">' .
-            '<span style="display:inline-block;background:#2e7d32;color:#fff;font-size:24px;' .
-            'font-weight:bold;letter-spacing:4px;padding:12px 28px;border-radius:8px;">' . $c . '</span></p>' .
-            ##aviso de que el código es para referidos y que se pueden recibir novedades, promos y talleres.##
-            '<p>🍀 Este código es tu <strong style="color:green;">código VERDE</strong> de la suerte 🍀 </p>' .
-            '<p>Y GUARDÁ ESTE MAIL 📧.</p>' .
-            '<p>Porque si 3 amigos tuyos se suscriben a nuestro newsletter con tu <strong style="color:green;">código VERDE</strong>, sumas 10% mas de descuento*</p>' .
-            ##'<p>Gracias por formar parte de nuestra comunidad. Te alcanzamos tu código de referido ' .
-            ##'para que refieras a nuevos clientes y obtengas importantes descuentos y vouchers.</p><br>' .
-            '<p style="font-size:13px;color:#666;">Compartilo con tus amigos y ganá descuentos.</p>' .
-            '<p>Vas a recibir novedades, promos y talleres exclusivos en tu email.</p>' .
-            '<p style="font-size:12px;color:#777;background:#fafafa;padding:10px;border-radius:6px;">' .
-            
-            '<p>*Éste código no es acumulable con otras promociones ni descuentos.</p>' .
-            
-            
-            '💡 Agregá <em>info@vivemundoverde.com</em> a tus contactos y si este mail llegó a ' .
-            'Spam o Promociones, marcalo como "No es spam" para no perderte nuestras novedades.</p>' .
-            '<p style="margin-top:24px;">🌿 El equipo de Mundo Verde</p>' .
-            '</div>';
+            '<p>🎉 Estamos tan contentos de estar on line que te regalamos ' .
+            '<strong>10% de descuento</strong> en tu primera compra. 🎉</p>' .
+            '<p>Tu cuenta ya está creada. Cuando tengas tu 🛒 carrito armado, iniciá sesión; ' .
+            'si el descuento no aparece solo, ingresá este <strong style="color:green;">Código Verde</strong> ' .
+            'en el paso 1 del carrito:</p>' .
+            recuadroCodigoMV($codigoVerde) .
+            '<p style="font-size:13px;color:#666;">Es de un solo uso. Guardá este mail 📧</p>' .
+            '<p>Vas a recibir novedades, promos y talleres exclusivos en tu email.</p>'
+        );
         $mail->AltBody =
             "¡Hola, $nombre!\n\n" .
-            "Gracias por formar parte de nuestra comunidad. Te alcanzamos tu código de referido " .
-            "para que refieras a nuevos clientes y obtengas importantes descuentos y vouchers.\n\n" .
-            "Tu código: $codigo\n\n" .
-            "Vas a recibir novedades, promos y talleres exclusivos en tu email.\n\n" .
+            "¡Bienvenidx a Mundo Verde! Te regalamos 10% de descuento en tu primera compra.\n\n" .
+            "Tu cuenta ya está creada. Cuando tengas tu carrito armado, iniciá sesión; si el " .
+            "descuento no aparece solo, ingresá este Código Verde en el paso 1 del carrito:\n\n" .
+            "Código Verde: $codigoVerde\n\n" .
+            "Es de un solo uso. Guardá este mail.\n\n" .
             "Tip: agregá info@vivemundoverde.com a tus contactos y, si este mail llegó a Spam " .
             "o Promociones, marcalo como \"No es spam\".\n\n" .
             "El equipo de Mundo Verde";
@@ -173,7 +185,109 @@ function enviarMailNewsletter(string $email, string $nombre, string $codigo): bo
         $mail->send();
         return true;
     } catch (\Throwable $e) {
-        error_log('[mail] Error enviando newsletter a ' . $email . ': ' . $e->getMessage());
+        error_log('[mail] Error enviando código verde a ' . $email . ': ' . $e->getMessage());
         return false;
     }
+}
+
+/**
+ * MAIL 2 — Código personal para REFERIR amigos (no es el del descuento).
+ * Nunca lanza excepciones: devuelve true/false y registra el error en el log.
+ */
+function enviarMailReferidos(string $email, string $nombre, string $codigoReferido): bool
+{
+    try {
+        $mail = crearMailer();
+        $mail->addAddress($email, $nombre);
+        $n = htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8');
+
+        $mail->Subject = 'Tu código para referir amigos a Mundo Verde 🍀';
+        $mail->Body = envolverMailMV(
+            '<h2 style="color:#2e7d32;">¡Hola, ' . $n . '!</h2>' .
+            '<p>🍀 Este es tu <strong style="color:green;">código para referir amigos</strong> 🍀</p>' .
+            recuadroCodigoMV($codigoReferido) .
+            '<p>Guardá este mail 📧 y compartí tu código: si <strong>3 amigos tuyos</strong> se suscriben ' .
+            'a nuestro newsletter con tu código, sumás <strong>10% más</strong> de descuento*.</p>' .
+            '<p style="font-size:13px;color:#666;">Este código <strong>no</strong> es el del descuento de bienvenida: ' .
+            'ese te llegó en otro mail.</p>' .
+            '<p style="font-size:12px;color:#777;">*Sujeto a las condiciones de la promoción.</p>'
+        );
+        $mail->AltBody =
+            "¡Hola, $nombre!\n\n" .
+            "Este es tu código para referir amigos: $codigoReferido\n\n" .
+            "Si 3 amigos tuyos se suscriben a nuestro newsletter con tu código, sumás 10% más " .
+            "de descuento*. Este código no es el del descuento de bienvenida: ese te llegó en otro mail.\n\n" .
+            "*Sujeto a las condiciones de la promoción.\n\n" .
+            "El equipo de Mundo Verde";
+
+        $mail->send();
+        return true;
+    } catch (\Throwable $e) {
+        error_log('[mail] Error enviando código de referidos a ' . $email . ': ' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * MAIL 3 — "Beneficios exclusivos": repite lo que anuncia el popup de la web
+ * (10% en la primera compra, ofertas únicas y gift cards especiales).
+ * No lleva ningún código: el descuento está en el mail 1.
+ * Nunca lanza excepciones: devuelve true/false y registra el error en el log.
+ */
+function enviarMailBeneficios(string $email, string $nombre): bool
+{
+    try {
+        $mail = crearMailer();
+        $mail->addAddress($email, $nombre);
+        $n = htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8');
+
+        $item = fn(string $icono, string $titulo, string $texto) =>
+            '<div style="margin:14px 0;">' .
+            '<div style="font-size:28px;">' . $icono . '</div>' .
+            '<div style="font-weight:bold;color:#2e7d32;font-size:16px;">' . $titulo . '</div>' .
+            '<div style="font-size:14px;color:#555;">' . $texto . '</div>' .
+            '</div>';
+
+        $mail->Subject = 'Tus beneficios exclusivos en Mundo Verde 🎁';
+        $mail->Body = envolverMailMV(
+            '<h2 style="color:#2e7d32;">¡Hola, ' . $n . '!</h2>' .
+            '<p>Por sumarte a la comunidad de <strong>Mundo Verde</strong>, estos son tus beneficios exclusivos:</p>' .
+            $item('🌿', '10% en tu primera compra', 'Usá el Código Verde que te enviamos en otro mail.') .
+            // TODO: acá van los detalles reales de ofertas y gift cards cuando estén definidos.
+            $item('🏷️', 'Ofertas únicas', 'Vas a recibir nuestras ofertas únicas en tu email.') .
+            $item('🎁', 'Gift cards especiales', 'Vas a recibir las novedades de nuestras gift cards especiales en tu email.')
+        );
+        $mail->AltBody =
+            "¡Hola, $nombre!\n\n" .
+            "Por sumarte a la comunidad de Mundo Verde, estos son tus beneficios exclusivos:\n\n" .
+            "- 10% en tu primera compra: usá el Código Verde que te enviamos en otro mail.\n" .
+            "- Ofertas únicas: las vas a recibir en tu email.\n" .
+            "- Gift cards especiales: vas a recibir las novedades en tu email.\n\n" .
+            "El equipo de Mundo Verde";
+
+        $mail->send();
+        return true;
+    } catch (\Throwable $e) {
+        error_log('[mail] Error enviando beneficios a ' . $email . ': ' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Al suscribirse al newsletter: manda los TRES mails, en este orden.
+ * El del Código Verde sale primero; si los otros fallan, el descuento ya llegó.
+ * Devuelve true si el mail del Código Verde se envió.
+ *
+ * Mantiene el nombre viejo (enviarMailNewsletter) para no romper al que lo llama.
+ * OJO: el 3er parámetro ahora es el CÓDIGO VERDE (antes recibía el de referidos).
+ * Si $codigoReferido viene vacío solo sale el mail 1 (los mails 2 y 3 se omiten).
+ */
+function enviarMailNewsletter(string $email, string $nombre, string $codigoVerde, string $codigoReferido = ''): bool
+{
+    $ok = enviarMailCodigoVerde($email, $nombre, $codigoVerde);
+    if ($codigoReferido !== '') {
+        enviarMailReferidos($email, $nombre, $codigoReferido);
+        enviarMailBeneficios($email, $nombre);
+    }
+    return $ok;
 }
