@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/newsletter.php';   // newsletter_codigo_verde_pendiente()
 
 function auth_registro(PDO $pdo): void
 {
@@ -79,6 +80,7 @@ function auth_registro(PDO $pdo): void
             'nombre' => $nombre,
             'email'  => $email,
             'rol'    => 'cliente',
+            'perfil_completo' => 1,   // el registro común pide todos los datos
         ],
     ];
 
@@ -126,7 +128,10 @@ function auth_login(PDO $pdo): void
             'nombre' => $usuario['nombre'],
             'email'  => $usuario['email'],
             'rol'    => $usuario['rol'],
+            'perfil_completo' => (int)($usuario['perfil_completo'] ?? 1),
         ],
+        // Si es suscriptor y todavía no usó su 10%, el front lo deja aplicado.
+        'codigo_verde_pendiente' => newsletter_codigo_verde_pendiente($pdo, $usuario['email']),
     ]);
 }
 
@@ -143,7 +148,73 @@ function auth_me(PDO $pdo): void
 {
     $usuario = usuarioAutenticado($pdo, true);
     unset($usuario['activo']);
+
+    $st = $pdo->prepare('SELECT perfil_completo FROM usuarios WHERE id = :id');
+    $st->execute(['id' => $usuario['id']]);
+    $pc = $st->fetchColumn();
+    $usuario['perfil_completo'] = $pc === false ? 1 : (int)$pc;
+
     responder($usuario);
+}
+
+/**
+ * PATCH /usuario/me — completa los datos pendientes del registro corto
+ * (el que se crea al suscribirse al newsletter). Exige sesión iniciada.
+ * Domicilio y localidad son obligatorios (igual que en el registro común);
+ * teléfono, código postal y fecha de nacimiento son opcionales y, si vienen
+ * vacíos, NO pisan lo que ya estuviera guardado.
+ */
+function auth_completar_perfil(PDO $pdo): void
+{
+    $usuario = usuarioAutenticado($pdo, true);
+    $body = leerBody();
+
+    $telefono          = trim($body['telefono'] ?? '');
+    $domicilioCompleto = trim($body['domicilio_completo'] ?? '');
+    $localidad         = trim($body['localidad'] ?? '');
+    $codigoPostal      = trim($body['codigo_postal'] ?? '');
+    $fechaNac          = trim($body['fecha_nacimiento'] ?? '');
+
+    if ($domicilioCompleto === '') error('El domicilio completo es obligatorio.');
+    if ($localidad === '') error('La localidad es obligatoria.');
+
+    if ($fechaNac !== '') {
+        $ok = preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $fechaNac, $m) && checkdate((int)$m[2], (int)$m[3], (int)$m[1]);
+        if (!$ok) error('La fecha de nacimiento no es válida.');
+    }
+
+    $pdo->prepare(
+        'UPDATE usuarios
+            SET domicilio_completo = :dom,
+                localidad          = :loc,
+                telefono           = COALESCE(:tel, telefono),
+                codigo_postal      = COALESCE(:cp, codigo_postal),
+                fecha_nacimiento   = COALESCE(:fecha, fecha_nacimiento),
+                perfil_completo    = 1
+          WHERE id = :id'
+    )->execute([
+        'dom'   => $domicilioCompleto,
+        'loc'   => $localidad,
+        'tel'   => $telefono !== '' ? $telefono : null,
+        'cp'    => $codigoPostal !== '' ? $codigoPostal : null,
+        'fecha' => $fechaNac !== '' ? $fechaNac : null,
+        'id'    => $usuario['id'],
+    ]);
+
+    $stmt = $pdo->prepare('SELECT id, nombre, email, rol FROM usuarios WHERE id = :id');
+    $stmt->execute(['id' => $usuario['id']]);
+    $u = $stmt->fetch();
+
+    responder([
+        'mensaje' => 'Datos guardados.',
+        'usuario' => [
+            'id'              => (int)$u['id'],
+            'nombre'          => $u['nombre'],
+            'email'           => $u['email'],
+            'rol'             => $u['rol'],
+            'perfil_completo' => 1,
+        ],
+    ]);
 }
 
 function auth_recuperar(PDO $pdo): void

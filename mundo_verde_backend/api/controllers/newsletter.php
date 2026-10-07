@@ -3,17 +3,23 @@
  * Newsletter + programa de referidos.
  * Cada suscriptor recibe un codigo_mio único. Si se suscribe usando el
  * código de otra persona (cod_ref), esa persona suma un referido exitoso.
+ *
+ * Suscribirse crea también la cuenta del usuario (REGISTRO CORTO): nombre,
+ * mail y contraseña. La cuenta queda con perfil_completo = 0 y la sesión
+ * iniciada; domicilio, teléfono, etc. los completa después (PATCH /usuario/me).
  */
 require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/auth.php';   // crearSesion()
 
 function newsletter_suscribir(PDO $pdo): void
 {
     $body = leerBody();
 
-    $nombre = trim($body['nombre'] ?? '');
-    $mail   = trim(strtolower($body['mail'] ?? ''));
-    $origen = trim($body['origen'] ?? '');
-    $codRef = trim(strtoupper($body['cod_ref'] ?? ''));
+    $nombre   = trim($body['nombre'] ?? '');
+    $mail     = trim(strtolower($body['mail'] ?? ''));
+    $origen   = trim($body['origen'] ?? '');
+    $codRef   = trim(strtoupper($body['cod_ref'] ?? ''));
+    $password = (string)($body['password'] ?? '');
 
     if ($nombre === '') error('El nombre es obligatorio.');
     if (!validarEmail($mail)) error('Ingresá un email válido.');
@@ -22,6 +28,24 @@ function newsletter_suscribir(PDO $pdo): void
     $existe->execute(['mail' => $mail]);
     if ($existe->fetch()) {
         error('Ese email ya está suscripto al newsletter.', 409);
+    }
+
+    // ¿Ya hay una cuenta con ese mail? Si la hay, solo su dueño (con la sesión
+    // iniciada en esa cuenta) puede suscribirla: así nadie "toma" el mail de otro.
+    // Si no la hay, se crea la cuenta y la contraseña es obligatoria.
+    $cuenta = $pdo->prepare('SELECT id FROM usuarios WHERE email = :email');
+    $cuenta->execute(['email' => $mail]);
+    $cuentaExistente = $cuenta->fetch();
+
+    $crearCuenta = false;
+    if ($cuentaExistente) {
+        $sesion = usuarioAutenticado($pdo, false);
+        if (!$sesion || (int)$sesion['id'] !== (int)$cuentaExistente['id']) {
+            error('Ya existe una cuenta con ese email. Iniciá sesión y suscribite desde ahí.', 409);
+        }
+    } else {
+        if (strlen($password) < 8) error('La contraseña debe tener al menos 8 caracteres.');
+        $crearCuenta = true;
     }
 
     $referidoPorId = null;
@@ -35,15 +59,29 @@ function newsletter_suscribir(PDO $pdo): void
         $referidoPorId = (int)$referente['id'];
     }
 
-    $codigoMio = generarCodigoReferido($pdo);
+    $codigoMio   = generarCodigoReferido($pdo);
     $codigoVerde = generarCodigoVerde($pdo);   // código propio para el descuento (distinto del de referidos)
 
-    $stmt = $pdo->prepare(
-        'INSERT INTO newsletter_suscriptores (nombre, mail, origen, codigo_mio, referido_por_id, acepta_tyc, codigo_verde)
-         VALUES (:nombre, :mail, :origen, :codigo, :referido_por, 1, :codigo_verde)'
-    );
+    // Cuenta + suscripción van juntas: si algo falla no queda una sin la otra.
+    $usuarioId = null;
+    $pdo->beginTransaction();
     try {
-        $stmt->execute([
+        if ($crearCuenta) {
+            $pdo->prepare(
+                'INSERT INTO usuarios (nombre, email, password_hash, rol, perfil_completo)
+                 VALUES (:nombre, :email, :hash, "cliente", 0)'
+            )->execute([
+                'nombre' => $nombre,
+                'email'  => $mail,
+                'hash'   => password_hash($password, PASSWORD_DEFAULT),
+            ]);
+            $usuarioId = (int)$pdo->lastInsertId();
+        }
+
+        $pdo->prepare(
+            'INSERT INTO newsletter_suscriptores (nombre, mail, origen, codigo_mio, referido_por_id, acepta_tyc, codigo_verde)
+             VALUES (:nombre, :mail, :origen, :codigo, :referido_por, 1, :codigo_verde)'
+        )->execute([
             'nombre'       => $nombre,
             'mail'         => $mail,
             'origen'       => $origen ?: null,
@@ -51,35 +89,51 @@ function newsletter_suscribir(PDO $pdo): void
             'referido_por' => $referidoPorId,
             'codigo_verde' => $codigoVerde,
         ]);
+
+        if ($referidoPorId) {
+            $pdo->prepare(
+                'UPDATE newsletter_suscriptores SET referidos_exitosos = referidos_exitosos + 1 WHERE id = :id'
+            )->execute(['id' => $referidoPorId]);
+        }
+
+        $pdo->commit();
     } catch (PDOException $e) {
-        // Dos suscripciones simultáneas con el mismo mail: gana la primera.
-        if (esDuplicadoEnClave($e, 'mail')) {
-            error('Ese email ya está suscripto al newsletter.', 409);
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        // Dos pedidos simultáneos con el mismo mail: gana el primero.
+        if (isset($e->errorInfo[1]) && (int)$e->errorInfo[1] === 1062) {
+            error('Ese email ya tiene una cuenta o una suscripción. Iniciá sesión.', 409);
         }
         throw $e;
     }
 
-    if ($referidoPorId) {
-        $pdo->prepare(
-            'UPDATE newsletter_suscriptores SET referidos_exitosos = referidos_exitosos + 1 WHERE id = :id'
-        )->execute(['id' => $referidoPorId]);
-    }
-
-    // Si el envío falla no rompe la suscripción: queda registrado en el log.
-    // Salen dos mails: 1) Código Verde (descuento) y 2) código para referir amigos.
-    // Orden de parámetros: (mail, nombre, CÓDIGO VERDE, código de referidos).
-    enviarMailNewsletter($mail, $nombre, $codigoVerde, $codigoMio);
-
-    responder([
-        'nombre'     => $nombre,
-        'codigo_mio' => $codigoMio,
+    $respuesta = [
+        'nombre'       => $nombre,
+        'codigo_mio'   => $codigoMio,
         'codigo_verde' => $codigoVerde,
         // Texto listo para mostrar en el frontend (incluye la nota sobre spam).
-        'mensaje'    => '¡Listo, ya estás suscripto/a! Te enviamos dos mails: uno con tu Código Verde (10% de descuento) y otro con tu código para referir amigos. ' .
-                        'Si no lo ves en unos minutos, revisá la carpeta de Spam o Promociones. ' .
-                        'Si está ahí, marcalo como "No es spam" y agregá viveunmundoverde@gmail.com ' .
-                        'a tus contactos para que los próximos mails lleguen a tu bandeja principal.',
-    ], 201);
+        'mensaje'      => '¡Listo, ya estás suscripto/a! Te enviamos dos mails: uno con tu Código Verde (10% de descuento) y otro con tu código para referir amigos. ' .
+                          'Si no los ves en unos minutos, revisá la carpeta de Spam o Promociones. ' .
+                          'Si están ahí, marcalos como "No es spam" y agregá info@vivemundoverde.com ' .
+                          'a tus contactos para que los próximos mails lleguen a tu bandeja principal.',
+    ];
+
+    // Cuenta nueva = sesión iniciada al instante (igual que en el registro común).
+    // Si ya tenía cuenta y sesión iniciada, no se devuelve token: sigue con la suya.
+    if ($crearCuenta) {
+        $respuesta['token']   = crearSesion($pdo, $usuarioId);
+        $respuesta['usuario'] = [
+            'id'              => $usuarioId,
+            'nombre'          => $nombre,
+            'email'           => $mail,
+            'rol'             => 'cliente',
+            'perfil_completo' => 0,
+        ];
+    }
+
+    // Se responde YA y recién después salen los 3 mails (SMTP puede tardar).
+    // Si el envío falla no rompe nada: queda en el log.
+    responderYContinuar($respuesta, 201);
+    enviarMailNewsletter($mail, $nombre, $codigoVerde, $codigoMio);
 }
 
 function newsletter_mi_estado(PDO $pdo): void
@@ -239,4 +293,19 @@ function generarCodigoVerde(PDO $pdo): string
     } while ($stmt->fetch());
 
     return $codigo;
+}
+
+/**
+ * Código Verde pendiente (sin usar y activo) del suscriptor con ese mail,
+ * o null. El login lo devuelve para que el 10% quede aplicado en el carrito.
+ */
+function newsletter_codigo_verde_pendiente(PDO $pdo, string $email): ?string
+{
+    $stmt = $pdo->prepare(
+        'SELECT codigo_verde FROM newsletter_suscriptores
+         WHERE mail = :mail AND activo = 1 AND codigo_usado_en IS NULL AND codigo_verde IS NOT NULL'
+    );
+    $stmt->execute(['mail' => strtolower(trim($email))]);
+    $codigo = $stmt->fetchColumn();
+    return $codigo ? (string)$codigo : null;
 }
