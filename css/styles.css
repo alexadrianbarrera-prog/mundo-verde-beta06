@@ -12,7 +12,8 @@
 ============================================= */
 .hero {
     position: relative;
-    height: 100vh;
+    height: 100vh;   /* respaldo para navegadores viejos */
+    height: 100dvh;  /* alto REAL visible en celulares (descuenta la barra del navegador) */
     overflow: hidden;
 }
 .video-bg {
@@ -109,11 +110,32 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
 }
+/* Celulares y tablets chicas */
+@media (max-width: 768px) {
+    .btn-logo img {
+        width: min(500px, 80vw);   /* el logo no se pasa del ancho de la pantalla */
+    }
+    .aviso-sonido {
+        /* sube el cartel por encima de la barra de gestos / home del celular */
+        bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+        max-width: calc(100vw - 32px);
+        font-size: 13px;
+        padding: 9px 16px;
+    }
+}
 @media (max-width: 480px) {
     .aviso-sonido {
-        bottom: 24px;
         font-size: 12.5px;
         padding: 8px 14px;
+    }
+}
+/* Celulares muy angostos: el texto puede pasar a 2 renglones */
+@media (max-width: 360px) {
+    .aviso-sonido {
+        white-space: normal;
+        text-align: center;
+        font-size: 12px;
+        border-radius: 18px;
     }
 }
 
