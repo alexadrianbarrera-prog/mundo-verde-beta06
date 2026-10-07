@@ -111,7 +111,7 @@
     50% { opacity: 0.6; }
 }
 /* Celulares y tablets chicas */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
     .btn-logo img {
         width: min(500px, 80vw);   /* el logo no se pasa del ancho de la pantalla */
     }
@@ -1663,7 +1663,7 @@ Responsive para FOOTER
    HEADER RESPONSIVE CELULARES
    ════════════════════════════════════ */
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
 
     .header {
         display: flex;
@@ -1792,7 +1792,7 @@ Responsive para FOOTER
    FOOTER RESPONSIVE MOBILE
    ════════════════════════════════════ */
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
 
     .footer-natural {
         padding: 35px 20px;
@@ -1907,7 +1907,7 @@ Responsive para FOOTER
 }
 
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
     /* La barra gris de subcategorías (Interior, Plantines florales,
        Arbustos, Aromáticas...) queda oculta en mobile: ese mismo
        listado ya está disponible en el menú hamburguesa. */
@@ -2619,7 +2619,7 @@ input[type="file"] {
    HEADER MOBILE — VERSION FINAL
    ============================================================ */
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
 
     /* ========================================================
        HEADER GENERAL
@@ -3026,7 +3026,7 @@ input[type="file"] {
    USUARIO LOGUEADO - HEADER MOBILE
    ============================================================ */
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
 
     .btn-login.logueado {
 
@@ -3429,7 +3429,7 @@ input[type="file"] {
 /**********LETRAS DE CATEGORÍAS (MOBILE)**********/
 /* Celulares: reemplaza el manuscrito dentro de aside y .fondo
    por una fuente sans-serif parecida a Lucida Sans */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
     aside,
     aside *,
     .fondo,
@@ -3441,7 +3441,7 @@ input[type="file"] {
 }
 /* Celulares en HORIZONTAL: header en una sola fila, como en PC
    (menú + lupa | logo | login + carrito). El banner queda arriba. */
-@media (max-width: 768px) and (max-height: 500px) and (orientation: landscape) {
+@media (max-height: 500px) and (orientation: landscape) {
 
     .header {
         display: grid;
@@ -3583,4 +3583,17 @@ input[type="file"] {
     padding: 2px 10px;
     font-size: 12px;
     font-weight: 700;
+}
+
+
+/* Celulares en horizontal: el logo del index no puede ser mas alto que la pantalla */
+@media (max-height: 500px) and (orientation: landscape) {
+    .btn-logo img {
+        width: auto;
+        max-width: 80vw;
+        max-height: 62dvh;
+    }
+    .contenido {
+        gap: 10px;
+    }
 }
