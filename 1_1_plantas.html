@@ -320,11 +320,9 @@
          PASO 1: Carrito
     ───────────────────────────────────────── -->
     <div id="checkout-paso-1" style="display:flex; flex-direction:column; flex:1;">
-
         <div class="carrito-items" id="carrito-lista">
             <div class="carrito-vacio">Tu carrito está vacío 🌱</div>
         </div>
-
         <div class="carrito-footer" id="carrito-footer-p1">
             <div id="aviso-envio-gratis" class="aviso-envio" style="display:none"></div>
             <div id="aviso-fragil-carrito" class="aviso-fragil" style="display:none">
@@ -339,19 +337,15 @@
             </button>
             <button class="btn-vaciar" onclick="vaciarCarrito()">Vaciar carrito</button>
         </div>
-
     </div>
 
     <!-- ─────────────────────────────────────────
          PASO 2: Forma de entrega
     ───────────────────────────────────────── -->
     <div id="checkout-paso-2" style="display:inline-block; flex-direction:column; flex:1;">
-
         <div class="checkout-metodos">
-
             <!-- Recuadros de forma de entrega, uno al lado del otro -->
             <div class="metodos-row">
-
                 <!-- Opción A: Retiro en local -->
                 <label class="metodo-box">
                     <input type="radio" name="formaEntrega" value="retiro">
@@ -360,7 +354,6 @@
                         <p>Camino General Belgrano 4470, Berazategui</p>
                     </div>
                 </label>
-
                 <!-- Opción B: Envío a domicilio -->
                 <label class="metodo-box">
                     <input type="radio" name="formaEntrega" value="envio">
@@ -369,13 +362,11 @@
                         <p>Gratis desde $150.000 en Berazategui y Quilmes Centro</p>
                     </div>
                 </label>
-
             </div>
-
             <!-- Opción C: coordinar la entrega directamente con un vendedor
                  por WhatsApp (ocupa el ancho de las dos opciones de arriba) -->
             <button type="button" class="btn-coordinar-vendedor" onclick="coordinarConVendedor()">
-                <i class="fab fa-whatsapp"></i> Quiero coordinar compra con la vendedora
+                <i class="fab fa-whatsapp"></i> Coordinar compra y entrega con la vendedora.
             </button>
 
             <!-- Formulario de retiro (visible solo al elegir retiro en local):
@@ -386,7 +377,6 @@
                 <input type="text" id="retiro-nombre" placeholder="Nombre de quien retira *" autocomplete="name">
                 <input type="text" id="retiro-dni" placeholder="DNI *" inputmode="numeric" pattern="[0-9]*" maxlength="8">
             </div>
-
             <!-- Formulario de envío (visible solo al elegir envío a domicilio) -->
             <div id="datosEnvio" class="oculto">
                 <input type="text" id="envio-nombre" placeholder="Nombre completo *" autocomplete="name">
@@ -432,16 +422,13 @@
                 Ver mapa de cobertura para Quilmes Centro
             </div>
         </a>
+    </div>
         
-        </div>
-        
-
         <div class="checkout-footer">
             <button class="btn-pedido" onclick="avanzarAPaso3Pago()">
                 Continuar al pago →
             </button>
         </div>
-
     </div>
 
     <!-- ─────────────────────────────────────────
@@ -453,8 +440,7 @@
 
             <p class="zona-msg" style="display:block; color:#555; margin-bottom:10px;">
                 Elegí cómo vas a pagar. Por ahora podés completar la compra con
-                <strong>Alias Bancario</strong> o <strong>Tarjeta</strong>; el resto de las
-                opciones va a estar disponible muy pronto.
+                <strong>Alias Bancario</strong> o <strong>Tarjeta</strong><!--; el resto de las opciones va a estar disponible muy pronto.-->
             </p>
 
             <!-- Grilla de botones: todos del mismo tamaño, solo ícono + nombre.
@@ -468,34 +454,29 @@
                     <span>Alias Bancario</span>
                     <span class="metodo-alias">AGUS.<wbr>MUNDO.<wbr>VERDE</span>
                 </label>
-
                 <label class="metodo-card">
                     <input type="radio" name="metodoPago" value="tarjeta">
                     <i class="fa-solid fa-credit-card"></i>
                     <span>Tarjeta de crédito / débito</span>
                 </label>
-
-                <label class="metodo-card metodo-card--proximamente">
+                <!--<label class="metodo-card metodo-card--proximamente">
                     <input type="radio" name="metodoPago" value="mercadopago">
                     <i class="fa-solid fa-wallet"></i>
                     <span>Mercado Pago</span>
                     <span class="metodo-proximamente-tag">Próximamente</span>
                 </label>
-
                 <label class="metodo-card metodo-card--proximamente">
                     <input type="radio" name="metodoPago" value="modo">
                     <i class="fa-solid fa-mobile-screen-button"></i>
                     <span>MODO</span>
                     <span class="metodo-proximamente-tag">Próximamente</span>
                 </label>
-
                 <label class="metodo-card metodo-card--proximamente">
                     <input type="radio" name="metodoPago" value="cuotasdebito">
                     <i class="fa-solid fa-calendar-days"></i>
                     <span>Cuotas sin interés con Débito</span>
                     <span class="metodo-proximamente-tag">Próximamente</span>
-                </label>
-
+                </label>-->
             </div>
 
             <!-- Panel de detalle: un solo renglón completo debajo de la
@@ -505,7 +486,7 @@
 
                 <!-- Transferencia (FUNCIONAL) -->
                 <div id="detalle-transferencia" class="metodo-detalle">
-                    <p class="zona-msg" style="display:block; color:#555;">
+                    <p class="zona-msg" style="display:block; color:green; font-weight:bold; margin-bottom:10px; font-size:16px;">
                         Hasta 3 cuotas sin interés desde $150.000
                     </p>
                     <!--<div id="cbu-info" class="cbu-info-box">
@@ -518,7 +499,7 @@
                             <span class="cbu-value">Banco Santander</span>
                         </div>
                     </div>-->
-                    <div class="pago-ref-box">
+                     <div class="pago-ref-box">
                         <p>Total a transferir: <strong class="pago-total">$0</strong></p>
                         <p>Poné este número de pedido en el <strong>concepto</strong> de la transferencia:<br>
                         <strong class="pago-numero">MV-----</strong></p>
@@ -661,6 +642,7 @@
         </button>
     </div>
 </div>
+
     <script src="js/anuncios-banner.js"></script>
     <script src="js/script.js"></script>
     <script src="js/api.js"></script>
