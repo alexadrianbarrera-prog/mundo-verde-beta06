@@ -162,7 +162,7 @@ function enviarMailCodigoVerde(string $email, string $nombre, string $codigoVerd
         $mail->Body = envolverMailMV(
             '<h2 style="color:#2e7d32;">¡Hola, ' . $n . '!</h2>' .
             '<h2 style="color:#2e7d32;">¡Bienvenidx a Mundo Verde!</h2>' .
-            '<p>🎉 Estamos tan contentos de estar on line que te regalamos ' .
+            '<p>🎉 Estamos tan contentos de estarque te regalamos ' .
             '<strong>10% de descuento</strong> en tu primera compra. 🎉</p>' .
             '<p>Tu cuenta ya está creada. Cuando tengas tu 🛒 carrito armado, iniciá sesión; ' .
             'si el descuento no aparece solo, ingresá este <strong style="color:green;">Código Verde</strong> ' .
