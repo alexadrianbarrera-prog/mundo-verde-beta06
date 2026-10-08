@@ -4,24 +4,22 @@
  * Cada suscriptor recibe un codigo_mio único. Si se suscribe usando el
  * código de otra persona (cod_ref), esa persona suma un referido exitoso.
  *
- * Suscribirse crea también la cuenta del usuario (REGISTRO CORTO): nombre,
- * mail y contraseña. La cuenta queda con perfil_completo = 0 y la sesión
- * iniciada; domicilio, teléfono, etc. los completa después (PATCH /usuario/me).
+ * Suscribirse SOLO registra al suscriptor: pide mail, de dónde nos conoció,
+ * aceptación de términos y (opcional) código de referido. NO crea cuenta de
+ * usuario ni inicia sesión. Si más adelante la persona se registra con ese
+ * mismo mail, el login le aplica su Código Verde pendiente
+ * (newsletter_codigo_verde_pendiente).
  */
 require_once __DIR__ . '/mailer.php';
-require_once __DIR__ . '/auth.php';   // crearSesion()
 
 function newsletter_suscribir(PDO $pdo): void
 {
     $body = leerBody();
 
-    $nombre   = trim($body['nombre'] ?? '');
-    $mail     = trim(strtolower($body['mail'] ?? ''));
-    $origen   = trim($body['origen'] ?? '');
-    $codRef   = trim(strtoupper($body['cod_ref'] ?? ''));
-    $password = (string)($body['password'] ?? '');
+    $mail   = trim(strtolower($body['mail'] ?? ''));
+    $origen = trim($body['origen'] ?? '');
+    $codRef = trim(strtoupper($body['cod_ref'] ?? ''));
 
-    if ($nombre === '') error('El nombre es obligatorio.');
     if (!validarEmail($mail)) error('Ingresá un email válido.');
 
     $existe = $pdo->prepare('SELECT id FROM newsletter_suscriptores WHERE mail = :mail');
@@ -30,23 +28,10 @@ function newsletter_suscribir(PDO $pdo): void
         error('Ese email ya está suscripto al newsletter.', 409);
     }
 
-    // ¿Ya hay una cuenta con ese mail? Si la hay, solo su dueño (con la sesión
-    // iniciada en esa cuenta) puede suscribirla: así nadie "toma" el mail de otro.
-    // Si no la hay, se crea la cuenta y la contraseña es obligatoria.
-    $cuenta = $pdo->prepare('SELECT id FROM usuarios WHERE email = :email');
-    $cuenta->execute(['email' => $mail]);
-    $cuentaExistente = $cuenta->fetch();
-
-    $crearCuenta = false;
-    if ($cuentaExistente) {
-        $sesion = usuarioAutenticado($pdo, false);
-        if (!$sesion || (int)$sesion['id'] !== (int)$cuentaExistente['id']) {
-            error('Ya existe una cuenta con ese email. Iniciá sesión y suscribite desde ahí.', 409);
-        }
-    } else {
-        if (strlen($password) < 8) error('La contraseña debe tener al menos 8 caracteres.');
-        $crearCuenta = true;
-    }
+    // El formulario ya no pide nombre. La columna `nombre` se completa con el
+    // que se deduce del mail (crixus@gmail.com -> "Crixus"), el mismo criterio
+    // que usa el mail de bienvenida del registro.
+    $nombre = nombreDesdeEmail($mail);
 
     $referidoPorId = null;
     if ($codRef !== '') {
@@ -62,22 +47,9 @@ function newsletter_suscribir(PDO $pdo): void
     $codigoMio   = generarCodigoReferido($pdo);
     $codigoVerde = generarCodigoVerde($pdo);   // código propio para el descuento (distinto del de referidos)
 
-    // Cuenta + suscripción van juntas: si algo falla no queda una sin la otra.
-    $usuarioId = null;
+    // La suscripción y el sumado del referido van juntos: si algo falla no queda uno sin el otro.
     $pdo->beginTransaction();
     try {
-        if ($crearCuenta) {
-            $pdo->prepare(
-                'INSERT INTO usuarios (nombre, email, password_hash, rol, perfil_completo)
-                 VALUES (:nombre, :email, :hash, "cliente", 0)'
-            )->execute([
-                'nombre' => $nombre,
-                'email'  => $mail,
-                'hash'   => password_hash($password, PASSWORD_DEFAULT),
-            ]);
-            $usuarioId = (int)$pdo->lastInsertId();
-        }
-
         $pdo->prepare(
             'INSERT INTO newsletter_suscriptores (nombre, mail, origen, codigo_mio, referido_por_id, acepta_tyc, codigo_verde)
              VALUES (:nombre, :mail, :origen, :codigo, :referido_por, 1, :codigo_verde)'
@@ -101,13 +73,13 @@ function newsletter_suscribir(PDO $pdo): void
         if ($pdo->inTransaction()) $pdo->rollBack();
         // Dos pedidos simultáneos con el mismo mail: gana el primero.
         if (isset($e->errorInfo[1]) && (int)$e->errorInfo[1] === 1062) {
-            error('Ese email ya tiene una cuenta o una suscripción. Iniciá sesión.', 409);
+            error('Ese email ya está suscripto al newsletter.', 409);
         }
         throw $e;
     }
 
+    // Sin token ni usuario: no se crea cuenta ni se inicia sesión.
     $respuesta = [
-        'nombre'       => $nombre,
         'codigo_mio'   => $codigoMio,
         'codigo_verde' => $codigoVerde,
         // Texto listo para mostrar en el frontend (incluye la nota sobre spam).
@@ -117,20 +89,7 @@ function newsletter_suscribir(PDO $pdo): void
                           'a tus contactos para que los próximos mails lleguen a tu bandeja principal.',
     ];
 
-    // Cuenta nueva = sesión iniciada al instante (igual que en el registro común).
-    // Si ya tenía cuenta y sesión iniciada, no se devuelve token: sigue con la suya.
-    if ($crearCuenta) {
-        $respuesta['token']   = crearSesion($pdo, $usuarioId);
-        $respuesta['usuario'] = [
-            'id'              => $usuarioId,
-            'nombre'          => $nombre,
-            'email'           => $mail,
-            'rol'             => 'cliente',
-            'perfil_completo' => 0,
-        ];
-    }
-
-    // Se responde YA y recién después salen los 3 mails (SMTP puede tardar).
+    // Se responde YA y recién después salen los mails (SMTP puede tardar).
     // Si el envío falla no rompe nada: queda en el log.
     responderYContinuar($respuesta, 201);
     enviarMailNewsletter($mail, $nombre, $codigoVerde, $codigoMio);

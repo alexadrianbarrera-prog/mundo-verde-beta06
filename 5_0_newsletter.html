@@ -557,35 +557,10 @@
         <p class="pf"><strong>Obtené beneficios exclusivos</strong></p>
 
         <div class="form_input">
-            <label>Nombre
-                <input type="text" id="nombre" placeholder="Tu nombre" required>
-            </label>
-            <div class="field-error" id="err-nombre">Ingresá tu nombre.</div>
-        </div>
-
-        <div class="form_input">
             <label>Email
                 <input type="email" id="mail" placeholder="Tu correo electrónico" required>
             </label>
             <div class="field-error" id="err-mail">Ingresá un email válido.</div>
-        </div>
-
-        <!-- Contraseña: la suscripción crea tu cuenta y te deja logueado.
-             (script.js los oculta solo si ya hay sesión iniciada) -->
-        <div id="nl-password-wrap">
-            <div class="form_input">
-                <label>Contraseña
-                    <input type="password" id="nl-password" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
-                </label>
-                <div class="field-error" id="err-nl-password">La contraseña debe tener al menos 8 caracteres.</div>
-            </div>
-
-            <div class="form_input">
-                <label>Confirmar contraseña
-                    <input type="password" id="nl-password2" placeholder="Repetí tu contraseña" autocomplete="new-password">
-                </label>
-                <div class="field-error" id="err-nl-password2">Las contraseñas no coinciden.</div>
-            </div>
         </div>
 
         <div class="form_input">
@@ -628,7 +603,7 @@
         <h3>¡Bienvenidx a Mundo Verde!</h3>
         <p id="conf-nombre-texto"></p>
         <p><span id="conf-cuenta-texto">¡Felicitaciones! Tu cuenta ya está creada y ya iniciaste sesión.</span> Tenés tu <strong><span id="conf-pct">10</span>% de descuento</strong> aplicado en tu carrito (se usa una sola vez).</p>
-        <p>Por las dudas, tu Código Verde es:</p>
+        <p>, tu Código Verde es:</p>
         <div class="codigo-ref" id="conf-codigo-verde"></div>
         <p>Y este es tu código personal para referir amigos:</p>
         <div class="codigo-ref" id="conf-codigo"></div>
@@ -636,7 +611,7 @@
         <p style="margin-top:14px; font-size:.82rem; opacity:.7;">
             Vas a recibir novedades, promos y talleres exclusivos en tu email.
         </p>
-        <p id="conf-completar-texto" style="font-size:.85rem;">Podés completar tus datos ahora o más adelante, cuando quieras.</p>
+        <p id="conf-completar-texto" style="font-size:.85rem;">Podés completar tus datos ahora o más adelante.</p>
         <div class="btn-container" style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
             <!-- script.js lo muestra solo si a la cuenta le faltan datos -->
             <a href="registro.html?completar=1" id="btn-completar-registro" class="btn-suscribirme" style="display:none; text-decoration:none;">Completar mi registro</a>

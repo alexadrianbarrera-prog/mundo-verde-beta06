@@ -844,6 +844,20 @@ function agregarColumnaComentarios(meta) {
   p.editables = Object.assign({}, p.editables, { comentarios: 'textarea' });
 }
 
+/* ── Newsletter: los códigos (codigo_mio, codigo_verde) y los contadores de referidos
+   los genera y actualiza el backend al suscribirse (newsletter_suscribir). Se siguen
+   mostrando en la tabla, pero solo de lectura. Tampoco se da de alta un suscriptor a
+   mano desde acá: quedaría sin códigos. Los suscriptores entran por el formulario. ── */
+function ajustarNewsletter(meta) {
+  const n = meta && meta.newsletter_suscriptores;
+  if (!n) return;
+  const ed = Object.assign({}, n.editables);
+  ['codigo_mio', 'codigo_verde', 'codigo_usado_en', 'referido_por_id', 'referidos_exitosos']
+    .forEach(c => { delete ed[c]; });
+  n.editables = ed;
+  n.sin_alta = true;
+}
+
 let META = null;
 let TABLA_ACTUAL = null;
 
@@ -910,6 +924,7 @@ async function iniciarApp() {
   META = await mvAdmin.tablas();
   agregarColumnaComentarios(META);
   agregarColumnaPaginas(META);
+  ajustarNewsletter(META);
   const tabsEl = document.getElementById('tabs');
   tabsEl.innerHTML = '';
   Object.keys(META).forEach((tabla, i) => {
@@ -1053,7 +1068,7 @@ function renderToolbar(tabla) {
     toolbarEl.appendChild(sel);
   }
 
-  if (!meta.solo_lectura) {
+  if (!meta.solo_lectura && !meta.sin_alta) {
     const btnAdd = document.createElement('button');
     btnAdd.className = 'btn-add';
     btnAdd.innerHTML = `<i class="fa-solid fa-plus"></i> Agregar`;

@@ -2040,62 +2040,22 @@ if (newsletterForm) {
         });
     }
 
-    /* La suscripción al newsletter ahora crea la cuenta: pide contraseña.
-       Si el HTML todavía no tiene los campos (#nl-password / #nl-password2),
-       se agregan solos justo antes del botón de enviar. Si ya hay sesión
-       iniciada no hacen falta y se ocultan. */
-    function asegurarCamposPasswordNewsletter() {
-        let wrap = document.getElementById('nl-password-wrap');
-        if (!wrap) {
-            wrap = document.createElement('div');
-            wrap.id = 'nl-password-wrap';
-            wrap.innerHTML = `
-                <div class="form_input">
-                    <label>Contraseña
-                        <input type="password" id="nl-password" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
-                    </label>
-                    <div class="field-error" id="err-nl-password">La contraseña debe tener al menos 8 caracteres.</div>
-                </div>
-                <div class="form_input">
-                    <label>Confirmar contraseña
-                        <input type="password" id="nl-password2" placeholder="Repetí tu contraseña" autocomplete="new-password">
-                    </label>
-                    <div class="field-error" id="err-nl-password2">Las contraseñas no coinciden.</div>
-                </div>`;
-            const boton = newsletterForm.querySelector('button[type="submit"]');
-            const destino = boton ? (boton.closest('.btn-container') || boton) : null;
-            if (destino && destino.parentNode) destino.parentNode.insertBefore(wrap, destino);
-            else newsletterForm.appendChild(wrap);
-        }
-        wrap.style.display = mvUsuarioActual() ? 'none' : '';
-    }
-    document.addEventListener('DOMContentLoaded', asegurarCamposPasswordNewsletter);
-
     newsletterForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const nombre  = document.getElementById('nombre').value.trim();
         const mail    = document.getElementById('mail').value.trim();
         const origen  = document.getElementById('origen').value;
         const codRef  = document.getElementById('codigo-referido').value.trim().toUpperCase();
         const tyc     = document.getElementById('acepta-tyc').checked;
-        const yaLogueado = !!mvUsuarioActual();
-        const password  = yaLogueado ? '' : document.getElementById('nl-password').value;
-        const password2 = yaLogueado ? '' : document.getElementById('nl-password2').value;
 
         let ok = true;
         const show = (id, mostrar) => {
             document.getElementById(id).style.display = mostrar ? 'block' : 'none';
         };
 
-        show('err-nombre', !nombre);   if (!nombre) ok = false;
         show('err-mail', !mail.includes('@'));  if (!mail.includes('@')) ok = false;
         show('err-tyc', !tyc);         if (!tyc) ok = false;
         show('err-ref', false);
-        if (!yaLogueado) {
-            show('err-nl-password', password.length < 8);   if (password.length < 8) ok = false;
-            show('err-nl-password2', password !== password2); if (password !== password2) ok = false;
-        }
 
         if (!ok) return;
 
@@ -2104,11 +2064,9 @@ if (newsletterForm) {
 
         try {
             const data = await mvNewsletter.suscribir({
-                nombre,
                 mail,
                 origen,
                 cod_ref: origen === 'Referido' ? codRef : '',
-                password: yaLogueado ? undefined : password,
             });
 
             localStorage.setItem('mv_newsletter_mail', mail);
@@ -2125,7 +2083,7 @@ if (newsletterForm) {
 
             this.style.display = 'none';
             const conf = document.getElementById('msg-confirmacion');
-            document.getElementById('conf-nombre-texto').textContent = `¡Hola, ${data.nombre}!`;
+            document.getElementById('conf-nombre-texto').textContent = data.nombre ? `¡Hola, ${data.nombre}!` : '¡Hola!';
             document.getElementById('conf-codigo').textContent = data.codigo_mio;
             const elVerde = document.getElementById('conf-codigo-verde');
             if (elVerde) elVerde.textContent = data.codigo_verde || '';
