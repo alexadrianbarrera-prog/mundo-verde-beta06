@@ -1979,7 +1979,7 @@ if (registroForm) {
                 ' por crear tu cuenta en <strong>🌿 Vive Mundo Verde 🌿</strong>. ' +
                 'Ya podés iniciar sesión para comprar plantas y productos, ' +
                 'reservar talleres o solicitar tu servicio.\n\n' +
-                'Si tenés cualquier duda, respondé al siguiente mail viveunmundoverde@gmail.com y te contestamos.\n\n' +
+                'A tu mail te estará llegando tu CODIGO VERDE que otorgara un descuento del 10% en tu primer compra.\n\n' +
                 '🌿 El equipo de Mundo Verde';
             document.getElementById('msg-confirmacion').style.display = 'block';
 
