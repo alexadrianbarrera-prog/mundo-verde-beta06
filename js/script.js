@@ -2109,8 +2109,52 @@ if (newsletterForm) {
         });
     }
 
+    // Muestra el cartel de confirmación. Sirve para una suscripción nueva (data = respuesta
+    // de suscribir) y para un mail que YA estaba suscripto (data = respuesta de miEstado).
+    const mostrarCartel = (data, yaSuscripto) => {
+        newsletterForm.style.display = 'none';
+        const conf = document.getElementById('msg-confirmacion');
+        const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+        set('conf-nombre-texto', yaSuscripto ? '¡Qué bueno verte de nuevo!'
+                                             : (data.nombre ? `¡Hola, ${data.nombre}!` : '¡Hola!'));
+        set('conf-codigo', data.codigo_mio || '');
+        set('conf-codigo-verde', data.codigo_verde || '');
+        set('conf-pct', CONFIG_DESCUENTOS.newsletterPct);
+
+        // Si el servidor no creó cuenta (no devolvió token), no se dice que hay sesión.
+        if (yaSuscripto) set('conf-cuenta-texto', 'Este mail ya estaba suscripto al newsletter.');
+        else if (!data.token) set('conf-cuenta-texto', '¡Felicitaciones, ya estás suscripto/a!');
+        if (yaSuscripto && data.codigo_verde_usado) {
+            set('conf-descuento-texto', 'Tu Código Verde ya fue utilizado (era de un solo uso).');
+        }
+
+        const txtCompletar = document.getElementById('conf-completar-texto');
+        if (txtCompletar && !data.token) txtCompletar.style.display = 'none';
+        const btnCompletar = document.getElementById('btn-completar-registro');
+        if (btnCompletar) btnCompletar.style.display = mvPerfilIncompleto(mvUsuarioActual()) ? '' : 'none';
+
+        const elRef = document.getElementById('conf-codigo');
+        if (elRef) elRef.onclick = () => navigator.clipboard.writeText(data.codigo_mio || '').catch(() => {});
+        const elVerde = document.getElementById('conf-codigo-verde');
+        if (elVerde) elVerde.onclick = () => navigator.clipboard.writeText(data.codigo_verde || '').catch(() => {});
+
+        conf.style.display = 'block';
+        try { conf.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { /* solo cosmético */ }
+    };
+
+    // Error visible y persistente dentro del formulario (el toast solo dura 2 s y se pierde fácil).
+    const mostrarErrorNewsletter = (msg) => {
+        const el = document.getElementById('err-general');
+        if (el) { el.textContent = msg; el.style.display = 'block'; }
+        mostrarToast(msg);
+    };
+
     newsletterForm.addEventListener('submit', async function (e) {
         e.preventDefault();
+
+        const errGeneral = document.getElementById('err-general');
+        if (errGeneral) errGeneral.style.display = 'none';
 
         const mail    = document.getElementById('mail').value.trim();
         const origen  = document.getElementById('origen').value;
@@ -2150,43 +2194,29 @@ if (newsletterForm) {
             }
             if (data.codigo_verde) guardarCodigoVerde(limpiarCodigoVerde(data.codigo_verde));
 
-            this.style.display = 'none';
-            const conf = document.getElementById('msg-confirmacion');
-            document.getElementById('conf-nombre-texto').textContent = data.nombre ? `¡Hola, ${data.nombre}!` : '¡Hola!';
-            document.getElementById('conf-codigo').textContent = data.codigo_mio;
-            const elVerde = document.getElementById('conf-codigo-verde');
-            if (elVerde) elVerde.textContent = data.codigo_verde || '';
-            const elPct = document.getElementById('conf-pct');
-            if (elPct) elPct.textContent = CONFIG_DESCUENTOS.newsletterPct;
-            conf.style.display = 'block';
-
-            document.getElementById('conf-codigo').addEventListener('click', () => {
-                navigator.clipboard.writeText(data.codigo_mio).catch(() => {});
-            });
-            if (elVerde) {
-                elVerde.addEventListener('click', () => {
-                    navigator.clipboard.writeText(data.codigo_verde).catch(() => {});
-                });
-            }
-
-            // No se redirige solo: la pantalla ofrece "Completar mi registro" e
-            // "Ir a comprar" (ya logueado y con el 10% aplicado). El botón de
-            // completar solo se muestra si a la cuenta le faltan datos.
-            // Si el servidor no creó cuenta (no devolvió token), no se dice que hay sesión.
-            const txtCuenta = document.getElementById('conf-cuenta-texto');
-            if (txtCuenta && !data.token) txtCuenta.textContent = '¡Felicitaciones, ya estás suscripto/a!';
-            const txtCompletar = document.getElementById('conf-completar-texto');
-            if (txtCompletar && !data.token) txtCompletar.style.display = 'none';
-            const btnCompletar = document.getElementById('btn-completar-registro');
-            if (btnCompletar) btnCompletar.style.display = mvPerfilIncompleto(mvUsuarioActual()) ? '' : 'none';
+            mostrarCartel(data, false);
         } catch (err) {
             if (btnSubmit) btnSubmit.disabled = false;
-            // "Ese email ya está suscripto": se recuerda para que el popup no reaparezca.
-            if (err.status === 409 && /suscript/i.test(err.message)) localStorage.setItem('mv_newsletter_mail', mail);
+
+            // "Ese email ya está suscripto": se recuerda para que el popup no reaparezca y se
+            // le muestra el mismo cartel con sus códigos (en vez de un aviso que casi no se ve).
+            const yaSuscripto = err.status === 409 && /suscript/i.test(err.message);
+            if (yaSuscripto) {
+                localStorage.setItem('mv_newsletter_mail', mail);
+                try {
+                    const estado = await mvNewsletter.miEstado(mail);
+                    if (estado.codigo_verde && !estado.codigo_verde_usado) {
+                        guardarCodigoVerde(limpiarCodigoVerde(estado.codigo_verde));
+                    }
+                    mostrarCartel(estado, true);
+                    return;
+                } catch (e2) { /* no se pudo consultar: se muestra el aviso común */ }
+            }
+
             if (err.message.toLowerCase().includes('referido')) {
                 show('err-ref', true);
             } else {
-                mostrarToast('⚠️ ' + err.message);
+                mostrarErrorNewsletter('⚠️ ' + err.message);
             }
         }
     });
