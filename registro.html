@@ -13,6 +13,13 @@
     <title>Crear cuenta — Mundo Verde</title>
     <link rel="stylesheet" href="css/styles.css"/>
     <link rel="stylesheet" href="CharonyPlywrite.css">
+    <style>
+        /* Registro: Domicilio + Piso + Dpto en la misma línea */
+        #registroForm .fila-domicilio { display: flex; gap: 10px; align-items: flex-start; }
+        #registroForm .fila-domicilio .fila-dom   { flex: 1 1 0; min-width: 0; }
+        #registroForm .fila-domicilio .fila-corto { flex: 0 0 64px; min-width: 0; }
+        #registroForm .fila-domicilio input { width: 100%; box-sizing: border-box; min-width: 0; }
+    </style>
 </head>
 <body>
 <!--Banner con anucios y ofertas movil-->
@@ -542,18 +549,30 @@
         </div>
 
         <div class="form_input">
-            <label>* Teléfono
-                <input type="tel" id="reg-telefono" placeholder="Tu celular" inputmode="numeric" pattern="[0-9]*" maxlength="15" required>
+            <label>Teléfono
+                <input type="tel" id="reg-telefono" placeholder="Tu celular" inputmode="numeric" pattern="[0-9]*" maxlength="15">
             </label>
             <div class="field-error" id="err-telefono"></div>
         </div>
 
-        <div class="form_input">
-            <label>* Domicilio completo
-                <input type="text" id="reg-dom-completo" placeholder="domicilio" required>
-            </label>
-            <div class="field-error" id="err-dom-completo"></div>
+        <div class="fila-domicilio">
+            <div class="form_input fila-dom">
+                <label>* Domicilio completo
+                    <input type="text" id="reg-dom-completo" placeholder="domicilio" required>
+                </label>
+            </div>
+            <div class="form_input fila-corto">
+                <label>Piso
+                    <input type="text" id="reg-piso" placeholder="Piso" maxlength="5" autocomplete="off">
+                </label>
+            </div>
+            <div class="form_input fila-corto">
+                <label>Dpto
+                    <input type="text" id="reg-dpto" placeholder="Dpto" maxlength="5" autocomplete="off">
+                </label>
+            </div>
         </div>
+        <div class="field-error" id="err-dom-completo"></div>
 
         <div class="form_input">
             <label>* Localidad - Partido

@@ -8,13 +8,15 @@ require_once __DIR__ . '/mailer.php';
 require_once __DIR__ . '/newsletter.php';   // newsletter_codigo_verde_pendiente()
 
 /**
- * Teléfono, código postal y fecha de nacimiento son obligatorios en el registro
- * (y al completarlo). Corta con error() si alguno falta o no es válido.
+ * Código postal y fecha de nacimiento son obligatorios en el registro (y al
+ * completarlo); el teléfono es opcional pero, si viene, tiene que ser válido.
+ * Corta con error() si alguno falta o no es válido.
  */
 function auth_validar_datos_personales(string $telefono, string $codigoPostal, string $fechaNac): void
 {
-    if (!preg_match('/^\d{8,15}$/', $telefono)) {
-        error('Ingresá tu teléfono (solo números, con código de área).');
+    // El teléfono es opcional: solo se valida si viene completo.
+    if ($telefono !== '' && !preg_match('/^\d{8,15}$/', $telefono)) {
+        error('El teléfono debe tener entre 8 y 15 números.');
     }
     if (!preg_match('/^\d{4}$/', $codigoPostal)) {
         error('Ingresá tu código postal de 4 dígitos.');

@@ -1790,8 +1790,17 @@ if (loginForm) {
 const MV_CARTEL_MS = 6000;
 
 /* ── Registro ── */
-/* Registro: teléfono, código postal y fecha de nacimiento son obligatorios.
-   Muestra el error en cada campo y devuelve true si los tres están bien. */
+/* Domicilio + Piso + Dpto (opcionales) en un solo texto: "Calle 123, Piso 2, Dpto B".
+   Se guarda todo junto en domicilio_completo, igual que el resto del sistema. */
+function mvDomicilioConPisoDpto(domicilio) {
+    const piso = (document.getElementById('reg-piso')?.value || '').trim();
+    const dpto = (document.getElementById('reg-dpto')?.value || '').trim();
+    return domicilio + (piso ? ', Piso ' + piso : '') + (dpto ? ', Dpto ' + dpto : '');
+}
+
+/* Registro: código postal y fecha de nacimiento son obligatorios; el teléfono es
+   opcional (si lo completa, se valida). Muestra el error en cada campo y devuelve
+   true si todo está bien. */
 function mvValidarDatosRegistro(v) {
     const ids = ['err-telefono', 'err-cp', 'err-fecha'];
     ids.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
@@ -1801,7 +1810,8 @@ function mvValidarDatosRegistro(v) {
         return false;
     };
     let ok = true;
-    if (!/^\d{8,15}$/.test(v.telefono || '')) ok = error('err-telefono', 'Ingresá tu teléfono (solo números, con código de área).');
+    // El teléfono es opcional: solo se valida si lo completó.
+    if (v.telefono && !/^\d{8,15}$/.test(v.telefono)) ok = error('err-telefono', 'El teléfono debe tener entre 8 y 15 números.');
     if (!/^\d{4}$/.test(v.cp || '')) ok = error('err-cp', 'Ingresá tu código postal de 4 dígitos.');
     if (!v.fechaNacimiento) {
         ok = error('err-fecha', 'Ingresá tu fecha de nacimiento.');
@@ -1869,7 +1879,7 @@ if (registroForm) {
         try {
             const data = await mvAuth.completarPerfil({
                 telefono,
-                domicilio_completo: domicilioCompleto,
+                domicilio_completo: mvDomicilioConPisoDpto(domicilioCompleto),
                 localidad,
                 codigo_postal: cp,
                 fecha_nacimiento: fechaNacimiento,
@@ -1943,7 +1953,7 @@ if (registroForm) {
             // el mail de bienvenida en paralelo, sin hacer esperar la respuesta.
             const data = await mvAuth.registro({
                 nombre, email, telefono,
-                domicilio_completo: domicilioCompleto,
+                domicilio_completo: mvDomicilioConPisoDpto(domicilioCompleto),
                 localidad,
                 codigo_postal: cp,
                 fecha_nacimiento: fechaNacimiento,
