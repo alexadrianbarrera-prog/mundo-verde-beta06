@@ -896,7 +896,6 @@ body {
   color: #000;
 }
 
-
 .TipPlantas {
     font-family: 'Lucida Sans Regular', 'BrRegular','Iosevka-bolder',  'Lucida Sans','DancingScript-Regular',  'Lucida Grande';
     text-align: center;
@@ -1447,6 +1446,7 @@ label{
     width: auto;
     height: 15px;
 }
+
 /* Botón de suscripción */
 .btn-container {
     display: flex;
