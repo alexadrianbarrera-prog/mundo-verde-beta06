@@ -7,6 +7,25 @@
 require_once __DIR__ . '/mailer.php';
 require_once __DIR__ . '/newsletter.php';   // newsletter_codigo_verde_pendiente()
 
+/**
+ * Teléfono, código postal y fecha de nacimiento son obligatorios en el registro
+ * (y al completarlo). Corta con error() si alguno falta o no es válido.
+ */
+function auth_validar_datos_personales(string $telefono, string $codigoPostal, string $fechaNac): void
+{
+    if (!preg_match('/^\d{8,15}$/', $telefono)) {
+        error('Ingresá tu teléfono (solo números, con código de área).');
+    }
+    if (!preg_match('/^\d{4}$/', $codigoPostal)) {
+        error('Ingresá tu código postal de 4 dígitos.');
+    }
+    $okFecha = preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $fechaNac, $m)
+        && checkdate((int)$m[2], (int)$m[3], (int)$m[1])
+        && (int)$m[1] >= 1900
+        && $fechaNac <= date('Y-m-d');
+    if (!$okFecha) error('Ingresá una fecha de nacimiento válida.');
+}
+
 function auth_registro(PDO $pdo): void
 {
     $body = leerBody();
@@ -24,12 +43,8 @@ function auth_registro(PDO $pdo): void
     if (!validarEmail($email)) error('Ingresá un email válido.');
     if ($domicilioCompleto === '') error('El domicilio completo es obligatorio.');
     if ($localidad === '') error('La localidad es obligatoria.');
+    auth_validar_datos_personales($telefono, $codigoPostal, $fechaNac);
     if (strlen($password) < 6) error('La contraseña debe tener al menos 6 caracteres.');
-
-    if ($fechaNac !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaNac)) {
-        $fechaNac = null;
-    }
-    $fechaNac = $fechaNac === '' ? null : $fechaNac;
 
     $existe = $pdo->prepare('SELECT id FROM usuarios WHERE email = :email');
     $existe->execute(['email' => $email]);
@@ -177,11 +192,7 @@ function auth_completar_perfil(PDO $pdo): void
 
     if ($domicilioCompleto === '') error('El domicilio completo es obligatorio.');
     if ($localidad === '') error('La localidad es obligatoria.');
-
-    if ($fechaNac !== '') {
-        $ok = preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $fechaNac, $m) && checkdate((int)$m[2], (int)$m[3], (int)$m[1]);
-        if (!$ok) error('La fecha de nacimiento no es válida.');
-    }
+    auth_validar_datos_personales($telefono, $codigoPostal, $fechaNac);
 
     $pdo->prepare(
         'UPDATE usuarios

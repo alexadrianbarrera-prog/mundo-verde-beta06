@@ -95,11 +95,23 @@ const closePromo = document.getElementById('closePromo');
 // sesión iniciada, el mail de la cuenta (así tampoco reaparece al entrar desde
 // otro dispositivo o después de borrar los datos del navegador). Solo un 404
 // confirma que NO está inscripta; un servidor caído o un timeout no cuentan.
+// Quien ya tiene cuenta (se registró o inició sesión) tampoco ve el popup: queda
+// marcado en este navegador (sigue marcado aunque después cierre sesión) y, además,
+// no se muestra mientras haya una sesión iniciada (por ejemplo, desde otro dispositivo).
+const MV_POPUP_OCULTO_KEY = 'mv_popup_oculto';
+function mvOcultarPopupNewsletter() {
+    try { localStorage.setItem(MV_POPUP_OCULTO_KEY, '1'); } catch (e) { /* storage bloqueado: se ignora */ }
+}
+
 async function mvDebeMostrarPopup() {
+    const usuario = (typeof mvUsuarioActual === 'function') ? mvUsuarioActual() : null;
+    let oculto = false;
+    try { oculto = !!localStorage.getItem(MV_POPUP_OCULTO_KEY); } catch (e) { /* sin storage */ }
+    if (oculto || usuario) return false;
+
     const candidatos = [];
     const guardado = localStorage.getItem('mv_newsletter_mail');
     if (guardado) candidatos.push(guardado);
-    const usuario = (typeof mvUsuarioActual === 'function') ? mvUsuarioActual() : null;
     if (usuario && usuario.email && !candidatos.includes(usuario.email)) candidatos.push(usuario.email);
 
     if (candidatos.length === 0) return true; // visitante anónimo: mostrar popup
@@ -1752,6 +1764,7 @@ if (loginForm) {
         try {
             const data = await mvAuth.login(email, password);
             mvSetSesion(data.token, data.usuario);
+            mvOcultarPopupNewsletter();
             migrarCarritoGuest();
             marcarRecordatorioCarrito();
             // Suscriptor con 10% sin usar: queda aplicado en el carrito
@@ -1777,6 +1790,28 @@ if (loginForm) {
 const MV_CARTEL_MS = 6000;
 
 /* ── Registro ── */
+/* Registro: teléfono, código postal y fecha de nacimiento son obligatorios.
+   Muestra el error en cada campo y devuelve true si los tres están bien. */
+function mvValidarDatosRegistro(v) {
+    const ids = ['err-telefono', 'err-cp', 'err-fecha'];
+    ids.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    const error = (id, msg) => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = msg; el.style.display = 'block'; }
+        return false;
+    };
+    let ok = true;
+    if (!/^\d{8,15}$/.test(v.telefono || '')) ok = error('err-telefono', 'Ingresá tu teléfono (solo números, con código de área).');
+    if (!/^\d{4}$/.test(v.cp || '')) ok = error('err-cp', 'Ingresá tu código postal de 4 dígitos.');
+    if (!v.fechaNacimiento) {
+        ok = error('err-fecha', 'Ingresá tu fecha de nacimiento.');
+    } else {
+        const f = new Date(v.fechaNacimiento + 'T00:00:00');
+        if (isNaN(f) || f > new Date() || f.getFullYear() < 1900) ok = error('err-fecha', 'La fecha de nacimiento no es válida.');
+    }
+    return ok;
+}
+
 const registroForm = document.getElementById('registroForm');
 if (registroForm) {
     /* ── Modo "completar registro" ──
@@ -1825,6 +1860,7 @@ if (registroForm) {
         let ok = true;
         if (!domicilioCompleto) { errDom.textContent = 'Ingresá tu domicilio completo.'; errDom.style.display = 'block'; ok = false; }
         if (!localidad) { errLoc.textContent = 'Ingresá tu localidad.'; errLoc.style.display = 'block'; ok = false; }
+        if (!mvValidarDatosRegistro({ telefono, cp, fechaNacimiento })) ok = false;
         if (!ok) return;
 
         const btnSubmit = registroForm.querySelector('button[type="submit"]');
@@ -1832,11 +1868,11 @@ if (registroForm) {
 
         try {
             const data = await mvAuth.completarPerfil({
-                telefono: telefono || undefined,
+                telefono,
                 domicilio_completo: domicilioCompleto,
                 localidad,
-                codigo_postal: cp || undefined,
-                fecha_nacimiento: fechaNacimiento || undefined,
+                codigo_postal: cp,
+                fecha_nacimiento: fechaNacimiento,
             });
 
             // Se actualiza la sesión guardada (ya no figura como incompleta).
@@ -1894,6 +1930,7 @@ if (registroForm) {
             errLocalidad.style.display = 'block';
             ok = false;
         }
+        if (!mvValidarDatosRegistro({ telefono, cp, fechaNacimiento })) ok = false;
         if (password.length < 8) { errPassword.style.display = 'block'; ok = false; }
         if (password !== password2) { errPassword2.style.display = 'block'; ok = false; }
         if (!ok) return;
@@ -1908,14 +1945,15 @@ if (registroForm) {
                 nombre, email, telefono,
                 domicilio_completo: domicilioCompleto,
                 localidad,
-                codigo_postal: cp || undefined,
-                fecha_nacimiento: fechaNacimiento || undefined,
+                codigo_postal: cp,
+                fecha_nacimiento: fechaNacimiento,
                 password,
             });
 
             // 1) Queda logueado al instante (el header ya lo muestra logueado
             //    en la próxima página).
             mvSetSesion(data.token, data.usuario);
+            mvOcultarPopupNewsletter();   // ya tiene cuenta: el popup del newsletter no vuelve a aparecer
             migrarCarritoGuest();
             marcarRecordatorioCarrito();
 
