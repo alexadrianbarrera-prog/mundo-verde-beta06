@@ -17,7 +17,7 @@
         /* Registro: Domicilio + Piso + Dpto en la misma línea */
         #registroForm .fila-domicilio { display: flex; gap: 10px; align-items: flex-start; }
         #registroForm .fila-domicilio .fila-dom   { flex: 1 1 0; min-width: 0; }
-        #registroForm .fila-domicilio .fila-corto { flex: 0 0 64px; min-width: 0; }
+        #registroForm .fila-domicilio .fila-corto { flex: 0 0 72px; min-width: 0; }
         #registroForm .fila-domicilio input { width: 100%; box-sizing: border-box; min-width: 0; }
     </style>
 </head>
@@ -562,13 +562,13 @@
                 </label>
             </div>
             <div class="form_input fila-corto">
-                <label>Piso
-                    <input type="text" id="reg-piso" placeholder="Piso" maxlength="5" autocomplete="off">
+                <label>* Piso
+                    <input type="text" id="reg-piso" placeholder="PB / 0" maxlength="10" autocomplete="off" required title="Si es casa, poné 0 o -">
                 </label>
             </div>
             <div class="form_input fila-corto">
-                <label>Dpto
-                    <input type="text" id="reg-dpto" placeholder="Dpto" maxlength="5" autocomplete="off">
+                <label>* Dpto
+                    <input type="text" id="reg-dpto" placeholder="A / -" maxlength="10" autocomplete="off" required title="Si es casa, poné - o 0">
                 </label>
             </div>
         </div>

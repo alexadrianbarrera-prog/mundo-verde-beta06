@@ -815,6 +815,7 @@ window.addEventListener('resize', cerrarPopPaginas);
 window.addEventListener('scroll', (e) => { if (POP_PAG && !POP_PAG.pop.contains(e.target)) cerrarPopPaginas(); }, true);
 function etiquetaCol(c) {
   if (c === 'paginas') return 'Aparece en';
+  if (c === 'dpto') return 'Dpto';
   return c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
@@ -842,6 +843,19 @@ function agregarColumnaComentarios(meta) {
   cols.splice(i >= 0 ? i + 1 : cols.length, 0, 'comentarios');
   p.columnas = cols;
   p.editables = Object.assign({}, p.editables, { comentarios: 'textarea' });
+}
+
+/* ── Usuarios: columnas Piso y Dpto (usuarios.piso / usuarios.dpto), ubicadas
+   justo después del domicilio. Editables como texto, igual que el resto. ── */
+function agregarColumnasPisoDpto(meta) {
+  const u = meta && meta.usuarios;
+  if (!u) return;
+  const cols = u.columnas.filter(c => c !== 'piso' && c !== 'dpto');
+  let i = cols.indexOf('domicilio_completo');
+  if (i < 0) i = cols.indexOf('domicilio');
+  cols.splice(i >= 0 ? i + 1 : cols.length, 0, 'piso', 'dpto');
+  u.columnas = cols;
+  u.editables = Object.assign({}, u.editables, { piso: 'text', dpto: 'text' });
 }
 
 /* ── Newsletter: los códigos (codigo_mio, codigo_verde) y los contadores de referidos
@@ -924,6 +938,7 @@ async function iniciarApp() {
   META = await mvAdmin.tablas();
   agregarColumnaComentarios(META);
   agregarColumnaPaginas(META);
+  agregarColumnasPisoDpto(META);
   ajustarNewsletter(META);
   const tabsEl = document.getElementById('tabs');
   tabsEl.innerHTML = '';
@@ -1189,6 +1204,8 @@ document.getElementById('modal-form').addEventListener('submit', async (e) => {
 /* Ancho de columnas editables, en caracteres visibles (unidad CSS ch) */
 const COL_ANCHO_CH = {
   nombre: 30,
+  piso: 8,
+  dpto: 8,
   comentarios: 40,
   stock: 8,
   texto: 60,

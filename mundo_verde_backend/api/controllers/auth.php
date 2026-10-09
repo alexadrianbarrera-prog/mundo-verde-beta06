@@ -28,6 +28,17 @@ function auth_validar_datos_personales(string $telefono, string $codigoPostal, s
     if (!$okFecha) error('Ingresá una fecha de nacimiento válida.');
 }
 
+/** Piso y Dpto son obligatorios (casa: "0" o "-"). Máx. 10 caracteres cada uno. */
+function auth_validar_piso_dpto(string $piso, string $dpto): void
+{
+    if ($piso === '' || $dpto === '') {
+        error('Completá Piso y Dpto (si es casa, poné 0 o -).');
+    }
+    if (mb_strlen($piso) > 10 || mb_strlen($dpto) > 10) {
+        error('Piso y Dpto pueden tener hasta 10 caracteres.');
+    }
+}
+
 function auth_registro(PDO $pdo): void
 {
     $body = leerBody();
@@ -36,6 +47,8 @@ function auth_registro(PDO $pdo): void
     $email             = trim(strtolower($body['email'] ?? ''));
     $telefono          = trim($body['telefono'] ?? '');
     $domicilioCompleto = trim($body['domicilio_completo'] ?? '');
+    $piso              = trim($body['piso'] ?? '');
+    $dpto              = trim($body['dpto'] ?? '');
     $localidad         = trim($body['localidad'] ?? '');
     $codigoPostal      = trim($body['codigo_postal'] ?? '');
     $fechaNac          = trim($body['fecha_nacimiento'] ?? '');
@@ -44,6 +57,7 @@ function auth_registro(PDO $pdo): void
     if ($nombre === '') error('El nombre es obligatorio.');
     if (!validarEmail($email)) error('Ingresá un email válido.');
     if ($domicilioCompleto === '') error('El domicilio completo es obligatorio.');
+    auth_validar_piso_dpto($piso, $dpto);
     if ($localidad === '') error('La localidad es obligatoria.');
     auth_validar_datos_personales($telefono, $codigoPostal, $fechaNac);
     if (strlen($password) < 6) error('La contraseña debe tener al menos 6 caracteres.');
@@ -57,9 +71,9 @@ function auth_registro(PDO $pdo): void
     $hash = password_hash($password, PASSWORD_DEFAULT);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO usuarios (nombre, email, telefono, domicilio_completo, localidad, codigo_postal,
+        'INSERT INTO usuarios (nombre, email, telefono, domicilio_completo, piso, dpto, localidad, codigo_postal,
                                 fecha_nacimiento, password_hash, rol)
-         VALUES (:nombre, :email, :telefono, :domicilio_completo, :localidad, :codigo_postal,
+         VALUES (:nombre, :email, :telefono, :domicilio_completo, :piso, :dpto, :localidad, :codigo_postal,
                  :fecha_nacimiento, :hash, "cliente")'
     );
     try {
@@ -68,6 +82,8 @@ function auth_registro(PDO $pdo): void
             'email'              => $email,
             'telefono'           => $telefono ?: null,
             'domicilio_completo' => $domicilioCompleto,
+            'piso'               => $piso,
+            'dpto'               => $dpto,
             'localidad'          => $localidad,
             'codigo_postal'      => $codigoPostal ?: null,
             'fecha_nacimiento'   => $fechaNac,
@@ -188,17 +204,22 @@ function auth_completar_perfil(PDO $pdo): void
 
     $telefono          = trim($body['telefono'] ?? '');
     $domicilioCompleto = trim($body['domicilio_completo'] ?? '');
+    $piso              = trim($body['piso'] ?? '');
+    $dpto              = trim($body['dpto'] ?? '');
     $localidad         = trim($body['localidad'] ?? '');
     $codigoPostal      = trim($body['codigo_postal'] ?? '');
     $fechaNac          = trim($body['fecha_nacimiento'] ?? '');
 
     if ($domicilioCompleto === '') error('El domicilio completo es obligatorio.');
+    auth_validar_piso_dpto($piso, $dpto);
     if ($localidad === '') error('La localidad es obligatoria.');
     auth_validar_datos_personales($telefono, $codigoPostal, $fechaNac);
 
     $pdo->prepare(
         'UPDATE usuarios
             SET domicilio_completo = :dom,
+                piso               = :piso,
+                dpto               = :dpto,
                 localidad          = :loc,
                 telefono           = COALESCE(:tel, telefono),
                 codigo_postal      = COALESCE(:cp, codigo_postal),
@@ -207,6 +228,8 @@ function auth_completar_perfil(PDO $pdo): void
           WHERE id = :id'
     )->execute([
         'dom'   => $domicilioCompleto,
+        'piso'  => $piso,
+        'dpto'  => $dpto,
         'loc'   => $localidad,
         'tel'   => $telefono !== '' ? $telefono : null,
         'cp'    => $codigoPostal !== '' ? $codigoPostal : null,
