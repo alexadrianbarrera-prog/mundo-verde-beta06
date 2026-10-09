@@ -1786,39 +1786,16 @@ if (loginForm) {
 /*Para celulares LOGIN Logout*/
 
 
-/* Tiempo máximo (ms) que se muestra el cartel de bienvenida antes de entrar al sitio:
-   30 segundos, o hasta que la persona mueva el mouse / toque la pantalla / apriete
-   una tecla (lo que ocurra primero). */
-const MV_CARTEL_MS = 30000;
-/* Ignora la interacción del primer instante: el mouse todavía se está moviendo
-   por el click en "Crear cuenta" y cerraría el cartel sin que nadie lo vea. */
-const MV_CARTEL_GRACIA_MS = 1200;
-
-function mvEsperarInteraccion(alTerminar, maxMs) {
-    let hecho = false;
-    const eventos = ['mousemove', 'mousedown', 'touchstart', 'touchmove', 'keydown', 'wheel'];
-    const terminar = () => {
-        if (hecho) return;
-        hecho = true;
-        clearTimeout(timer);
-        eventos.forEach(ev => window.removeEventListener(ev, terminar, true));
-        alTerminar();
-    };
-    const timer = setTimeout(terminar, maxMs);
-    setTimeout(() => {
-        if (hecho) return;
-        eventos.forEach(ev => window.addEventListener(ev, terminar, { capture: true, passive: true }));
-    }, MV_CARTEL_GRACIA_MS);
-}
+/* Tiempo (ms) que se muestra el cartel de bienvenida antes de entrar al sitio. */
+const MV_CARTEL_MS = 6000;
 
 /* ── Registro ── */
-/* Piso y Dpto son obligatorios y van en columnas propias (usuarios.piso / usuarios.dpto).
-   Si es una casa, se pone "0" o "-". */
-function mvPisoDpto() {
-    return {
-        piso: (document.getElementById('reg-piso')?.value || '').trim(),
-        dpto: (document.getElementById('reg-dpto')?.value || '').trim(),
-    };
+/* Domicilio + Piso + Dpto (opcionales) en un solo texto: "Calle 123, Piso 2, Dpto B".
+   Se guarda todo junto en domicilio_completo, igual que el resto del sistema. */
+function mvDomicilioConPisoDpto(domicilio) {
+    const piso = (document.getElementById('reg-piso')?.value || '').trim();
+    const dpto = (document.getElementById('reg-dpto')?.value || '').trim();
+    return domicilio + (piso ? ', Piso ' + piso : '') + (dpto ? ', Dpto ' + dpto : '');
 }
 
 /* Registro: código postal y fecha de nacimiento son obligatorios; el teléfono es
@@ -1833,10 +1810,6 @@ function mvValidarDatosRegistro(v) {
         return false;
     };
     let ok = true;
-    const pd = mvPisoDpto();
-    if (!pd.piso || !pd.dpto) {
-        ok = error('err-dom-completo', 'Completá Piso y Dpto (si es casa, poné 0 o -).');
-    }
     // El teléfono es opcional: solo se valida si lo completó.
     if (v.telefono && !/^\d{8,15}$/.test(v.telefono)) ok = error('err-telefono', 'El teléfono debe tener entre 8 y 15 números.');
     if (!/^\d{4}$/.test(v.cp || '')) ok = error('err-cp', 'Ingresá tu código postal de 4 dígitos.');
@@ -1906,8 +1879,7 @@ if (registroForm) {
         try {
             const data = await mvAuth.completarPerfil({
                 telefono,
-                domicilio_completo: domicilioCompleto,
-                ...mvPisoDpto(),
+                domicilio_completo: mvDomicilioConPisoDpto(domicilioCompleto),
                 localidad,
                 codigo_postal: cp,
                 fecha_nacimiento: fechaNacimiento,
@@ -1922,7 +1894,7 @@ if (registroForm) {
             document.getElementById('conf-nombre-texto').textContent =
                 `Gracias, ${usuario.nombre}. Ya tenés tus datos cargados: tu próxima compra va a ser más rápida. 🌿`;
             document.getElementById('msg-confirmacion').style.display = 'block';
-            mvEsperarInteraccion(() => { window.location.href = '1_0_vivero.html'; }, MV_CARTEL_MS);
+            setTimeout(() => { window.location.href = '1_0_vivero.html'; }, MV_CARTEL_MS);
         } catch (err) {
             errGeneral.textContent = '⚠️ ' + err.message;
             errGeneral.style.display = 'block';
@@ -1938,8 +1910,6 @@ if (registroForm) {
         const email = document.getElementById('reg-email').value.trim();
         const telefono = document.getElementById('reg-telefono').value.trim();
         const domicilioCompleto = document.getElementById('reg-dom-completo').value.trim();
-        const piso = document.getElementById('reg-piso').value.trim();
-        const dpto = document.getElementById('reg-dpto').value.trim();  
         const localidad = document.getElementById('reg-localidad').value.trim();
         const cp = document.getElementById('reg-cp').value.trim();
         const fechaNacimiento = document.getElementById('reg-fecha-nacimiento').value;
@@ -1949,14 +1919,12 @@ if (registroForm) {
         const errNombre = document.getElementById('err-nombre');
         const errEmail = document.getElementById('err-email');
         const errDomCompleto = document.getElementById('err-dom-completo');
-        const errPiso = document.getElementById('err-piso');
-        const errDpto = document.getElementById('err-dpto');
         const errLocalidad = document.getElementById('err-localidad');
         const errPassword = document.getElementById('err-password');
         const errPassword2 = document.getElementById('err-password2');
         const errGeneral = document.getElementById('err-general');
 
-        [errNombre, errEmail, errDomCompleto, errPiso, errDpto, errLocalidad, errPassword, errPassword2, errGeneral]
+        [errNombre, errEmail, errDomCompleto, errLocalidad, errPassword, errPassword2, errGeneral]
             .forEach(el => el.style.display = 'none');
 
         let ok = true;
@@ -1965,16 +1933,6 @@ if (registroForm) {
         if (!domicilioCompleto) {
             errDomCompleto.textContent = 'Ingresá tu domicilio completo.';
             errDomCompleto.style.display = 'block';
-            ok = false;
-        }
-        if (!piso) {
-            errPiso.textContent = 'Ingresá tu piso.';
-            errPiso.style.display = 'block';
-            ok = false;
-        }
-        if (!dpto) {
-            errDpto.textContent = 'Ingresá tu departamento.';
-            errDpto.style.display = 'block';
             ok = false;
         }
         if (!localidad) {
@@ -1995,9 +1953,7 @@ if (registroForm) {
             // el mail de bienvenida en paralelo, sin hacer esperar la respuesta.
             const data = await mvAuth.registro({
                 nombre, email, telefono,
-                domicilio_completo: domicilioCompleto,
-                piso,
-                dpto,
+                domicilio_completo: mvDomicilioConPisoDpto(domicilioCompleto),
                 localidad,
                 codigo_postal: cp,
                 fecha_nacimiento: fechaNacimiento,
@@ -2028,7 +1984,7 @@ if (registroForm) {
             document.getElementById('msg-confirmacion').style.display = 'block';
 
             // Después del cartel, entra al sitio ya logueado.
-            mvEsperarInteraccion(() => { window.location.href = '1_0_vivero.html'; }, MV_CARTEL_MS);
+            setTimeout(() => { window.location.href = '1_0_vivero.html'; }, MV_CARTEL_MS);
         } catch (err) {
             errGeneral.textContent = '⚠️ ' + err.message;
             errGeneral.style.display = 'block';
