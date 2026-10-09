@@ -815,7 +815,6 @@ window.addEventListener('resize', cerrarPopPaginas);
 window.addEventListener('scroll', (e) => { if (POP_PAG && !POP_PAG.pop.contains(e.target)) cerrarPopPaginas(); }, true);
 function etiquetaCol(c) {
   if (c === 'paginas') return 'Aparece en';
-  if (c === 'dpto') return 'Dpto';
   return c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
@@ -845,23 +844,25 @@ function agregarColumnaComentarios(meta) {
   p.editables = Object.assign({}, p.editables, { comentarios: 'textarea' });
 }
 
-/* ── Usuarios: columnas Piso y Dpto (usuarios.piso / usuarios.dpto), ubicadas
-   justo después del domicilio. Editables como texto, igual que el resto. ── */
-function agregarColumnasPisoDpto(meta) {
-  const u = meta && meta.usuarios;
-  if (!u) return;
-  const cols = u.columnas.filter(c => c !== 'piso' && c !== 'dpto');
-  let i = cols.indexOf('domicilio_completo');
-  if (i < 0) i = cols.indexOf('domicilio');
-  cols.splice(i >= 0 ? i + 1 : cols.length, 0, 'piso', 'dpto');
-  u.columnas = cols;
-  u.editables = Object.assign({}, u.editables, { piso: 'text', dpto: 'text' });
-}
-
 /* ── Newsletter: los códigos (codigo_mio, codigo_verde) y los contadores de referidos
    los genera y actualiza el backend al suscribirse (newsletter_suscribir). Se siguen
    mostrando en la tabla, pero solo de lectura. Tampoco se da de alta un suscriptor a
    mano desde acá: quedaría sin códigos. Los suscriptores entran por el formulario. ── */
+/* ── Usuarios: columnas "Piso" y "Dpto" (VARCHAR en la tabla usuarios), a continuación de
+   "Domicilio completo". Requiere correr migracion_piso_dpto.sql en la base. Si la tabla
+   ya se puede editar desde el admin, estas dos también. ── */
+function agregarColumnasPisoDpto(meta) {
+  const u = meta && meta.usuarios;
+  if (!u) return;
+  const cols = (u.columnas || []).filter(c => c !== 'piso' && c !== 'dpto');
+  const i = cols.indexOf('domicilio_completo');
+  cols.splice(i >= 0 ? i + 1 : cols.length, 0, 'piso', 'dpto');
+  u.columnas = cols;
+  if (u.editables && u.editables.domicilio_completo) {
+    u.editables = Object.assign({}, u.editables, { piso: 'text', dpto: 'text' });
+  }
+}
+
 function ajustarNewsletter(meta) {
   const n = meta && meta.newsletter_suscriptores;
   if (!n) return;
@@ -938,8 +939,8 @@ async function iniciarApp() {
   META = await mvAdmin.tablas();
   agregarColumnaComentarios(META);
   agregarColumnaPaginas(META);
-  agregarColumnasPisoDpto(META);
   ajustarNewsletter(META);
+  agregarColumnasPisoDpto(META);
   const tabsEl = document.getElementById('tabs');
   tabsEl.innerHTML = '';
   Object.keys(META).forEach((tabla, i) => {
@@ -1204,12 +1205,12 @@ document.getElementById('modal-form').addEventListener('submit', async (e) => {
 /* Ancho de columnas editables, en caracteres visibles (unidad CSS ch) */
 const COL_ANCHO_CH = {
   nombre: 30,
-  piso: 8,
-  dpto: 8,
   comentarios: 40,
   stock: 8,
   texto: 60,
   orden: 10,
+  piso: 7,
+  dpto: 7,
 };
 function anchoEstilo(c) {
   const ch = COL_ANCHO_CH[c];

@@ -95,20 +95,13 @@ const closePromo = document.getElementById('closePromo');
 // sesión iniciada, el mail de la cuenta (así tampoco reaparece al entrar desde
 // otro dispositivo o después de borrar los datos del navegador). Solo un 404
 // confirma que NO está inscripta; un servidor caído o un timeout no cuentan.
-// Quien ya tiene cuenta (se registró o inició sesión) tampoco ve el popup: queda
-// marcado en este navegador (sigue marcado aunque después cierre sesión) y, además,
-// no se muestra mientras haya una sesión iniciada (por ejemplo, desde otro dispositivo).
-const MV_POPUP_OCULTO_KEY = 'mv_popup_oculto';
-function mvOcultarPopupNewsletter() {
-    try { localStorage.setItem(MV_POPUP_OCULTO_KEY, '1'); } catch (e) { /* storage bloqueado: se ignora */ }
-}
-
+// Fuera de eso, el popup aparece SIEMPRE que se entra (o se vuelve) a 1_0_vivero.html:
+// registrarse, iniciar sesión o cerrarla no lo oculta.
 async function mvDebeMostrarPopup() {
-    const usuario = (typeof mvUsuarioActual === 'function') ? mvUsuarioActual() : null;
-    let oculto = false;
-    try { oculto = !!localStorage.getItem(MV_POPUP_OCULTO_KEY); } catch (e) { /* sin storage */ }
-    if (oculto || usuario) return false;
+    // Limpieza: una versión anterior marcaba el navegador para ocultarlo tras registrarse.
+    try { localStorage.removeItem('mv_popup_oculto'); } catch (e) { /* sin storage */ }
 
+    const usuario = (typeof mvUsuarioActual === 'function') ? mvUsuarioActual() : null;
     const candidatos = [];
     const guardado = localStorage.getItem('mv_newsletter_mail');
     if (guardado) candidatos.push(guardado);
@@ -1764,7 +1757,6 @@ if (loginForm) {
         try {
             const data = await mvAuth.login(email, password);
             mvSetSesion(data.token, data.usuario);
-            mvOcultarPopupNewsletter();
             migrarCarritoGuest();
             marcarRecordatorioCarrito();
             // Suscriptor con 10% sin usar: queda aplicado en el carrito
@@ -1786,16 +1778,44 @@ if (loginForm) {
 /*Para celulares LOGIN Logout*/
 
 
-/* Tiempo (ms) que se muestra el cartel de bienvenida antes de entrar al sitio. */
-const MV_CARTEL_MS = 6000;
+/* Cartel posterior al registro: se queda en pantalla hasta 30 s o hasta que la persona
+   mueva el mouse o toque la pantalla (lo que pase primero); después entra al sitio.
+   Los primeros 1,5 s no cuentan y el mouse tiene que moverse un poco (40 px): así el
+   mismo clic/toque del botón de registro no lo cierra al instante. */
+const MV_CARTEL_MS = 30000;
+const MV_CARTEL_GRACIA_MS = 1500;
+const MV_CARTEL_MOVIMIENTO_PX = 40;
+function mvEntrarAlSitio(destino) {
+    let listo = false;
+    let armado = false;
+    let x0 = null, y0 = null;
+    const ir = () => {
+        if (listo) return;
+        listo = true;
+        clearTimeout(tope);
+        document.removeEventListener('mousemove', alMover);
+        document.removeEventListener('touchstart', alTocar);
+        window.location.href = destino;
+    };
+    const alMover = (e) => {
+        if (!armado) return;
+        if (x0 === null) { x0 = e.clientX; y0 = e.clientY; return; }
+        if (Math.hypot(e.clientX - x0, e.clientY - y0) >= MV_CARTEL_MOVIMIENTO_PX) ir();
+    };
+    const alTocar = () => { if (armado) ir(); };
+    const tope = setTimeout(ir, MV_CARTEL_MS);
+    setTimeout(() => { armado = true; }, MV_CARTEL_GRACIA_MS);
+    document.addEventListener('mousemove', alMover);
+    document.addEventListener('touchstart', alTocar, { passive: true });
+}
 
 /* ── Registro ── */
-/* Domicilio + Piso + Dpto (opcionales) en un solo texto: "Calle 123, Piso 2, Dpto B".
-   Se guarda todo junto en domicilio_completo, igual que el resto del sistema. */
-function mvDomicilioConPisoDpto(domicilio) {
-    const piso = (document.getElementById('reg-piso')?.value || '').trim();
-    const dpto = (document.getElementById('reg-dpto')?.value || '').trim();
-    return domicilio + (piso ? ', Piso ' + piso : '') + (dpto ? ', Dpto ' + dpto : '');
+/* Piso y Dpto (opcionales): se guardan en sus propias columnas (usuarios.piso / usuarios.dpto). */
+function mvPisoDpto() {
+    return {
+        piso: (document.getElementById('reg-piso')?.value || '').trim(),
+        dpto: (document.getElementById('reg-dpto')?.value || '').trim(),
+    };
 }
 
 /* Registro: código postal y fecha de nacimiento son obligatorios; el teléfono es
@@ -1879,7 +1899,8 @@ if (registroForm) {
         try {
             const data = await mvAuth.completarPerfil({
                 telefono,
-                domicilio_completo: mvDomicilioConPisoDpto(domicilioCompleto),
+                domicilio_completo: domicilioCompleto,
+                ...mvPisoDpto(),
                 localidad,
                 codigo_postal: cp,
                 fecha_nacimiento: fechaNacimiento,
@@ -1894,7 +1915,7 @@ if (registroForm) {
             document.getElementById('conf-nombre-texto').textContent =
                 `Gracias, ${usuario.nombre}. Ya tenés tus datos cargados: tu próxima compra va a ser más rápida. 🌿`;
             document.getElementById('msg-confirmacion').style.display = 'block';
-            setTimeout(() => { window.location.href = '1_0_vivero.html'; }, MV_CARTEL_MS);
+            mvEntrarAlSitio('1_0_vivero.html');
         } catch (err) {
             errGeneral.textContent = '⚠️ ' + err.message;
             errGeneral.style.display = 'block';
@@ -1953,7 +1974,8 @@ if (registroForm) {
             // el mail de bienvenida en paralelo, sin hacer esperar la respuesta.
             const data = await mvAuth.registro({
                 nombre, email, telefono,
-                domicilio_completo: mvDomicilioConPisoDpto(domicilioCompleto),
+                domicilio_completo: domicilioCompleto,
+                ...mvPisoDpto(),
                 localidad,
                 codigo_postal: cp,
                 fecha_nacimiento: fechaNacimiento,
@@ -1963,7 +1985,6 @@ if (registroForm) {
             // 1) Queda logueado al instante (el header ya lo muestra logueado
             //    en la próxima página).
             mvSetSesion(data.token, data.usuario);
-            mvOcultarPopupNewsletter();   // ya tiene cuenta: el popup del newsletter no vuelve a aparecer
             migrarCarritoGuest();
             marcarRecordatorioCarrito();
 
@@ -1984,7 +2005,7 @@ if (registroForm) {
             document.getElementById('msg-confirmacion').style.display = 'block';
 
             // Después del cartel, entra al sitio ya logueado.
-            setTimeout(() => { window.location.href = '1_0_vivero.html'; }, MV_CARTEL_MS);
+            mvEntrarAlSitio('1_0_vivero.html');
         } catch (err) {
             errGeneral.textContent = '⚠️ ' + err.message;
             errGeneral.style.display = 'block';
