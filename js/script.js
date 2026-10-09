@@ -1938,6 +1938,8 @@ if (registroForm) {
         const email = document.getElementById('reg-email').value.trim();
         const telefono = document.getElementById('reg-telefono').value.trim();
         const domicilioCompleto = document.getElementById('reg-dom-completo').value.trim();
+        const piso = document.getElementById('reg-piso').value.trim();
+        const dpto = document.getElementById('reg-dpto').value.trim();  
         const localidad = document.getElementById('reg-localidad').value.trim();
         const cp = document.getElementById('reg-cp').value.trim();
         const fechaNacimiento = document.getElementById('reg-fecha-nacimiento').value;
@@ -1947,12 +1949,14 @@ if (registroForm) {
         const errNombre = document.getElementById('err-nombre');
         const errEmail = document.getElementById('err-email');
         const errDomCompleto = document.getElementById('err-dom-completo');
+        const errPiso = document.getElementById('err-piso');
+        const errDpto = document.getElementById('err-dpto');
         const errLocalidad = document.getElementById('err-localidad');
         const errPassword = document.getElementById('err-password');
         const errPassword2 = document.getElementById('err-password2');
         const errGeneral = document.getElementById('err-general');
 
-        [errNombre, errEmail, errDomCompleto, errLocalidad, errPassword, errPassword2, errGeneral]
+        [errNombre, errEmail, errDomCompleto, errPiso, errDpto, errLocalidad, errPassword, errPassword2, errGeneral]
             .forEach(el => el.style.display = 'none');
 
         let ok = true;
@@ -1961,6 +1965,16 @@ if (registroForm) {
         if (!domicilioCompleto) {
             errDomCompleto.textContent = 'Ingresá tu domicilio completo.';
             errDomCompleto.style.display = 'block';
+            ok = false;
+        }
+        if (!piso) {
+            errPiso.textContent = 'Ingresá tu piso.';
+            errPiso.style.display = 'block';
+            ok = false;
+        }
+        if (!dpto) {
+            errDpto.textContent = 'Ingresá tu departamento.';
+            errDpto.style.display = 'block';
             ok = false;
         }
         if (!localidad) {
@@ -1982,7 +1996,8 @@ if (registroForm) {
             const data = await mvAuth.registro({
                 nombre, email, telefono,
                 domicilio_completo: domicilioCompleto,
-                ...mvPisoDpto(),
+                piso,
+                dpto,
                 localidad,
                 codigo_postal: cp,
                 fecha_nacimiento: fechaNacimiento,
