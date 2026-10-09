@@ -1976,10 +1976,10 @@ if (registroForm) {
             texto.textContent = '';
             texto.innerHTML =
                 'Gracias ' + saludo.replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';') +
-                ' por crear tu cuenta en <strong>Mundo Verde</strong>. ' +
+                ' por crear tu cuenta en <strong>🌿 Vive Mundo Verde 🌿</strong>. ' +
                 'Ya podés iniciar sesión para comprar plantas y productos, ' +
-                'reservar talleres y seguir tus pedidos.\n\n' +
-                'Si tenés cualquier duda, respondé este mail y te contestamos.\n\n' +
+                'reservar talleres o solicitar tu servicio.\n\n' +
+                'Si tenés cualquier duda, respondé al siguiente mail viveunmundoverde@gmail.com y te contestamos.\n\n' +
                 '🌿 El equipo de Mundo Verde';
             document.getElementById('msg-confirmacion').style.display = 'block';
 
