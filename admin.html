@@ -844,25 +844,15 @@ function agregarColumnaComentarios(meta) {
   p.editables = Object.assign({}, p.editables, { comentarios: 'textarea' });
 }
 
+/* Escapa texto que viene del cliente antes de ponerlo en el HTML del panel. */
+function escHtml(v) {
+  return String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 /* ── Newsletter: los códigos (codigo_mio, codigo_verde) y los contadores de referidos
    los genera y actualiza el backend al suscribirse (newsletter_suscribir). Se siguen
    mostrando en la tabla, pero solo de lectura. Tampoco se da de alta un suscriptor a
    mano desde acá: quedaría sin códigos. Los suscriptores entran por el formulario. ── */
-/* ── Usuarios: columnas "Piso" y "Dpto" (VARCHAR en la tabla usuarios), a continuación de
-   "Domicilio completo". Requiere correr migracion_piso_dpto.sql en la base. Si la tabla
-   ya se puede editar desde el admin, estas dos también. ── */
-function agregarColumnasPisoDpto(meta) {
-  const u = meta && meta.usuarios;
-  if (!u) return;
-  const cols = (u.columnas || []).filter(c => c !== 'piso' && c !== 'dpto');
-  const i = cols.indexOf('domicilio_completo');
-  cols.splice(i >= 0 ? i + 1 : cols.length, 0, 'piso', 'dpto');
-  u.columnas = cols;
-  if (u.editables && u.editables.domicilio_completo) {
-    u.editables = Object.assign({}, u.editables, { piso: 'text', dpto: 'text' });
-  }
-}
-
 function ajustarNewsletter(meta) {
   const n = meta && meta.newsletter_suscriptores;
   if (!n) return;
@@ -940,7 +930,6 @@ async function iniciarApp() {
   agregarColumnaComentarios(META);
   agregarColumnaPaginas(META);
   ajustarNewsletter(META);
-  agregarColumnasPisoDpto(META);
   const tabsEl = document.getElementById('tabs');
   tabsEl.innerHTML = '';
   Object.keys(META).forEach((tabla, i) => {
@@ -1209,8 +1198,6 @@ const COL_ANCHO_CH = {
   stock: 8,
   texto: 60,
   orden: 10,
-  piso: 7,
-  dpto: 7,
 };
 function anchoEstilo(c) {
   const ch = COL_ANCHO_CH[c];
@@ -1386,11 +1373,10 @@ function renderPedidos(pedidos) {
       <td data-label="Retira">${p.forma_entrega === 'retiro'
             ? `<strong>${p.retiro_nombre || '—'}</strong><span class="cell-mono" style="display:block">DNI ${p.retiro_dni || '—'}</span>`
             : '—'}</td>
-      <td data-label="Pago">${ETIQUETAS_PAGO[p.forma_pago] || p.forma_pago}${p.referencia_pago
-            ? `<span class="cell-mono" style="display:block">Ref. ${p.referencia_pago}</span>`
-            : ''}</td>
-      <td data-label="Comprobante">${p.comprobante_url
-            ? `<a href="${URL_BASE_ARCHIVOS}${p.comprobante_url}" target="_blank" rel="noopener" class="btn-mini">Ver comprobante</a>`
+      <td data-label="Pago">${ETIQUETAS_PAGO[p.forma_pago] || p.forma_pago}</td>
+      <td data-label="Comprobante">${(p.referencia_pago || p.comprobante_url)
+            ? (p.referencia_pago ? `<strong class="cell-mono" style="display:block">${escHtml(p.referencia_pago)}</strong>` : '') +
+              (p.comprobante_url ? `<a href="${URL_BASE_ARCHIVOS}${p.comprobante_url}" target="_blank" rel="noopener" class="btn-mini">Ver comprobante</a>` : '')
             : '<span class="cell-mono">—</span>'}</td>
       <td data-label="Envío">${p.envio_localidad || '—'}</td>
       <td class="cell-money" data-label="Subtotal">${formatMoney(p.subtotal)}</td>

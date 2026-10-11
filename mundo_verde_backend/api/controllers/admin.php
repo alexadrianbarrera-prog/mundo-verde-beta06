@@ -178,6 +178,14 @@ function admin_listar(PDO $pdo, string $tabla): void
     $meta = tablaValidaOError($tabla);
     permisoTabla($pdo, $tabla, 'listar');
 
+    // Pedidos: "referencia_pago" es el Nº de pedido (MV-DDMM-NNNN) que ve el cliente al
+    // transferir; el panel lo muestra en la columna Comprobante. Se pide solo si la
+    // columna ya existe en la base (migracion_referencia_pago.sql), así el listado no se rompe.
+    if ($tabla === 'pedidos' && !in_array('referencia_pago', $meta['columnas'], true)) {
+        $tieneRef = $pdo->query("SHOW COLUMNS FROM `pedidos` LIKE 'referencia_pago'")->fetch();
+        if ($tieneRef) $meta['columnas'][] = 'referencia_pago';
+    }
+
     $columnas = implode(', ', array_map(fn($c) => "`$c`", $meta['columnas']));
     $stmt = $pdo->query("SELECT $columnas FROM `$tabla` ORDER BY `{$meta['pk']}` DESC LIMIT 500");
     $filas = $stmt->fetchAll();
