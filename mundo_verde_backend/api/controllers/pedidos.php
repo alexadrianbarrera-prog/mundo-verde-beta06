@@ -38,6 +38,19 @@ function pedidos_crear(PDO $pdo): void
     if (!in_array($formaEntrega, ['retiro', 'envio'], true)) error('Forma de entrega inválida.');
     if (!in_array($formaPago, ['efectivo', 'transferencia', 'tarjeta'], true)) error('Forma de pago inválida.');
 
+    // Nº de pedido (MV-DDMM-NNNN): lo genera el front y es el MISMO que el cliente ve
+    // como concepto de la transferencia, en el resumen y en "¡Pedido enviado!".
+    // Se guarda tal cual para mostrarlo en la columna "Comprobante" del admin.
+    // Solo aplica a transferencia; para efectivo/tarjeta queda en NULL.
+    $referenciaPago = null;
+    if ($formaPago === 'transferencia') {
+        $ref = strtoupper(trim((string)($body['referencia_pago'] ?? '')));
+        if ($ref !== '') {
+            if (!preg_match('/^MV-\d{4}-\d{4}$/', $ref)) error('Número de pedido inválido.');
+            $referenciaPago = $ref;
+        }
+    }
+
     $cliente = $body['cliente'] ?? [];
     $envio   = $body['envio'] ?? [];
     $retiro  = $body['retiro'] ?? [];
@@ -134,12 +147,14 @@ function pedidos_crear(PDO $pdo): void
                                    forma_entrega, forma_pago, envio_domicilio, envio_localidad, envio_cp,
                                    retiro_nombre, retiro_dni,
                                    subtotal, descuento, total,
-                                   codigo_verde, descuento_inauguracion, descuento_newsletter)
+                                   codigo_verde, descuento_inauguracion, descuento_newsletter,
+                                   referencia_pago)
              VALUES (:usuario_id, :cliente_nombre, :cliente_email, :cliente_celular,
                      :forma_entrega, :forma_pago, :envio_domicilio, :envio_localidad, :envio_cp,
                      :retiro_nombre, :retiro_dni,
                      :subtotal, :descuento, :total,
-                     :codigo_verde, :desc_inauguracion, :desc_newsletter)'
+                     :codigo_verde, :desc_inauguracion, :desc_newsletter,
+                     :referencia_pago)'
         );
         $stmt->execute([
             'usuario_id'      => $usuario['id'] ?? null,
@@ -159,6 +174,7 @@ function pedidos_crear(PDO $pdo): void
             'codigo_verde'      => $suscriptorId !== null ? $codigoVerde : null,
             'desc_inauguracion' => $descInauguracion,
             'desc_newsletter'   => $descNewsletter,
+            'referencia_pago'   => $referenciaPago,
         ]);
         $pedidoId = (int)$pdo->lastInsertId();
 
@@ -212,6 +228,7 @@ function pedidos_crear(PDO $pdo): void
         'descuento_newsletter'   => $descNewsletter,
         'codigo_verde_aplicado'  => $suscriptorId !== null,
         'estado'          => 'pendiente',
+        'referencia_pago' => $referenciaPago,
         'comprobante_url' => null,
         'retiro_nombre'   => $formaEntrega === 'retiro' ? trim($retiro['nombre']) : null,
         'retiro_dni'      => $formaEntrega === 'retiro' ? trim($retiro['dni']) : null,
