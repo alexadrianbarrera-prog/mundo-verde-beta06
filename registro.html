@@ -17,9 +17,11 @@
         /* Registro: Domicilio + Piso + Dpto en la misma línea */
         #registroForm .fila-domicilio { display: flex; gap: 10px; align-items: flex-start; }
         #registroForm .fila-domicilio .fila-dom   { flex: 1 1 0; min-width: 0; }
-        #registroForm .fila-domicilio .fila-corto { flex: 0 0 64px; min-width: 0; }
+        #registroForm .fila-domicilio .fila-corto { flex: 0 0 84px; min-width: 0; padding-left: 0; padding-right: 0; }
         #registroForm .fila-domicilio label { display: block; width: 100%; text-align: left; }
         #registroForm .fila-domicilio input { width: 100%; box-sizing: border-box; min-width: 0; }
+        #registroForm .fila-domicilio .fila-corto input { padding: 6px 6px; text-align: center; }
+        #registroForm .fila-domicilio .fila-corto input::placeholder { font-size: .8em; }
     </style>
 </head>
 <body>
