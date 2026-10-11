@@ -14,13 +14,16 @@
     <link rel="stylesheet" href="css/styles.css"/>
     <link rel="stylesheet" href="CharonyPlywrite.css">
     <style>
-        /* Registro: Domicilio + Piso + Dpto en la misma línea */
-        #registroForm .fila-domicilio { display: flex; gap: 10px; align-items: flex-start; }
-        #registroForm .fila-domicilio .fila-dom   { flex: 1 1 0; min-width: 0; }
-        #registroForm .fila-domicilio .fila-corto { flex: 0 0 84px; min-width: 0; padding-left: 0; padding-right: 0; }
-        #registroForm .fila-domicilio label { display: block; width: 100%; text-align: left; }
+        /* Registro: Domicilio + Piso + Dpto en la misma línea.
+           El margen lateral (20px, igual que .form_input) lo pone la fila entera, así
+           los bordes izquierdo y derecho quedan alineados con el resto de los campos. */
+        #registroForm .fila-domicilio { display: flex; gap: 8px; align-items: flex-start; padding: 6px 20px; box-sizing: border-box; width: 100%; }
+        #registroForm .fila-domicilio .form_input { padding: 0; min-width: 0; }
+        #registroForm .fila-domicilio .fila-dom   { flex: 1 1 0; }
+        #registroForm .fila-domicilio .fila-corto { flex: 0 0 62px; }
+        #registroForm .fila-domicilio label { display: block; width: 100%; text-align: left; white-space: nowrap; }
         #registroForm .fila-domicilio input { width: 100%; box-sizing: border-box; min-width: 0; }
-        #registroForm .fila-domicilio .fila-corto input { padding: 6px 6px; text-align: center; }
+        #registroForm .fila-domicilio .fila-corto input { padding: 6px 4px; text-align: center; }
         #registroForm .fila-domicilio .fila-corto input::placeholder { font-size: .8em; }
         #registroForm .ayuda-piso-dpto { margin: 2px 20px 8px; font-size: .78em; line-height: 1.4; color: #b7c9b7; text-align: left; }
     </style>
