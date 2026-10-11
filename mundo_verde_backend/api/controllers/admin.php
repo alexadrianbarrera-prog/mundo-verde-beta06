@@ -20,13 +20,15 @@ function tablasWhitelist(): array
     return [
         'usuarios' => [
             'pk'         => 'id',
-            'columnas'   => ['id', 'nombre', 'email', 'telefono', 'domicilio_completo', 'localidad',
+            'columnas'   => ['id', 'nombre', 'email', 'telefono', 'domicilio_completo', 'piso', 'dpto', 'localidad',
                              'codigo_postal', 'fecha_nacimiento', 'rol', 'activo', 'creado_en'],
             'editables'  => [
                 'nombre'             => 'text',
                 'email'              => 'text',
                 'telefono'           => 'text',
                 'domicilio_completo' => 'text',
+                'piso'               => 'text',
+                'dpto'               => 'text',
                 'localidad'          => 'text',
                 'codigo_postal'      => 'text',
                 'rol'                => 'select:cliente,vendedor,mantenimiento,admin',
@@ -251,7 +253,11 @@ function admin_editar(PDO $pdo, string $tabla, string $pk): void
             }
         } else {
             $valor = trim((string)$valor);
-            if ($valor === '') {
+            if (in_array($col, ['piso', 'dpto'], true)) {
+                // Opcionales: máx. 10 caracteres y vacío = NULL
+                $valor = mb_substr($valor, 0, 10);
+                if ($valor === '') $valor = null;
+            } elseif ($valor === '') {
                 error("El campo \"$col\" no puede quedar vacío.");
             }
         }
@@ -414,9 +420,9 @@ function admin_crear_usuario(PDO $pdo, array $body): void
     $hash = password_hash($passwordTemporal, PASSWORD_DEFAULT);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO usuarios (nombre, email, telefono, domicilio_completo, localidad, codigo_postal,
+        'INSERT INTO usuarios (nombre, email, telefono, domicilio_completo, piso, dpto, localidad, codigo_postal,
                                 fecha_nacimiento, password_hash, rol, activo, confirmado)
-         VALUES (:nombre, :email, :telefono, :domicilio, :localidad, :cp, :fecha_nac, :hash, :rol, 1, 1)'
+         VALUES (:nombre, :email, :telefono, :domicilio, :piso, :dpto, :localidad, :cp, :fecha_nac, :hash, :rol, 1, 1)'
     );
     try {
         $stmt->execute([
@@ -424,6 +430,8 @@ function admin_crear_usuario(PDO $pdo, array $body): void
             'email'     => $email,
             'telefono'  => trim($body['telefono'] ?? '') ?: null,
             'domicilio' => trim($body['domicilio_completo'] ?? '') ?: null,
+            'piso'      => mb_substr(trim($body['piso'] ?? ''), 0, 10) ?: null,
+            'dpto'      => mb_substr(trim($body['dpto'] ?? ''), 0, 10) ?: null,
             'localidad' => trim($body['localidad'] ?? '') ?: null,
             'cp'        => trim($body['codigo_postal'] ?? '') ?: null,
             'fecha_nac' => trim($body['fecha_nacimiento'] ?? '') ?: null,
