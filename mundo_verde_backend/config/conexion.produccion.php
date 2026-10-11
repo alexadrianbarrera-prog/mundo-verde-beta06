@@ -16,10 +16,15 @@ $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 
+// Hora de Argentina (UTC-3, sin horario de verano) para PHP y para MySQL
+date_default_timezone_set('America/Argentina/Buenos_Aires');
+
 $opciones = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES   => false,
+    // Se ejecuta al abrir la conexión: NOW() y CURRENT_TIMESTAMP pasan a hora argentina
+    PDO::MYSQL_ATTR_INIT_COMMAND => "SET time_zone = '-03:00'",
 ];
 
 try {
