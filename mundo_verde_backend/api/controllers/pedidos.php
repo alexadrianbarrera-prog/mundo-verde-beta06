@@ -219,6 +219,32 @@ function pedidos_crear(PDO $pdo): void
         error('No se pudo registrar el pedido. Intentá de nuevo.', 500);
     }
 
+    // Remito por mail al comprador (solo si tiene mail: los invitados no lo cargan).
+    // Nunca frena el pedido: si falla el SMTP, el pedido ya quedó guardado.
+    require_once __DIR__ . '/mailer.php';
+    enviarMailPedido([
+        'id'              => $pedidoId,
+        'referencia'      => $referenciaPago,
+        'fecha'           => (new DateTime('now', new DateTimeZone('America/Argentina/Buenos_Aires')))->format('d/m/Y H:i'),
+        'email'           => $cliente['email'] ?? ($usuario['email'] ?? ''),
+        'nombre'          => $cliente['nombre'] ?? '',
+        'forma_entrega'   => $formaEntrega,
+        'forma_pago'      => $formaPago,
+        'retiro_nombre'   => $retiro['nombre'] ?? '',
+        'retiro_dni'      => $retiro['dni'] ?? '',
+        'envio_domicilio' => $envio['domicilio'] ?? '',
+        'envio_localidad' => $envio['localidad'] ?? '',
+        'envio_cp'        => $envio['cp'] ?? '',
+        'items'           => $itemsResueltos,
+        'subtotal'        => $subtotal,
+        'descuentos'      => [
+            ['Descuento efectivo + retiro', $descEfectivo],
+            ['Descuento de inauguración',   $descInauguracion],
+            ['Código Verde (newsletter)',   $descNewsletter],
+        ],
+        'total'           => $total,
+    ]);
+
     responder([
         'id'              => $pedidoId,
         'subtotal'        => $subtotal,

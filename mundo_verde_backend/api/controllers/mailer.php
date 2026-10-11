@@ -291,3 +291,167 @@ function enviarMailNewsletter(string $email, string $nombre, string $codigoVerde
     }
     return $ok;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * REMITO DE PEDIDO — mail al comprador con el resumen de su compra
+ * (mismo contenido que el paso 4 "Confirmar pedido", con formato de remito).
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+const ALIAS_BANCARIO_MV = 'AGUS.MUNDO.VERDE';
+
+function moneyMV(float $n): string
+{
+    return '$' . number_format($n, 0, ',', '.');
+}
+
+/**
+ * Envía el remito del pedido. $p espera:
+ *   id, referencia (MV-DDMM-NNNN o null), fecha (string), email, nombre,
+ *   forma_entrega ('retiro'|'envio'), forma_pago ('efectivo'|'transferencia'|'tarjeta'),
+ *   retiro_nombre, retiro_dni, envio_domicilio, envio_localidad, envio_cp,
+ *   items [ [codigo, nombre, precio, cantidad, subtotal] ],
+ *   subtotal, descuentos [ [etiqueta, monto] ], total
+ * Nunca lanza excepciones: devuelve true/false y registra el error en el log.
+ */
+function enviarMailPedido(array $p): bool
+{
+    try {
+        $email = trim((string)($p['email'] ?? ''));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return false; // invitado sin mail
+
+        $h   = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+        $nro = !empty($p['referencia']) ? $p['referencia'] : '#' . $p['id'];
+        $nombre = trim((string)($p['nombre'] ?? '')) !== '' ? $p['nombre'] : nombreDesdeEmail($email);
+
+        $esRetiro = ($p['forma_entrega'] ?? '') === 'retiro';
+        $metodos  = ['efectivo' => 'Efectivo', 'transferencia' => 'Alias bancario', 'tarjeta' => 'Tarjeta de crédito / débito'];
+        $metodo   = $metodos[$p['forma_pago']] ?? $p['forma_pago'];
+        $esTransf = $p['forma_pago'] === 'transferencia';
+        $estado   = $esTransf ? 'Pendiente de verificación' : ($p['forma_pago'] === 'tarjeta' ? 'Pago procesado' : 'Pendiente de pago');
+
+        $td  = 'padding:8px 6px;border-bottom:1px solid #e5e5e5;font-size:13px;';
+        $lbl = 'padding:5px 0;font-size:13px;color:#777;';
+        $val = 'padding:5px 0;font-size:13px;color:#222;text-align:right;';
+
+        // Filas de ítems
+        $filas = '';
+        foreach ($p['items'] as $it) {
+            $filas .=
+                '<tr>' .
+                '<td style="' . $td . 'font-family:Courier New,monospace;color:#777;">' . $h($it['codigo']) . '</td>' .
+                '<td style="' . $td . '">' . $h($it['nombre']) . '</td>' .
+                '<td style="' . $td . 'text-align:center;">' . (int)$it['cantidad'] . '</td>' .
+                '<td style="' . $td . 'text-align:right;">' . moneyMV((float)$it['precio']) . '</td>' .
+                '<td style="' . $td . 'text-align:right;"><strong>' . moneyMV((float)$it['subtotal']) . '</strong></td>' .
+                '</tr>';
+        }
+
+        // Totales
+        $totales = '<tr><td style="' . $lbl . '">Subtotal</td><td style="' . $val . '">' . moneyMV((float)$p['subtotal']) . '</td></tr>';
+        foreach ($p['descuentos'] as [$etiqueta, $monto]) {
+            if ($monto > 0) {
+                $totales .= '<tr><td style="' . $lbl . 'color:#2e7d32;">' . $h($etiqueta) . '</td>' .
+                            '<td style="' . $val . 'color:#2e7d32;">-' . moneyMV((float)$monto) . '</td></tr>';
+            }
+        }
+
+        // Entrega
+        if ($esRetiro) {
+            $entrega =
+                '<tr><td style="' . $lbl . '">Forma de entrega</td><td style="' . $val . '">Retiro en local</td></tr>' .
+                '<tr><td style="' . $lbl . '">Retira</td><td style="' . $val . '">' . $h($p['retiro_nombre']) . '</td></tr>' .
+                '<tr><td style="' . $lbl . '">DNI</td><td style="' . $val . '">' . $h($p['retiro_dni']) . '</td></tr>';
+        } else {
+            $entrega =
+                '<tr><td style="' . $lbl . '">Forma de entrega</td><td style="' . $val . '">Envío a domicilio</td></tr>' .
+                '<tr><td style="' . $lbl . '">Domicilio</td><td style="' . $val . '">' . $h($p['envio_domicilio']) . '</td></tr>' .
+                '<tr><td style="' . $lbl . '">Localidad</td><td style="' . $val . '">' . $h($p['envio_localidad']) . ' (CP ' . $h($p['envio_cp']) . ')</td></tr>';
+        }
+
+        // Bloque de instrucciones (solo transferencia)
+        $instrucciones = '';
+        if ($esTransf) {
+            $instrucciones =
+                '<div style="margin:22px 0 0;padding:14px 16px;background:#fff8e1;border:1px solid #f0d98a;border-radius:6px;font-size:13px;color:#5d4a00;">' .
+                '<strong>¿Ya transferiste?</strong> Enviános el comprobante por el mismo chat de WhatsApp indicando tu ' .
+                'número de pedido <strong>' . $h($nro) . '</strong>. Cuando verifiquemos el pago te confirmamos por ahí.<br>' .
+                '<span style="display:block;margin-top:8px;">Alias: <strong style="font-family:Courier New,monospace;">' . ALIAS_BANCARIO_MV . '</strong> · ' .
+                'Importe: <strong>' . moneyMV((float)$p['total']) . '</strong> · Concepto: <strong>' . $h($nro) . '</strong></span>' .
+                '</div>';
+        }
+
+        $mail = crearMailer();
+        $mail->addAddress($email, $nombre);
+        $mail->Subject = 'Remito de tu pedido ' . $nro . ' — Mundo Verde 🌿';
+
+        $mail->Body =
+            '<div style="background:#f3f3f0;padding:20px 8px;font-family:Arial,sans-serif;color:#333;">' .
+            '<div style="max-width:620px;margin:auto;background:#fff;border:1px solid #ddd;border-radius:8px;overflow:hidden;">' .
+
+            // Encabezado
+            '<table width="100%" cellspacing="0" cellpadding="0" style="background:#2e7d32;color:#fff;"><tr>' .
+            '<td style="padding:18px 22px;"><div style="font-size:20px;font-weight:bold;">Mundo Verde 🌿</div>' .
+            '<div style="font-size:12px;opacity:.85;">Vivero · Berazategui, Buenos Aires</div></td>' .
+            '<td style="padding:18px 22px;text-align:right;"><div style="font-size:11px;letter-spacing:2px;opacity:.85;">REMITO DE PEDIDO</div>' .
+            '<div style="font-size:18px;font-weight:bold;font-family:Courier New,monospace;">' . $h($nro) . '</div></td>' .
+            '</tr></table>' .
+
+            '<div style="padding:22px;">' .
+            '<p style="margin:0 0 4px;font-size:15px;">¡Hola, ' . $h($nombre) . '! Recibimos tu pedido.</p>' .
+            '<p style="margin:0 0 18px;font-size:13px;color:#777;">Fecha: ' . $h($p['fecha']) . '</p>' .
+
+            // Datos del pedido
+            '<table width="100%" cellspacing="0" cellpadding="0" style="border-top:2px solid #2e7d32;">' .
+            '<tr><td colspan="2" style="padding:12px 0 4px;font-size:11px;letter-spacing:1.5px;color:#999;">ENTREGA</td></tr>' .
+            $entrega .
+            '<tr><td colspan="2" style="padding:14px 0 4px;font-size:11px;letter-spacing:1.5px;color:#999;">PAGO</td></tr>' .
+            '<tr><td style="' . $lbl . '">Método</td><td style="' . $val . '">' . $h($metodo) . '</td></tr>' .
+            '<tr><td style="' . $lbl . '">Nº de pedido</td><td style="' . $val . 'font-family:Courier New,monospace;"><strong>' . $h($nro) . '</strong></td></tr>' .
+            '<tr><td style="' . $lbl . '">Estado del pago</td><td style="' . $val . '"><span style="background:#fdf0c8;border:1px solid #f0d98a;color:#7a5b00;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:bold;">' . $h($estado) . '</span></td></tr>' .
+            '</table>' .
+
+            // Detalle
+            '<div style="margin-top:20px;font-size:11px;letter-spacing:1.5px;color:#999;">DETALLE</div>' .
+            '<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:6px;border-collapse:collapse;">' .
+            '<tr style="background:#f3f7f3;color:#2e7d32;font-size:11px;text-transform:uppercase;">' .
+            '<th style="padding:8px 6px;text-align:left;">Código</th><th style="padding:8px 6px;text-align:left;">Producto</th>' .
+            '<th style="padding:8px 6px;text-align:center;">Cant.</th><th style="padding:8px 6px;text-align:right;">P. unit.</th>' .
+            '<th style="padding:8px 6px;text-align:right;">Importe</th></tr>' .
+            $filas . '</table>' .
+
+            // Totales
+            '<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:10px;">' . $totales .
+            '<tr><td style="padding:12px 0 0;font-size:17px;font-weight:bold;color:#2e7d32;border-top:2px solid #2e7d32;">TOTAL</td>' .
+            '<td style="padding:12px 0 0;font-size:17px;font-weight:bold;color:#2e7d32;text-align:right;border-top:2px solid #2e7d32;">' . moneyMV((float)$p['total']) . '</td></tr>' .
+            '</table>' .
+
+            $instrucciones .
+            '<p style="margin:22px 0 0;font-size:12px;color:#999;text-align:center;">Este remito es un resumen de tu pedido y no tiene validez fiscal. ' .
+            'Si tenés dudas, respondé este mail.</p>' .
+            '</div></div></div>';
+
+        // Versión texto plano
+        $txt = "REMITO DE PEDIDO $nro — Mundo Verde\nFecha: {$p['fecha']}\n\nHola, $nombre! Recibimos tu pedido.\n\n";
+        foreach ($p['items'] as $it) {
+            $txt .= "- {$it['nombre']} x{$it['cantidad']}  " . moneyMV((float)$it['subtotal']) . "\n";
+        }
+        $txt .= "\nSubtotal: " . moneyMV((float)$p['subtotal']) . "\n";
+        foreach ($p['descuentos'] as [$etiqueta, $monto]) {
+            if ($monto > 0) $txt .= "$etiqueta: -" . moneyMV((float)$monto) . "\n";
+        }
+        $txt .= "TOTAL: " . moneyMV((float)$p['total']) . "\n\n" .
+                "Entrega: " . ($esRetiro ? "Retiro en local — {$p['retiro_nombre']} (DNI {$p['retiro_dni']})" : "Envío a {$p['envio_domicilio']}, {$p['envio_localidad']}") . "\n" .
+                "Pago: $metodo — $estado\n";
+        if ($esTransf) {
+            $txt .= "\nAlias: " . ALIAS_BANCARIO_MV . " | Concepto: $nro\nEnviá el comprobante por WhatsApp indicando tu número de pedido.\n";
+        }
+        $mail->AltBody = $txt . "\nEl equipo de Mundo Verde";
+
+        $mail->send();
+        return true;
+    } catch (\Throwable $e) {
+        error_log('[mail] Error enviando remito de pedido ' . ($p['id'] ?? '?') . ': ' . $e->getMessage());
+        return false;
+    }
+}
