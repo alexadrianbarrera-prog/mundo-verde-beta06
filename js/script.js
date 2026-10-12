@@ -1271,8 +1271,17 @@ function aplicarVisibilidadMetodo(valor) {
    de api.js. El contenido del recuadro #detalle-tarjeta se genera acá, así
    no hace falta tocar el HTML de cada hoja. */
 function renderDetalleTarjeta() {
-    const panel = document.getElementById('detalle-tarjeta');
-    if (!panel) return;
+    // Las hojas no traen #detalle-tarjeta: se crea dentro de #metodoDetalle la primera vez.
+    let panel = document.getElementById('detalle-tarjeta');
+    if (!panel) {
+        const contenedor = document.getElementById('metodoDetalle');
+        if (!contenedor) return;
+        panel = document.createElement('div');
+        panel.id = 'detalle-tarjeta';
+        panel.className = 'metodo-detalle';
+        contenedor.appendChild(panel);
+    }
+    panel.style.display = 'block';
     const total = '$' + calcularTotal(cargarCarrito()).toLocaleString('es-AR');
     panel.innerHTML = `
         <div class="detalle-tarjeta-getnet" style="line-height:1.5;">

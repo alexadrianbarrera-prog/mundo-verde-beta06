@@ -382,29 +382,7 @@
                 <input type="text" id="envio-nombre" placeholder="Nombre completo *" autocomplete="name">
                 <input type="tel"  id="envio-celular" placeholder="Celular *" inputmode="numeric" pattern="[0-9]*" maxlength="15" autocomplete="tel">
                 <input type="text"   id="envio-domicilio" placeholder="Domicilio (calle y número) *">
-                <select id="envio-localidad">
-                    <option value="">Localidad *</option>
-                    <option value="Avellaneda Centro">Avellaneda</option>
-                    <option value="Crucesita">Crucesita</option>
-                    <option value="Quinta Galli">Quinta Galli</option>
-                    <option value="Gerli">Gerli</option>
-                    <option value="Sarandi">Sarandí</option>
-                    <option value="Villa Dominico">Villa Dominico</option>
-                    <option value="Wilde">Wilde</option>
-                    <option value="Bernal Residencial">Bernal Residecial</option>
-                    <option value="Bernal Centro">Bernal Centro</option>
-                    <option value="Country Nuevo Quilmes">Country Nuevo Quilmes</option>
-                    <option value="Quilmes">Quilmes Centro</option>
-                    <option value="Berazategui">Berazategui</option>
-                    <option value="Country el Cármen">Country el Cármen</option>
-                    <option value="Country Abril Sur">Country Abril Sur</option>
-                    <option value="Fincas de Hudson">Fincas de Hudson</option>
-                    <option value="Fincas de Iraola">Fincas de Iraola</option>
-                    <option value="Lanús">Lanús</option>
-                    <option value="Banfield">Banfield</option>
-                    <option value="Lomas de Zamora">Lomas de Zamora</option>
-                    <option value="Otro">Otro</option>
-                </select>
+                <input type="text" id="envio-localidad" placeholder="Localidad de envío *" autocomplete="address-level2">
                 <div id="zona-cobertura-msg" class="zona-msg" style="display:none"></div>
                 <input type="number" id="envio-cp" placeholder="Código postal *">
                 <br><br>
@@ -459,24 +437,6 @@
                     <i class="fa-solid fa-credit-card"></i>
                     <span>Tarjeta de crédito / débito</span>
                 </label>
-                <!--<label class="metodo-card metodo-card--proximamente">
-                    <input type="radio" name="metodoPago" value="mercadopago">
-                    <i class="fa-solid fa-wallet"></i>
-                    <span>Mercado Pago</span>
-                    <span class="metodo-proximamente-tag">Próximamente</span>
-                </label>
-                <label class="metodo-card metodo-card--proximamente">
-                    <input type="radio" name="metodoPago" value="modo">
-                    <i class="fa-solid fa-mobile-screen-button"></i>
-                    <span>MODO</span>
-                    <span class="metodo-proximamente-tag">Próximamente</span>
-                </label>
-                <label class="metodo-card metodo-card--proximamente">
-                    <input type="radio" name="metodoPago" value="cuotasdebito">
-                    <i class="fa-solid fa-calendar-days"></i>
-                    <span>Cuotas sin interés con Débito</span>
-                    <span class="metodo-proximamente-tag">Próximamente</span>
-                </label>-->
             </div>
 
             <!-- Panel de detalle: un solo renglón completo debajo de la
@@ -489,17 +449,7 @@
                     <p class="zona-msg" style="display:block; color:green; font-weight:bold; margin-bottom:10px; font-size:16px;">
                         Hasta 3 cuotas sin interés desde $150.000
                     </p>
-                    <!--<div id="cbu-info" class="cbu-info-box">
-                        <div class="cbu-row">
-                            <span class="cbu-label">Alias</span>
-                            <span class="cbu-value">AGUS.MUNDO.VERDE</span>
-                        </div>
-                        <div class="cbu-row">
-                            <span class="cbu-label">Banco</span>
-                            <span class="cbu-value">Banco Santander</span>
-                        </div>
-                    </div>-->
-                     <div class="pago-ref-box">
+                    <div class="pago-ref-box">
                         <p>Total a transferir: <strong class="pago-total">$0</strong></p>
                         <p>Poné este número de pedido en el <strong>concepto</strong> de la transferencia:<br>
                         <strong class="pago-numero">MV-----</strong></p>
@@ -509,54 +459,6 @@
                         <span>Ya transferí</span>
                     </label>
                 </div>
-
-                <!-- Tarjeta vía Mercado Pago Bricks (FUNCIONAL) -->
-                <div id="detalle-tarjeta" class="metodo-detalle" style="display:none">
-                    <div id="tarjetaBox">
-
-                        <!-- Se muestra SOLO si MP_PUBLIC_KEY todavía no está configurada
-                             en script.js (ver inicializarBrickTarjeta). Con la Public Key
-                             puesta, este aviso se oculta solo y el Brick real ocupa su lugar. -->
-                        <div class="mp-preview-banner" id="mp-preview-banner">
-                            Vista previa — se conecta cuando cargues tu Public Key de Mercado Pago en script.js (MP_PUBLIC_KEY)
-                        </div>
-
-                        <!-- Acá el SDK de Mercado Pago monta el Card Payment Brick real:
-                             número de tarjeta, vencimiento, CVV, cuotas y DNI, todo
-                             tokenizado en el navegador del cliente. Mundo Verde nunca
-                             recibe el número de tarjeta ni el código de seguridad. -->
-                        <div id="cardPaymentBrick_container"></div>
-
-                        <div class="zona-msg" style="display:block; color:#555; margin-top:8px;">
-                            Con tarjeta el pago se confirma al instante — no hace falta adjuntar comprobante.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- MODO — todavía sin integración -->
-                <div id="detalle-modo" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
-                    <p class="zona-msg" style="display:block; color:#555;">
-                        Vas a poder pagar directamente desde la app MODO. Todavía estamos
-                        conectando este medio de pago.
-                    </p>
-                </div>
-
-                <!-- Mercado Pago (billetera) — todavía sin integración -->
-                <div id="detalle-mercadopago" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
-                    <p class="zona-msg" style="display:block; color:#555;">
-                        Pago con el saldo de tu cuenta de Mercado Pago. Todavía estamos
-                        conectando este medio de pago.
-                    </p>
-                </div>
-
-                <!-- Mercado Crédito — todavía sin integración -->
-                <div id="detalle-mercadocredito" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
-                    <p class="zona-msg" style="display:block; color:#555;">
-                        Financiá tu compra con tu línea de Mercado Crédito. Todavía estamos
-                        conectando este medio de pago.
-                    </p>
-                </div>
-
                 <!-- Cuotas sin interés con Débito — todavía sin integración -->
                 <div id="detalle-cuotasdebito" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
                     <p class="zona-msg" style="display:block; color:#555;">
@@ -564,9 +466,7 @@
                         estamos conectando este medio de pago.
                     </p>
                 </div>
-
             </div>
-
         </div>
 
         <div class="checkout-footer">
