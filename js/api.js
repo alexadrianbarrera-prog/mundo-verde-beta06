@@ -123,17 +123,19 @@ const mvPedidos = {
     listar: () => mvApi('/pedidos', { auth: true }),
 };
 
-/* ── Pagos con tarjeta (Mercado Pago) ─────────────────────
-   El Card Payment Brick ya generó el token de la tarjeta en el
-   navegador del cliente (ver script.js → procesarPagoConTarjeta).
-   Acá solo se lo mandamos al backend, que es quien de verdad
-   cobra usando el Access Token PRIVADO de Mercado Pago del lado
-   del servidor — a este archivo nunca le llega el número de
-   tarjeta completo ni el CVV.
-   Requiere el endpoint POST /pagos/tarjeta en mundo_verde_backend
-   (ver ejemplo de referencia en pagos.php). ── */
+/* ── Pagos con tarjeta (Getnet) ───────────────────────────
+   Flujo por redirección (el sitio nunca ve datos de tarjeta):
+   1) script.js crea el pedido con mvPedidos.crear (forma_pago 'tarjeta').
+   2) mvPagos.crear(pedidoId) pide al backend crear el pago en Getnet y
+      devuelve { url }: ahí se redirige al cliente.
+   3) Getnet vuelve a pago_resultado.html?id=..&ref=.. y esa página consulta
+      mvPagos.estado (el estado lo cambia el WEBHOOK del backend, no el front).
+   Endpoints: POST /pagos/tarjeta y GET /pagos/estado (controllers/pagos.php). ── */
 const mvPagos = {
-    pagarConTarjeta: (datos) => mvApi('/pagos/tarjeta', { method: 'POST', body: datos, auth: !!mvGetToken() }),
+    crear: (pedidoId) =>
+        mvApi('/pagos/tarjeta', { method: 'POST', body: { pedido_id: pedidoId }, auth: !!mvGetToken() }),
+    estado: (id, ref) =>
+        mvApi('/pagos/estado?id=' + encodeURIComponent(id) + '&ref=' + encodeURIComponent(ref)),
 };
 
 /* ── Super Admin (CRUD genérico sobre las tablas de la BD) ── */
