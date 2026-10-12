@@ -12,8 +12,8 @@ return [
     'entorno' => 'sandbox', // 'sandbox' | 'produccion'
 
     'sandbox' => [
-        'client_id'     => 'CLIENT_ID_PREPRODUCCION',
-        'client_secret' => 'CLIENT_SECRET_PREPRODUCCION',
+        'client_id'     => 'cid_3a18944d-661c-4c4f-bc72-05b83a8b9a7',
+        'client_secret' => 'c28dc006-03c4-4a68-bf32-41a314b5c2ac ',
         'auth_url'      => 'https://auth.geopagos.com/oauth/token', // TODO(doc): confirmar
         'api_base'      => 'https://TODO-sandbox.globalgetnet.com.ar', // TODO(doc): URL de preproducción
     ],
@@ -28,5 +28,5 @@ return [
     'webhook_url' => 'https://vivemundoverde.com/mundo_verde_backend/api/pagos/webhook',
 
     // Texto largo y aleatorio (ej.: bin2hex(random_bytes(24))). Viaja como ?k=... en la URL del webhook.
-    'webhook_token' => 'CAMBIAR_POR_UN_TOKEN_LARGO_Y_ALEATORIO',
+    'webhook_token' => 'Qwertys23324sd6sdjsdfs63ksd',
 ];
