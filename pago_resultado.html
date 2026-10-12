@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Resultado del pago | Vivero Mundo Verde</title>
+    <style>
+        :root {
+            --verde: #1b5e20;
+            --verde-claro: #e8f3e8;
+            --rojo: #9b2c2c;
+            --rojo-claro: #fbeaea;
+            --ambar: #8a5a00;
+            --ambar-claro: #fdf3dc;
+            --texto: #1f2a1f;
+            --suave: #5b675b;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            color: var(--texto);
+            background: #f6f8f4;
+        }
+        header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #dfe6da;
+            background: #fff;
+        }
+        header a { color: var(--verde); font-weight: 700; text-decoration: none; font-size: 1.1rem; }
+        main { flex: 1; display: grid; place-items: center; padding: 1.5rem 1rem; }
+        .tarjeta {
+            width: 100%;
+            max-width: 30rem;
+            background: #fff;
+            border: 1px solid #dfe6da;
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+        .icono {
+            width: 3.5rem; height: 3.5rem;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: grid; place-items: center;
+            font-size: 1.6rem;
+        }
+        .estado-cargando .icono { background: var(--ambar-claro); }
+        .estado-ok .icono       { background: var(--verde-claro); }
+        .estado-fallo .icono    { background: var(--rojo-claro); }
+        .estado-espera .icono   { background: var(--ambar-claro); }
+        h1 { font-size: 1.4rem; margin: 0 0 .5rem; }
+        p { margin: .5rem 0; line-height: 1.5; }
+        .pedido-nro {
+            display: inline-block;
+            margin: .75rem 0 .25rem;
+            padding: .35rem .8rem;
+            background: var(--verde-claro);
+            color: var(--verde);
+            border-radius: 6px;
+            font-weight: 700;
+            letter-spacing: .02em;
+        }
+        .suave { color: var(--suave); font-size: .95rem; }
+        .acciones { display: flex; flex-direction: column; gap: .6rem; margin-top: 1.5rem; }
+        .btn {
+            display: block;
+            padding: .75rem 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--verde);
+            background: var(--verde);
+            color: #fff;
+            font: inherit;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn.secundario { background: #fff; color: var(--verde); }
+        .btn:focus-visible { outline: 3px solid #7cb87f; outline-offset: 2px; }
+        .spinner {
+            width: 1.6rem; height: 1.6rem;
+            border: 3px solid #e3d3a8;
+            border-top-color: var(--ambar);
+            border-radius: 50%;
+            animation: girar 1s linear infinite;
+        }
+        @keyframes girar { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+        [hidden] { display: none !important; }
+    </style>
+</head>
+<body>
+    <header><a href="index.html">🌿 Vivero Mundo Verde</a></header>
+
+    <main>
+        <section class="tarjeta estado-cargando" id="tarjeta" aria-live="polite">
+            <div class="icono" id="icono"><div class="spinner" id="spinner"></div></div>
+            <h1 id="titulo">Confirmando tu pago…</h1>
+            <p id="detalle">Estamos verificando el resultado con Getnet. No cierres esta página.</p>
+            <div id="nro-wrap" hidden>
+                <span class="pedido-nro" id="nro"></span>
+                <p class="suave">Guardá este número por cualquier consulta.</p>
+            </div>
+            <div class="acciones" id="acciones" hidden></div>
+        </section>
+    </main>
+
+    <!-- api.js antes que script.js (mvPagos, mvUsuarioActual); script.js aporta vaciarCarrito y guardarCodigoVerde -->
+    <script src="js/api.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+    (function () {
+        const params = new URLSearchParams(window.location.search);
+        let id  = params.get('id');
+        let ref = params.get('ref');
+
+        // Si Getnet no devolvió los parámetros, se recupera lo guardado antes de redirigir.
+        if (!id || !ref) {
+            try {
+                const g = JSON.parse(sessionStorage.getItem('mvPagoPendiente') || 'null');
+                if (g) { id = id || g.id; ref = ref || g.ref; }
+            } catch (e) {}
+        }
+
+        const INTERVALO_MS = 3000;
+        const MAX_INTENTOS = 30;      // ~90 segundos
+        const ESTADOS_OK = ['pagado', 'confirmado', 'entregado'];
+
+        const $ = (x) => document.getElementById(x);
+        const tarjeta = $('tarjeta');
+        let intentos = 0;
+        let timer = null;
+
+        function whatsappUrl() {
+            const numero = (typeof WA_NUMBER !== 'undefined') ? WA_NUMBER : '5491168316730';
+            const msg = ref
+                ? 'Hola! Hice un pedido con tarjeta (' + ref + ') y necesito consultar por mi pago.'
+                : 'Hola! Necesito consultar por un pago con tarjeta.';
+            return 'https://wa.me/' + numero + '?text=' + encodeURIComponent(msg);
+        }
+
+        function mostrar(clase, icono, titulo, detalle, acciones) {
+            tarjeta.className = 'tarjeta ' + clase;
+            $('icono').textContent = icono;
+            $('titulo').textContent = titulo;
+            $('detalle').textContent = detalle;
+            const wrap = $('acciones');
+            wrap.innerHTML = '';
+            (acciones || []).forEach(a => {
+                const el = document.createElement(a.href ? 'a' : 'button');
+                el.className = 'btn' + (a.secundario ? ' secundario' : '');
+                el.textContent = a.texto;
+                if (a.href) { el.href = a.href; if (a.nueva) { el.target = '_blank'; el.rel = 'noopener'; } }
+                if (a.onclick) { el.type = 'button'; el.addEventListener('click', a.onclick); }
+                wrap.appendChild(el);
+            });
+            wrap.hidden = !(acciones && acciones.length);
+        }
+
+        function mostrarNumero() {
+            if (!ref) return;
+            $('nro').textContent = 'Pedido ' + ref;
+            $('nro-wrap').hidden = false;
+        }
+
+        function pagoConfirmado() {
+            // El carrito se vacía recién ahora (y una sola vez por pedido).
+            const marca = 'mvPagoLimpio_' + id;
+            try {
+                if (!sessionStorage.getItem(marca)) {
+                    if (typeof guardarCodigoVerde === 'function') guardarCodigoVerde(null);
+                    if (typeof vaciarCarrito === 'function') vaciarCarrito();
+                    sessionStorage.setItem(marca, '1');
+                }
+                sessionStorage.removeItem('mvPagoPendiente');
+            } catch (e) {}
+
+            mostrarNumero();
+            mostrar('estado-ok', '✅', '¡Pago recibido!',
+                'Tu pedido quedó pagado. Si dejaste un mail, te enviamos el detalle. Nos pondremos en contacto para coordinar la entrega o el retiro.',
+                [
+                    { texto: 'Seguir comprando', href: 'index.html' },
+                    { texto: 'Consultar por WhatsApp', href: whatsappUrl(), nueva: true, secundario: true },
+                ]);
+        }
+
+        function pagoNoCompletado() {
+            try { sessionStorage.removeItem('mvPagoPendiente'); } catch (e) {}
+            mostrarNumero();
+            mostrar('estado-fallo', '⚠️', 'El pago no se completó',
+                'No se realizó ningún cobro. Tu carrito sigue como lo dejaste: podés volver y elegir otra tarjeta u otro método de pago.',
+                [
+                    { texto: 'Volver al sitio', href: 'index.html' },
+                    { texto: 'Pedir ayuda por WhatsApp', href: whatsappUrl(), nueva: true, secundario: true },
+                ]);
+        }
+
+        function sinConfirmacion() {
+            mostrarNumero();
+            mostrar('estado-espera', '⏳', 'Todavía no recibimos la confirmación',
+                'Getnet puede demorar unos minutos en avisarnos. No hace falta que pagues de nuevo: cuando se acredite, tu pedido pasa a pagado. Si ya te debitaron y esto no cambia, escribinos.',
+                [
+                    { texto: 'Volver a consultar', onclick: () => { intentos = 0; arrancar(); } },
+                    { texto: 'Escribir por WhatsApp', href: whatsappUrl(), nueva: true, secundario: true },
+                ]);
+        }
+
+        function enlaceInvalido() {
+            mostrar('estado-fallo', '🔗', 'No encontramos tu pedido',
+                'Este enlace está incompleto. Si pagaste, escribinos con el número de pedido y lo revisamos.',
+                [
+                    { texto: 'Volver al sitio', href: 'index.html' },
+                    { texto: 'Escribir por WhatsApp', href: whatsappUrl(), nueva: true, secundario: true },
+                ]);
+        }
+
+        async function consultar() {
+            intentos++;
+            try {
+                const r = await mvPagos.estado(id, ref);
+                if (ESTADOS_OK.includes(r.estado)) return pagoConfirmado();
+                if (r.estado === 'cancelado')      return pagoNoCompletado();
+                // 'pendiente': el webhook todavía no llegó
+            } catch (err) {
+                if (err.status === 404) return enlaceInvalido();
+                // error de red / servidor: se sigue intentando
+            }
+            if (intentos >= MAX_INTENTOS) return sinConfirmacion();
+            timer = setTimeout(consultar, INTERVALO_MS);
+        }
+
+        function arrancar() {
+            clearTimeout(timer);
+            mostrar('estado-cargando', '', 'Confirmando tu pago…',
+                'Estamos verificando el resultado con Getnet. No cierres esta página.', []);
+            $('icono').innerHTML = '<div class="spinner"></div>';
+            if (ref) mostrarNumero();
+            consultar();
+        }
+
+        if (!id || !ref) enlaceInvalido(); else arrancar();
+    })();
+    </script>
+</body>
+</html>

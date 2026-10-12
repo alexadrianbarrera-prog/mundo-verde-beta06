@@ -260,7 +260,7 @@ function guardarCarrito(items) {
    Ambos porcentajes se calculan sobre el SUBTOTAL (acumulables:
    10% + 10% = 20% sobre el subtotal).
    calcularTotal() ya devuelve el total CON descuentos, así que
-   el paso 3 (pago), el Brick de Mercado Pago, el paso 4, el
+   el paso 3 (pago), el pago con tarjeta (Getnet), el paso 4, el
    WhatsApp y el mail usan automáticamente el monto correcto.
    ══════════════════════════════════════════════════════ */
 const CODIGO_VERDE_KEY = 'mvCodigoVerde';
@@ -845,21 +845,27 @@ function esFragil(codigo) {
     return CODIGOS_FRAGILES.has((codigo || '').toUpperCase());
 }
 
-/* ── Mercado Pago — Card Payment Brick (pago con tarjeta) ──
-   MP_PUBLIC_KEY es la clave PÚBLICA (no la privada/Access Token,
-   esa va solo en el backend). Se consigue en:
-   https://www.mercadopago.com.ar/developers/panel/app
-   Mientras esté vacía o con el valor de ejemplo, el paso 3
-   muestra el aviso de "Vista previa" y no cobra nada de verdad. ── */
-const MP_PUBLIC_KEY = ''; // ← pegar acá la Public Key real (empieza con APP_USR- o TEST-)
-
-let mpBrickController = null;   // instancia del Brick ya montado (se reutiliza)
-let pagoTarjetaAprobado = null; // {payment_id, status} una vez que Mercado Pago confirma el pago
+/* ── Pago con tarjeta: redirección a Getnet ──
+   Ya no se tokeniza la tarjeta en el navegador (no hay SDK ni Public Key).
+   Flujo: paso 4 "Pagar con tarjeta" → se crea el pedido (POST /pedidos,
+   queda "pendiente") → POST /pagos/tarjeta devuelve la URL de Getnet →
+   se redirige al cliente → Getnet vuelve a pago_resultado.html y el
+   WEBHOOK del backend es quien marca el pedido como "pagado". ── */
+const PAGO_PENDIENTE_KEY = 'mvPagoPendiente'; // {id, ref} del pedido que se mandó a pagar (lo lee pago_resultado.html)
+let pagandoConTarjeta = false;                // evita doble clic mientras se prepara el pago
+let pedidoTarjetaCreado = null;               // {id, ref}: si falla Getnet se reintenta sin duplicar el pedido
 
 let pasoActual = 1;
 
 function irAPaso(n) {
     pasoActual = n;
+
+    // Si ya se había creado un pedido para pagar con tarjeta y el cliente vuelve a
+    // editar (pasos 1-3), ese pedido deja de valer: se arma uno nuevo con Nº nuevo.
+    if (n < 4 && pedidoTarjetaCreado) {
+        pedidoTarjetaCreado = null;
+        reiniciarReferenciaPedido();
+    }
 
     // Mostrar/ocultar pasos
     [1, 2, 3, 4].forEach(p => {
@@ -1241,10 +1247,9 @@ function aplicarVisibilidadMetodo(valor) {
 
     if (valor === 'transferencia') generarQrAlias();
 
-    // El botón "Ver resumen del pedido →" del footer solo tiene sentido
-    // para transferencia: con tarjeta, el propio Brick tiene su botón de
-    // pago y avanza al paso 4 automáticamente cuando Mercado Pago aprueba.
-    if (footerPaso3) footerPaso3.style.display = valor === 'tarjeta' ? 'none' : 'block';
+    // El botón "Ver resumen del pedido →" sirve para todos los métodos: con
+    // tarjeta, el pago se hace recién en el paso 4 (redirección a Getnet).
+    if (footerPaso3) footerPaso3.style.display = 'block';
 
     // Métodos todavía no conectados: se puede abrir el recuadro para ver
     // el aviso, pero el botón de continuar queda deshabilitado.
@@ -1257,86 +1262,107 @@ function aplicarVisibilidadMetodo(valor) {
 
     if (valor === 'transferencia') actualizarPanelTransferencia();
 
-    if (valor === 'tarjeta') inicializarBrickTarjeta();
+    if (valor === 'tarjeta') renderDetalleTarjeta();
 }
 
-/* ── Card Payment Brick de Mercado Pago ──────────────────
-   Requiere:
-   1) <script src="https://sdk.mercadopago.com/js/v2"></script>
-      cargado ANTES de script.js en el HTML.
-   2) MP_PUBLIC_KEY seteada más arriba en este archivo.
-   3) El endpoint /pagos/tarjeta en mundo_verde_backend, que
-      recibe el token generado acá y efectiviza el cobro del
-      lado del servidor con el Access Token PRIVADO de Mercado
-      Pago (ver mvPagos en api.js y el ejemplo pagos.php). ── */
-async function inicializarBrickTarjeta() {
-    const banner = document.getElementById('mp-preview-banner');
-    const brickContainer = document.getElementById('cardPaymentBrick_container');
-    if (!brickContainer) return;
-
-    // Sin Public Key configurada: se queda en modo "vista previa" (como
-    // estaba hasta ahora) y no intenta cobrar nada.
-    if (!MP_PUBLIC_KEY) {
-        if (banner) banner.style.display = 'block';
-        return;
-    }
-    if (banner) banner.style.display = 'none';
-
-    // Ya está montado de una vez anterior en esta misma sesión de checkout
-    if (mpBrickController) return;
-
-    if (typeof MercadoPago === 'undefined') {
-        console.error('SDK de Mercado Pago no está cargado. Revisá el <script src="https://sdk.mercadopago.com/js/v2"></script> en el HTML.');
-        mostrarToast('⚠️ No se pudo cargar el módulo de pago con tarjeta');
-        return;
-    }
-
-    const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'es-AR' });
-    const total = calcularTotal(cargarCarrito());
-
-    try {
-        mpBrickController = await mp.bricks().create('cardPayment', 'cardPaymentBrick_container', {
-            initialization: { amount: total },
-            customization: { visual: { style: { theme: 'default' } } },
-            callbacks: {
-                onReady: () => {},
-                onSubmit: (cardFormData) => procesarPagoConTarjeta(cardFormData),
-                onError: (error) => {
-                    console.error('Error en el Brick de tarjeta:', error);
-                    mostrarToast('⚠️ Hubo un problema con los datos de la tarjeta');
-                },
-            },
-        });
-    } catch (error) {
-        console.error('No se pudo inicializar el Brick de Mercado Pago:', error);
-        mostrarToast('⚠️ No se pudo cargar el módulo de pago con tarjeta');
-    }
+/* ── Tarjeta (Getnet) ────────────────────────────────────
+   Requiere en el backend: POST /pagos/tarjeta, POST /pagos/webhook y
+   GET /pagos/estado (ver controllers/pagos.php) y las funciones mvPagos
+   de api.js. El contenido del recuadro #detalle-tarjeta se genera acá, así
+   no hace falta tocar el HTML de cada hoja. */
+function renderDetalleTarjeta() {
+    const panel = document.getElementById('detalle-tarjeta');
+    if (!panel) return;
+    const total = '$' + calcularTotal(cargarCarrito()).toLocaleString('es-AR');
+    panel.innerHTML = `
+        <div class="detalle-tarjeta-getnet" style="line-height:1.5;">
+            <strong>💳 Tarjeta de crédito o débito</strong>
+            <p style="margin:.5rem 0 0;">Pagás en la página segura de Getnet. Primero revisás el resumen del
+            pedido y, cuando lo confirmás, te llevamos a Getnet para completar los datos de la tarjeta.</p>
+            <p style="margin:.5rem 0 0;">Mundo Verde no ve ni guarda los datos de tu tarjeta.</p>
+            <p style="margin:.5rem 0 0;">Total a pagar: <strong>${total}</strong></p>
+        </div>`;
 }
 
-/* Manda el token (generado acá, en el navegador) a TU backend, que es
-   quien de verdad cobra con el Access Token privado. A este archivo del
-   frontend NUNCA le llega ni pasa el número de tarjeta completo. */
-async function procesarPagoConTarjeta(cardFormData) {
-    try {
-        const total = calcularTotal(cargarCarrito());
-        const resultado = await mvPagos.pagarConTarjeta({
-            ...cardFormData,
-            transaction_amount: total,
-        });
+/* En el paso 4, con tarjeta se reemplazan los botones de WhatsApp / mail por
+   "Pagar con tarjeta". Los botones existentes se detectan por su onclick o id
+   (enviarPedidoWhatsApp / enviarPedidoMail); si el HTML los llama distinto,
+   ajustá el filtro de abajo. */
+function prepararAccionesPaso4(metodo) {
+    const paso4 = document.getElementById('checkout-paso-4');
+    if (!paso4) return;
 
-        if (resultado.status === 'approved') {
-            pagoTarjetaAprobado = resultado;
-            mostrarToast('✅ Pago aprobado');
-            irAPaso(4);
-        } else if (resultado.status === 'in_process' || resultado.status === 'pending') {
-            pagoTarjetaAprobado = resultado;
-            mostrarToast('⏳ Tu pago quedó en revisión');
-            irAPaso(4);
-        } else {
-            mostrarToast('❌ El pago fue rechazado. Probá con otra tarjeta o elegí transferencia.');
+    const botonesEnvio = Array.from(paso4.querySelectorAll('button, a')).filter(b =>
+        /enviarPedido(WhatsApp|Mail)/.test(b.getAttribute('onclick') || '') ||
+        /whatsapp|mail/i.test(b.id || '')
+    );
+    let btn = document.getElementById('btn-pagar-tarjeta');
+
+    if (metodo !== 'tarjeta') {
+        if (btn) btn.style.display = 'none';
+        botonesEnvio.forEach(b => { b.style.display = ''; });
+        return;
+    }
+
+    botonesEnvio.forEach(b => { b.style.display = 'none'; });
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'btn-pagar-tarjeta';
+        btn.type = 'button';
+        btn.className = botonesEnvio[0]?.className || '';
+        btn.addEventListener('click', pagarConTarjetaGetnet);
+        const ancla = botonesEnvio[0];
+        if (ancla && ancla.parentNode) ancla.parentNode.insertBefore(btn, ancla);
+        else paso4.appendChild(btn);
+    }
+    btn.style.display = '';
+    btn.disabled = pagandoConTarjeta;
+    btn.textContent = 'Pagar $' + calcularTotal(cargarCarrito()).toLocaleString('es-AR') + ' con tarjeta →';
+}
+
+async function pagarConTarjetaGetnet() {
+    if (pagandoConTarjeta) return;
+    if (cargarCarrito().length === 0) { mostrarToast('El carrito está vacío'); return; }
+    if (typeof mvPedidos === 'undefined' || typeof mvPagos === 'undefined') {
+        mostrarToast('⚠️ No se pudo cargar el módulo de pagos. Recargá la página.');
+        return;
+    }
+
+    const btn = document.getElementById('btn-pagar-tarjeta');
+    const textoOriginal = btn ? btn.textContent : '';
+    pagandoConTarjeta = true;
+    let redirigiendo = false;
+    if (btn) { btn.disabled = true; btn.textContent = 'Preparando tu pago…'; }
+
+    try {
+        // 1) Pedido en la base (queda "pendiente" hasta que Getnet confirme el pago).
+        //    Si ya se creó en un intento anterior (falló Getnet), se reutiliza.
+        if (!pedidoTarjetaCreado) {
+            const pedido = await guardarPedidoEnBackend();
+            if (pedido === false) return;   // Código Verde / descuento vencido: ya se avisó y se volvió al paso 1
+            if (!pedido) return;            // guardarPedidoEnBackend ya mostró el aviso
+            if (!pedido.id) { mostrarToast('⚠️ No pudimos registrar tu pedido. Intentá de nuevo.'); return; }
+            pedidoTarjetaCreado = { id: pedido.id, ref: pedido.referencia_pago || obtenerReferenciaPedido() };
         }
+
+        // 2) Pago en Getnet: el backend devuelve la URL a la que hay que ir.
+        const pago = await mvPagos.crear(pedidoTarjetaCreado.id);
+        if (!pago || !pago.url) throw new Error('No pudimos obtener el enlace de pago. Intentá de nuevo.');
+
+        // 3) Redirección. El carrito NO se vacía acá: se vacía en pago_resultado.html
+        //    cuando el pago se confirma (si el cliente cancela, conserva su carrito).
+        try { sessionStorage.setItem(PAGO_PENDIENTE_KEY, JSON.stringify(pedidoTarjetaCreado)); } catch (e) {}
+        redirigiendo = true;
+        pedidoTarjetaCreado = null;
+        reiniciarReferenciaPedido();        // si vuelve a intentar, se arma un Nº nuevo
+        window.location.href = pago.url;
     } catch (err) {
         mostrarToast('⚠️ ' + err.message);
+    } finally {
+        if (!redirigiendo) {
+            pagandoConTarjeta = false;
+            if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+        }
     }
 }
 
@@ -1365,14 +1391,6 @@ function avanzarAPaso4() {
         return;
     }
 
-    // Con tarjeta no se llega hasta acá por botón propio (el Brick tiene
-    // su propio submit y ya te manda al paso 4 al aprobarse el pago), pero
-    // se valida igual por las dudas de que se llame desde otro lado.
-    if (metodo.value === 'tarjeta' && !pagoTarjetaAprobado) {
-        mostrarToast('⚠️ Completá el pago con tu tarjeta para continuar');
-        return;
-    }
-
     irAPaso(4);
 }
 
@@ -1380,7 +1398,7 @@ function avanzarAPaso4() {
 const ENTREGA_LABEL = { retiro: 'Retiro en local', envio: 'Envío a domicilio' };
 const PAGO_LABEL = {
     transferencia: 'Alias Bancario',
-    tarjeta: 'Tarjeta (Mercado Pago)',
+    tarjeta: 'Tarjeta de crédito/débito (Getnet)',
     modo: 'MODO',
     mercadopago: 'Mercado Pago',
     mercadocredito: 'Mercado Crédito',
@@ -1424,14 +1442,14 @@ function renderPaso4Confirmar() {
                 <span>Método</span>
                 <span>${PAGO_LABEL[metodo] || metodo}</span>
             </div>
-            ${metodo === 'transferencia' ? `
+            ${(metodo === 'transferencia' || metodo === 'tarjeta') ? `
             <div class="confirm-item">
                 <span>Nº de pedido</span>
                 <span><strong>${obtenerReferenciaPedido()}</strong></span>
             </div>
             <div class="confirm-item">
                 <span>Estado del pago</span>
-                <span><span class="badge-pendiente-verif">Pendiente de verificación</span></span>
+                <span><span class="badge-pendiente-verif">${metodo === 'tarjeta' ? 'Se paga en Getnet al confirmar' : 'Pendiente de verificación'}</span></span>
             </div>` : ''}
         `;
     }
@@ -1477,6 +1495,9 @@ function renderPaso4Confirmar() {
     if (totalFinalEl) {
         totalFinalEl.textContent = '$' + totalFinal.toLocaleString('es-AR');
     }
+
+    // Con tarjeta: botón "Pagar con tarjeta" en lugar de WhatsApp / mail
+    prepararAccionesPaso4(metodo);
 }
 
 /* ── Guardar pedido en la base de datos (backend Flask + SQLite3) ──
@@ -1526,19 +1547,10 @@ async function guardarPedidoEnBackend() {
         total: desc.total,
     };
 
-    // Pago con tarjeta ya aprobado por el Brick: se manda el id de pago de
-    // Mercado Pago para que el backend lo asocie al pedido (sin comprobante).
-    if (metodo === 'tarjeta' && pagoTarjetaAprobado) {
-        payload.pago_mp = {
-            payment_id: pagoTarjetaAprobado.payment_id,
-            status: pagoTarjetaAprobado.status,
-        };
-    }
-
-    // Transferencia al alias: el pedido se crea como "pendiente" (hasta que se
+    // Transferencia o tarjeta: el pedido se crea como "pendiente" (hasta que se
     // marque como pagado en el admin) y se manda su número de referencia
     // (el backend debe guardar el campo referencia_pago).
-    if (metodo === 'transferencia') {
+    if (metodo === 'transferencia' || metodo === 'tarjeta') {
         payload.referencia_pago = obtenerReferenciaPedido();
     }
 
@@ -1565,7 +1577,9 @@ async function guardarPedidoEnBackend() {
         // quedaba en la base pero igual se mostraba "¡Pedido enviado!" y
         // se abría WhatsApp, como si todo hubiera salido bien. Ahora se
         // avisa para poder detectarlo durante las pruebas.
-        mostrarToast('⚠️ No se pudo registrar el pedido en el sistema (revisá la consola). El WhatsApp igual se envía.');
+        mostrarToast(metodo === 'tarjeta'
+            ? '⚠️ No pudimos registrar tu pedido. Intentá de nuevo en unos minutos.'
+            : '⚠️ No se pudo registrar el pedido en el sistema (revisá la consola). El WhatsApp igual se envía.');
         return null;
     }
 }
@@ -1694,13 +1708,6 @@ function mostrarConfirmacionPedido() {
             }
         }
     }
-
-    // Reset del pago con tarjeta para que el próximo checkout arranque limpio
-    pagoTarjetaAprobado = null;
-    if (mpBrickController && typeof mpBrickController.unmount === 'function') {
-        mpBrickController.unmount();
-    }
-    mpBrickController = null;
 
     reiniciarReferenciaPedido();
     guardarCodigoVerde(null);   // el Código Verde es de único uso: se descarta al confirmar el pedido
