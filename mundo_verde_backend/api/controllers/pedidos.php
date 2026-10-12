@@ -41,9 +41,10 @@ function pedidos_crear(PDO $pdo): void
     // Nº de pedido (MV-DDMM-NNNN): lo genera el front y es el MISMO que el cliente ve
     // como concepto de la transferencia, en el resumen y en "¡Pedido enviado!".
     // Se guarda tal cual para mostrarlo en la columna "Comprobante" del admin.
-    // Solo aplica a transferencia; para efectivo/tarjeta queda en NULL.
+    // Aplica a transferencia y tarjeta (con tarjeta es la referencia del pago en Getnet);
+    // para efectivo queda en NULL.
     $referenciaPago = null;
-    if ($formaPago === 'transferencia') {
+    if (in_array($formaPago, ['transferencia', 'tarjeta'], true)) {
         $ref = strtoupper(trim((string)($body['referencia_pago'] ?? '')));
         if ($ref !== '') {
             if (!preg_match('/^MV-\d{4}-\d{4}$/', $ref)) error('Número de pedido inválido.');
@@ -221,29 +222,32 @@ function pedidos_crear(PDO $pdo): void
 
     // Remito por mail al comprador (solo si tiene mail: los invitados no lo cargan).
     // Nunca frena el pedido: si falla el SMTP, el pedido ya quedó guardado.
-    require_once __DIR__ . '/mailer.php';
-    enviarMailPedido([
-        'id'              => $pedidoId,
-        'referencia'      => $referenciaPago,
-        'fecha'           => (new DateTime('now', new DateTimeZone('America/Argentina/Buenos_Aires')))->format('d/m/Y H:i'),
-        'email'           => $cliente['email'] ?? ($usuario['email'] ?? ''),
-        'nombre'          => $cliente['nombre'] ?? '',
-        'forma_entrega'   => $formaEntrega,
-        'forma_pago'      => $formaPago,
-        'retiro_nombre'   => $retiro['nombre'] ?? '',
-        'retiro_dni'      => $retiro['dni'] ?? '',
-        'envio_domicilio' => $envio['domicilio'] ?? '',
-        'envio_localidad' => $envio['localidad'] ?? '',
-        'envio_cp'        => $envio['cp'] ?? '',
-        'items'           => $itemsResueltos,
-        'subtotal'        => $subtotal,
-        'descuentos'      => [
-            ['Descuento efectivo + retiro', $descEfectivo],
-            ['Descuento de inauguración',   $descInauguracion],
-            ['Código Verde (newsletter)',   $descNewsletter],
-        ],
-        'total'           => $total,
-    ]);
+    // Con tarjeta el remito NO sale acá: se manda cuando Getnet confirma el pago (ver pagos_webhook).
+    if ($formaPago !== 'tarjeta') {
+        require_once __DIR__ . '/mailer.php';
+        enviarMailPedido([
+            'id'              => $pedidoId,
+            'referencia'      => $referenciaPago,
+            'fecha'           => (new DateTime('now', new DateTimeZone('America/Argentina/Buenos_Aires')))->format('d/m/Y H:i'),
+            'email'           => $cliente['email'] ?? ($usuario['email'] ?? ''),
+            'nombre'          => $cliente['nombre'] ?? '',
+            'forma_entrega'   => $formaEntrega,
+            'forma_pago'      => $formaPago,
+            'retiro_nombre'   => $retiro['nombre'] ?? '',
+            'retiro_dni'      => $retiro['dni'] ?? '',
+            'envio_domicilio' => $envio['domicilio'] ?? '',
+            'envio_localidad' => $envio['localidad'] ?? '',
+            'envio_cp'        => $envio['cp'] ?? '',
+            'items'           => $itemsResueltos,
+            'subtotal'        => $subtotal,
+            'descuentos'      => [
+                ['Descuento efectivo + retiro', $descEfectivo],
+                ['Descuento de inauguración',   $descInauguracion],
+                ['Código Verde (newsletter)',   $descNewsletter],
+            ],
+            'total'           => $total,
+        ]);
+    }
 
     responder([
         'id'              => $pedidoId,

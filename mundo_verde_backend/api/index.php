@@ -24,6 +24,7 @@ require_once __DIR__ . '/controllers/anuncios.php';
 require_once __DIR__ . '/controllers/descuentos.php';
 require_once __DIR__ . '/controllers/newsletter.php';
 require_once __DIR__ . '/controllers/pedidos.php';
+require_once __DIR__ . '/controllers/pagos.php';
 require_once __DIR__ . '/controllers/admin.php';
 
 // --- Determinar la ruta pedida (todo lo que viene después de /api) ---
@@ -94,6 +95,12 @@ function despachar(PDO $pdo, string $metodo, array $segmentos): void
     if ($r0 === 'pedidos' && $metodo === 'POST') { pedidos_crear($pdo); return; }
     if ($r0 === 'pedidos' && $metodo === 'GET')  { pedidos_listar($pdo); return; }
     if ($r0 === 'pedidos' && $r1 !== '' && $r2 === 'comprobante' && $metodo === 'POST') { pedidos_subir_comprobante($pdo, $r1); return; }
+
+    // ── Pagos con tarjeta (Getnet) ──────────────────────────
+    // El webhook es PÚBLICO a propósito (lo llama Getnet, sin sesión): se protege con ?k=<token> y reconsultando el pago.
+    if ($r0 === 'pagos' && $r1 === 'tarjeta' && $metodo === 'POST') { pagos_crear($pdo); return; }
+    if ($r0 === 'pagos' && $r1 === 'webhook' && $metodo === 'POST') { pagos_webhook($pdo); return; }
+    if ($r0 === 'pagos' && $r1 === 'estado'  && $metodo === 'GET')  { pagos_estado($pdo); return; }
 
     // ── Admin (CRUD genérico whitelisteado) ────────────────
     if ($r0 === 'admin' && $r1 === 'tablas' && $metodo === 'GET')                        { admin_tablas($pdo); return; }
