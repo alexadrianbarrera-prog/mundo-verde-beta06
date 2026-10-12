@@ -1082,7 +1082,7 @@ document.addEventListener('change', e => {
         const enZona = validarZonaEnvio(val);
         aviso.textContent = enZona
             ? '✅ ¡Si estás en Quilmes Centro o Berazategui tú envío es gratis!'
-            : '⚠️ Contáctate por Whatsapp para saber si tu compra tiene envío gratis.';
+            : '⚠️ Contáctate por Whatsapp para saber el valor del envío o verificar si tu compra tiene envío gratis.';
         aviso.style.display = 'block';
         aviso.style.color = enZona ? '#1b5e20' : '#e65100';
     }
