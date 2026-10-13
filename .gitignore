@@ -1,1 +1,4 @@
 *.bak
+
+# Credenciales de Getnet (se crea a mano en cada servidor)
+mundo_verde_backend/config/getnet.config.php
