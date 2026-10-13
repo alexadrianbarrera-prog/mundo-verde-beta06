@@ -73,10 +73,10 @@ function getnet_token(): string
         if (is_array($t) && ($t['exp'] ?? 0) > time() + 60) return $t['token'];
     }
 
-    // TODO(doc): confirmar si el token se pide en JSON o x-www-form-urlencoded
-    // y si requiere "audience" u otros campos.
-    [$codigo, $r] = getnet_http('POST', $c['auth_url'], ['Content-Type: application/json'],
-        json_encode([
+    // Confirmado con pruebas: el servidor responde "Invalid Content Type" si se envía JSON,
+    // así que se pide en application/x-www-form-urlencoded.
+    [$codigo, $r] = getnet_http('POST', $c['auth_url'], ['Content-Type: application/x-www-form-urlencoded'],
+        http_build_query([
             'grant_type'    => 'client_credentials',
             'client_id'     => $c['client_id'],
             'client_secret' => $c['client_secret'],

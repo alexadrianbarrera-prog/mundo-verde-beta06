@@ -67,27 +67,30 @@ function probar(string $nombre, string $url, array $headers, string $body): void
     echo "\n";
 }
 
-probar('Formato JSON', $cfg['auth_url'], ['Content-Type: application/json'], json_encode([
-    'grant_type' => 'client_credentials',
-    'client_id' => $cfg['client_id'],
-    'client_secret' => $cfg['client_secret'],
-]));
-
-probar('Formato formulario', $cfg['auth_url'], ['Content-Type: application/x-www-form-urlencoded'], http_build_query([
-    'grant_type' => 'client_credentials',
-    'client_id' => $cfg['client_id'],
-    'client_secret' => $cfg['client_secret'],
-]));
-
-// Variante 3: credenciales en el encabezado Authorization (HTTP Basic), muy usada en OAuth2.
-probar('Basic Auth (credenciales en el encabezado)', trim($cfg['auth_url']), [
-    'Content-Type: application/x-www-form-urlencoded',
-    'Authorization: Basic ' . base64_encode(trim($cfg['client_id']) . ':' . trim($cfg['client_secret'])),
-], http_build_query(['grant_type' => 'client_credentials']));
-
-// Variante 4: igual que JSON pero con las credenciales recortadas (descarta espacios sobrantes).
-probar('JSON con credenciales recortadas (trim)', trim($cfg['auth_url']), ['Content-Type: application/json'], json_encode([
-    'grant_type' => 'client_credentials',
-    'client_id' => trim($cfg['client_id']),
-    'client_secret' => trim($cfg['client_secret']),
-]));
+// ── Resultado de la ronda anterior: JSON → 400 "Invalid Content Type" (el servidor exige formulario)
+//    y formulario → "invalid_client" (el servidor entiende el pedido pero rechaza las credenciales).
+//    Ahora se prueban varias direcciones de autenticación posibles con formato formulario.
+$candidatas = [
+    'La de tu config'                 => trim($cfg['auth_url']),
+    'Sandbox (api-sbx.pre)'           => 'https://api-sbx.pre.globalgetnet.com/authentication/oauth2/access_token',
+    'Pre-producción (api.pre)'        => 'https://api.pre.globalgetnet.com/authentication/oauth2/access_token',
+    'Sandbox (api-sbx)'               => 'https://api-sbx.globalgetnet.com/authentication/oauth2/access_token',
+    'Producción (api)'                => 'https://api.globalgetnet.com/authentication/oauth2/access_token',
+];
+$vistas = [];
+foreach ($candidatas as $etiqueta => $url) {
+    if (isset($vistas[$url])) continue;   // no repetir la misma dirección
+    $vistas[$url] = true;
+    echo "################ $etiqueta\n$url\n\n";
+    probar('Formulario (credenciales en el cuerpo)', $url,
+        ['Content-Type: application/x-www-form-urlencoded'],
+        http_build_query([
+            'grant_type'    => 'client_credentials',
+            'client_id'     => trim($cfg['client_id']),
+            'client_secret' => trim($cfg['client_secret']),
+        ]));
+    probar('Basic Auth (credenciales en el encabezado)', $url, [
+        'Content-Type: application/x-www-form-urlencoded',
+        'Authorization: Basic ' . base64_encode(trim($cfg['client_id']) . ':' . trim($cfg['client_secret'])),
+    ], http_build_query(['grant_type' => 'client_credentials']));
+}
