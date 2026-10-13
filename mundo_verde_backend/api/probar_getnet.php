@@ -18,12 +18,22 @@ header('Content-Type: text/plain; charset=utf-8');
 $archivo = __DIR__ . '/../config/getnet.config.php';
 if (!is_file($archivo)) { exit("Falta config/getnet.config.php\n"); }
 $cfg = (require $archivo)['sandbox'];
+$cfgOriginal = $cfg;
 
 foreach (['client_id', 'client_secret', 'auth_url'] as $k) {
     if (empty($cfg[$k]) || str_contains($cfg[$k], 'CLIENT_') || str_contains($cfg[$k], 'TODO')) {
         exit("Completá '$k' en el bloque 'sandbox' de config/getnet.config.php\n");
     }
 }
+
+// ── Diagnóstico de formato (NO imprime los valores) ──
+$id = $cfg['client_id']; $sec = $cfg['client_secret'];
+echo "== Diagnóstico de las credenciales (sin mostrar valores)\n";
+echo "client_id: " . strlen($id) . " caracteres" . ($id !== trim($id) ? " — TIENE ESPACIOS al inicio/fin" : "") . "\n";
+echo "  formato cid_ + UUID: " . (preg_match('/^cid_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', trim($id)) ? "OK" : "NO COINCIDE (¿incompleto o con caracteres de más?)") . "\n";
+echo "client_secret: " . strlen($sec) . " caracteres" . ($sec !== trim($sec) ? " — TIENE ESPACIOS al inicio/fin" : "") . "\n";
+echo "  formato UUID: " . (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', trim($sec)) ? "OK" : "no es un UUID estándar (puede ser normal)") . "\n";
+echo "auth_url: " . $cfg['auth_url'] . "\n\n";
 
 function probar(string $nombre, string $url, array $headers, string $body): void
 {
@@ -67,4 +77,17 @@ probar('Formato formulario', $cfg['auth_url'], ['Content-Type: application/x-www
     'grant_type' => 'client_credentials',
     'client_id' => $cfg['client_id'],
     'client_secret' => $cfg['client_secret'],
+]));
+
+// Variante 3: credenciales en el encabezado Authorization (HTTP Basic), muy usada en OAuth2.
+probar('Basic Auth (credenciales en el encabezado)', trim($cfg['auth_url']), [
+    'Content-Type: application/x-www-form-urlencoded',
+    'Authorization: Basic ' . base64_encode(trim($cfg['client_id']) . ':' . trim($cfg['client_secret'])),
+], http_build_query(['grant_type' => 'client_credentials']));
+
+// Variante 4: igual que JSON pero con las credenciales recortadas (descarta espacios sobrantes).
+probar('JSON con credenciales recortadas (trim)', trim($cfg['auth_url']), ['Content-Type: application/json'], json_encode([
+    'grant_type' => 'client_credentials',
+    'client_id' => trim($cfg['client_id']),
+    'client_secret' => trim($cfg['client_secret']),
 ]));

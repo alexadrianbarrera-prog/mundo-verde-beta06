@@ -26,6 +26,11 @@ function getnet_cfg(): array
     $esLocal = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1']);
     $entorno = $esLocal ? 'sandbox' : ($base['entorno'] ?? 'sandbox');
 
+    // Defensivo: un espacio al copiar/pegar las credenciales rompe la autenticación.
+    foreach (['client_id', 'client_secret', 'auth_url', 'api_base'] as $k) {
+        if (isset($base[$entorno][$k])) $base[$entorno][$k] = trim($base[$entorno][$k]);
+    }
+
     $cfg = array_merge($base[$entorno], [
         'entorno'       => $entorno,
         'return_url'    => $base['return_url'],
