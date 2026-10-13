@@ -18,8 +18,8 @@ return [
         'api_base'      => 'https://TODO-sandbox.globalgetnet.com.ar', // TODO(doc): URL de preproducción
     ],
     'produccion' => [
-        'client_id'     => 'CLIENT_ID_PRODUCCION',
-        'client_secret' => 'CLIENT_SECRET_PRODUCCION',
+        'client_id'     => 'cid_3a18944d-661c-4c4f-bc72-05b83a8b9a7',
+        'client_secret' => 'c28dc006-03c4-4a68-bf32-41a314b5c2ac ',
         'auth_url'      => 'https://auth.geopagos.com/oauth/token', // TODO(doc): confirmar
         'api_base'      => 'https://api.globalgetnet.com.ar',       // TODO(doc): confirmar
     ],
