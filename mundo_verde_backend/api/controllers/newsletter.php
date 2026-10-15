@@ -111,6 +111,12 @@ function newsletter_mi_estado(PDO $pdo): void
         error('Ese email no está suscripto al newsletter todavía.', 404);
     }
 
+    // Código retenido por un pedido de tarjeta abandonado: se libera y se vuelve a leer.
+    if ($sub['codigo_usado_en'] !== null && pagos_liberar_codigo_retenido($pdo, (int)$sub['id'])) {
+        $stmt->execute(['mail' => $mail]);
+        $sub = $stmt->fetch();
+    }
+
     // Suscriptores anteriores a la migración no tienen Código Verde: se les
     // genera la primera vez que consultan su estado.
     if (empty($sub['codigo_verde'])) {
@@ -210,6 +216,13 @@ function newsletter_estado_codigo_verde(PDO $pdo, string $codigo): array
     $stmt->execute(['c' => $codigo]);
     $sub = $stmt->fetch();
 
+    // Si el código lo retiene un pedido de tarjeta que quedó pendiente (el cliente
+    // abandonó Getnet), se cierra ese pedido y el código vuelve a estar disponible.
+    if ($sub && $sub['codigo_usado_en'] !== null && pagos_liberar_codigo_retenido($pdo, (int)$sub['id'])) {
+        $stmt->execute(['c' => $codigo]);
+        $sub = $stmt->fetch();
+    }
+
     if (!$sub) {
         return ['ok' => false, 'error' => 'Ese Código Verde no existe. Revisalo (no es el mismo que tu código de referidos).'];
     }
@@ -260,6 +273,15 @@ function generarCodigoVerde(PDO $pdo): string
  */
 function newsletter_codigo_verde_pendiente(PDO $pdo, string $email): ?string
 {
+    // Si su código quedó retenido por un pedido de tarjeta abandonado, se libera antes de buscarlo.
+    $ret = $pdo->prepare(
+        'SELECT id FROM newsletter_suscriptores
+         WHERE mail = :mail AND activo = 1 AND codigo_usado_en IS NOT NULL AND codigo_verde IS NOT NULL'
+    );
+    $ret->execute(['mail' => strtolower(trim($email))]);
+    $retenido = $ret->fetchColumn();
+    if ($retenido) pagos_liberar_codigo_retenido($pdo, (int)$retenido);
+
     $stmt = $pdo->prepare(
         'SELECT codigo_verde FROM newsletter_suscriptores
          WHERE mail = :mail AND activo = 1 AND codigo_usado_en IS NULL AND codigo_verde IS NOT NULL'

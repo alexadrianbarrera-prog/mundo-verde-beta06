@@ -97,7 +97,7 @@ function despachar(PDO $pdo, string $metodo, array $segmentos): void
     if ($r0 === 'pedidos' && $r1 !== '' && $r2 === 'comprobante' && $metodo === 'POST') { pedidos_subir_comprobante($pdo, $r1); return; }
 
     // ── Pagos con tarjeta (Getnet) ──────────────────────────
-    // El webhook es PÚBLICO a propósito (lo llama Getnet, sin sesión): se protege con ?k=<token> y reconsultando el pago.
+    // El webhook es PÚBLICO a propósito (lo llama Getnet, sin sesión): se protege con Basic (usuario/clave del Portal de Comercios) + ?k=<token> y se verifica referencia/monto.
     if ($r0 === 'pagos' && $r1 === 'tarjeta' && $metodo === 'POST') { pagos_crear($pdo); return; }
     if ($r0 === 'pagos' && $r1 === 'webhook' && $metodo === 'POST') { pagos_webhook($pdo); return; }
     if ($r0 === 'pagos' && $r1 === 'estado'  && $metodo === 'GET')  { pagos_estado($pdo); return; }

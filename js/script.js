@@ -826,7 +826,6 @@ const ZONAS_ENVIO_GRATIS = ['quilmes', 'berazategui', 'quilmes centro', 'berazat
 const UMBRAL_ENVIO_GRATIS = 150000;
 const WA_NUMBER = '5491168316730';
 const MAIL_DESTINO = 'viveunmundoverde@gmail.com.ar'; // ← reemplazar con el mail real
-const MERCADOPAGO_LINK = 'https://mpago.la/TU-LINK-AQUI'; // ← reemplazar con el link real de Mercado Pago
 
 /* ── Productos frágiles / plantas vivas ──────────────────
    Códigos (los mismos que usa cada tarjeta de producto:
@@ -1189,10 +1188,6 @@ function renderPaso3Pago() {
     // Mostrar/ocultar secciones según método seleccionado
     const metodoSeleccionado = document.querySelector('input[name="metodoPago"]:checked');
     aplicarVisibilidadMetodo(metodoSeleccionado ? metodoSeleccionado.value : 'transferencia');
-
-    // Link de Mercado Pago
-    const btnMP = document.getElementById('btn-mercadopago');
-    if (btnMP) btnMP.href = MERCADOPAGO_LINK;
 }
 
 let qrAliasGenerado = false; // el QR se genera una sola vez y se reutiliza
@@ -1216,11 +1211,28 @@ function generarQrAlias() {
     qrAliasGenerado = true;
 }
 
-// Métodos que ya están en la grilla del paso 3 pero todavía no tienen
-// integración real del lado del backend (MODO, Mercado Pago billetera,
-// Mercado Crédito, cuotas sin interés con débito). Se pueden abrir para
-// ver el aviso, pero no dejan continuar el pedido hasta conectarlos.
-const METODOS_PROXIMAMENTE = ['modo', 'mercadopago', 'mercadocredito', 'cuotasdebito'];
+// Únicos métodos de pago habilitados. Si alguna hoja HTML trae otro radio
+// (de una versión anterior), no deja continuar el pedido con ese método.
+// Pago con tarjeta (Getnet): ponelo en true recién cuando Getnet habilite Web Checkout
+// para tus credenciales y probar_pago_getnet.php cree el pago sin errores.
+const TARJETA_HABILITADA = false;
+const METODOS_ACTIVOS = TARJETA_HABILITADA ? ['transferencia', 'tarjeta'] : ['transferencia'];
+
+// Mientras la tarjeta no esté habilitada, se quita su botón del paso 3 y se ajusta el texto.
+// Así no hace falta tocar los HTML y al activarla todo vuelve solo.
+function ocultarTarjetaSiNoEstaHabilitada() {
+    if (TARJETA_HABILITADA) return;
+    document.querySelectorAll('input[name="metodoPago"][value="tarjeta"]').forEach(r => {
+        (r.closest('label') || r).remove();
+    });
+    document.querySelectorAll('.checkout-metodos > .zona-msg').forEach(p => {
+        if (/Tarjeta/.test(p.textContent)) {
+            p.innerHTML = 'Elegí cómo vas a pagar. Por ahora podés completar la compra con <strong>Alias Bancario</strong>.';
+        }
+    });
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ocultarTarjetaSiNoEstaHabilitada);
+else ocultarTarjetaSiNoEstaHabilitada();
 
 // Cada método de pago tiene su propio renglón de detalle debajo de la
 // grilla de botones (ver #metodoDetalle en el HTML). Acá se mapea el
@@ -1228,16 +1240,11 @@ const METODOS_PROXIMAMENTE = ['modo', 'mercadopago', 'mercadocredito', 'cuotasde
 const DETALLE_ID_POR_METODO = {
     transferencia: 'detalle-transferencia',
     tarjeta: 'detalle-tarjeta',
-    mercadopago: 'detalle-mercadopago',
-    modo: 'detalle-modo',
-    mercadocredito: 'detalle-mercadocredito',
-    cuotasdebito: 'detalle-cuotasdebito',
 };
 
 function aplicarVisibilidadMetodo(valor) {
     const footerPaso3 = document.querySelector('#checkout-paso-3 .checkout-footer');
     const btnContinuar = document.getElementById('btnContinuarPago');
-    const esProximamente = METODOS_PROXIMAMENTE.includes(valor);
 
     // Mostrar solo el renglón de detalle del método elegido, ocultar el resto.
     Object.entries(DETALLE_ID_POR_METODO).forEach(([metodo, id]) => {
@@ -1251,13 +1258,9 @@ function aplicarVisibilidadMetodo(valor) {
     // tarjeta, el pago se hace recién en el paso 4 (redirección a Getnet).
     if (footerPaso3) footerPaso3.style.display = 'block';
 
-    // Métodos todavía no conectados: se puede abrir el recuadro para ver
-    // el aviso, pero el botón de continuar queda deshabilitado.
     if (btnContinuar) {
-        btnContinuar.disabled = esProximamente;
-        btnContinuar.textContent = esProximamente
-            ? 'Método no disponible todavía'
-            : 'Ver resumen del pedido →';
+        btnContinuar.disabled = false;
+        btnContinuar.textContent = 'Ver resumen del pedido →';
     }
 
     if (valor === 'transferencia') actualizarPanelTransferencia();
@@ -1283,15 +1286,47 @@ function renderDetalleTarjeta() {
     }
     panel.style.display = 'block';
     const total = '$' + calcularTotal(cargarCarrito()).toLocaleString('es-AR');
-    panel.innerHTML = `
+
+    // El panel se arma UNA vez: así el mail que escribe el cliente no se borra al volver a mostrarlo.
+    if (!panel.querySelector('.detalle-tarjeta-getnet')) {
+        const usuario = (typeof mvUsuarioActual === 'function') ? mvUsuarioActual() : null;
+        panel.innerHTML = `
         <div class="detalle-tarjeta-getnet" style="line-height:1.5;">
             <strong>💳 Tarjeta de crédito o débito</strong>
             <p style="margin:.5rem 0 0;">Pagás en la página segura de Getnet. Primero revisás el resumen del
             pedido y, cuando lo confirmás, te llevamos a Getnet para completar los datos de la tarjeta.</p>
-            <p style="margin:.5rem 0 0;">Mundo Verde no ve ni guarda los datos de tu tarjeta.</p>
-            <p style="margin:.5rem 0 0;">Total a pagar: <strong>${total}</strong></p>
+            <p style="margin:.5rem 0 0;">Mundo Verde no ve ni guarda los datos de tarjeta.</p>
+            <p style="margin:.5rem 0 0;">Total a pagar: <strong class="tarjeta-total"></strong></p>
+            <div class="tarjeta-mail" style="margin-top:.75rem;"></div>
         </div>`;
+        const caja = panel.querySelector('.tarjeta-mail');
+        if (usuario && usuario.email) {
+            // Logueado: se usa el mail de su cuenta.
+            caja.append('Te enviamos el comprobante a ');
+            const s = document.createElement('strong'); s.textContent = usuario.email; caja.appendChild(s); caja.append('.');
+        } else {
+            // Invitado: Getnet y el comprobante necesitan un mail.
+            const lab = document.createElement('label');
+            lab.style.cssText = 'display:block;font-weight:600;';
+            lab.textContent = 'Tu mail (ahí te enviamos el comprobante)';
+            const inp = document.createElement('input');
+            inp.type = 'email'; inp.id = 'tarjeta-email'; inp.autocomplete = 'email';
+            inp.placeholder = 'nombre@ejemplo.com'; inp.required = true;
+            inp.style.cssText = 'display:block;width:100%;margin-top:.35rem;padding:.6rem;border:1px solid #bbb;border-radius:6px;font:inherit;box-sizing:border-box;';
+            lab.appendChild(inp); caja.appendChild(lab);
+        }
+    }
+    panel.querySelector('.tarjeta-total').textContent = total;
 }
+
+/* Mail del comprador: el de su cuenta si está logueado; si es invitado y paga con tarjeta, el que escribió. */
+function emailDeCompra(metodo) {
+    const u = (typeof mvUsuarioActual === 'function') ? mvUsuarioActual() : null;
+    if (u && u.email) return u.email;
+    if (metodo === 'tarjeta') return (document.getElementById('tarjeta-email')?.value || '').trim();
+    return '';
+}
+function emailValido(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e || ''); }
 
 /* En el paso 4, con tarjeta se reemplazan los botones de WhatsApp / mail por
    "Pagar con tarjeta". Los botones existentes se detectan por su onclick o id
@@ -1375,6 +1410,18 @@ async function pagarConTarjetaGetnet() {
     }
 }
 
+// Si el cliente vuelve desde Getnet con el botón "Atrás", el navegador puede restaurar la página
+// tal como estaba (con "Preparando tu pago…" trabado). Se destraba para que pueda reintentar.
+window.addEventListener('pageshow', e => {
+    if (!e.persisted) return;
+    pagandoConTarjeta = false;
+    const btn = document.getElementById('btn-pagar-tarjeta');
+    if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Pagar $' + calcularTotal(cargarCarrito()).toLocaleString('es-AR') + ' con tarjeta →';
+    }
+});
+
 // Listener cambio de método de pago
 document.addEventListener('change', e => {
     if (e.target.name === 'metodoPago') {
@@ -1389,14 +1436,20 @@ function avanzarAPaso4() {
         return;
     }
 
-    if (METODOS_PROXIMAMENTE.includes(metodo.value)) {
-        mostrarToast('⚠️ Ese método todavía no está disponible. Elegí Alias Bancario o Tarjeta.');
+    if (!METODOS_ACTIVOS.includes(metodo.value)) {
+        mostrarToast('⚠️ Ese método no está disponible. Elegí Alias Bancario o Tarjeta.');
         return;
     }
 
 
     if (metodo.value === 'transferencia' && !transferenciaConfirmada()) {
         mostrarToast('⚠️ Tildá "Ya transferí" para continuar');
+        return;
+    }
+
+    if (metodo.value === 'tarjeta' && !emailValido(emailDeCompra('tarjeta'))) {
+        mostrarToast('⚠️ Ingresá un mail válido para recibir el comprobante');
+        document.getElementById('tarjeta-email')?.focus();
         return;
     }
 
@@ -1408,10 +1461,6 @@ const ENTREGA_LABEL = { retiro: 'Retiro en local', envio: 'Envío a domicilio' }
 const PAGO_LABEL = {
     transferencia: 'Alias Bancario',
     tarjeta: 'Tarjeta de crédito/débito (Getnet)',
-    modo: 'MODO',
-    mercadopago: 'Mercado Pago',
-    mercadocredito: 'Mercado Crédito',
-    cuotasdebito: 'Cuotas sin interés con Débito',
 };
 
 function renderPaso4Confirmar() {
@@ -1459,6 +1508,11 @@ function renderPaso4Confirmar() {
             <div class="confirm-item">
                 <span>Estado del pago</span>
                 <span><span class="badge-pendiente-verif">${metodo === 'tarjeta' ? 'Se paga en Getnet al confirmar' : 'Pendiente de verificación'}</span></span>
+            </div>` : ''}
+            ${metodo === 'tarjeta' ? `
+            <div class="confirm-item">
+                <span>Comprobante a</span>
+                <span>${emailDeCompra('tarjeta').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</span>
             </div>` : ''}
         `;
     }
@@ -1527,7 +1581,7 @@ async function guardarPedidoEnBackend() {
         forma_pago: metodo,
         cliente: {
             nombre: document.getElementById('envio-nombre')?.value || (mvUsuarioActual()?.nombre ?? ''),
-            email: mvUsuarioActual()?.email ?? '',
+            email: emailDeCompra(metodo),
             celular: document.getElementById('envio-celular')?.value || '',
         },
         envio: entrega === 'envio' ? {

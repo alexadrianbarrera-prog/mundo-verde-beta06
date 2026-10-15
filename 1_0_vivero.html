@@ -23,10 +23,9 @@
         /* Alias dentro de la tarjeta "Alias Bancario" */
         .metodo-card span.metodo-alias{display:block;max-width:100%;margin-top:3px;font-size:.78rem;line-height:1.15;font-weight:700;letter-spacing:0;text-align:center;overflow-wrap:normal;word-break:normal}
 
-        /* Fila de arriba: 2 botones largos (Alias Bancario y Tarjeta); abajo: 3 (Mercado Pago, MODO, Cuotas) */
+        /* 2 botones de igual ancho: Alias Bancario y Tarjeta */
         .metodos-grid{grid-template-columns:repeat(6,1fr) !important}
         .metodos-grid > .metodo-card:nth-child(-n+2){grid-column:span 3}
-        .metodos-grid > .metodo-card:nth-child(n+3){grid-column:span 2}
 
         /* Total y número de pedido para el concepto de la transferencia */
         .pago-ref-box{background:#f4f4f4;border-radius:8px;padding:10px 12px;margin:8px 0;font-size:13.5px;line-height:1.6;color:#333}
@@ -498,13 +497,6 @@
                         <input type="checkbox" class="chk-transferencia">
                         <span>Ya transferí</span>
                     </label>
-                </div>
-                <!-- Cuotas sin interés con Débito — todavía sin integración -->
-                <div id="detalle-cuotasdebito" class="metodo-detalle metodo-detalle--proximamente" style="display:none">
-                    <p class="zona-msg" style="display:block; color:#555;">
-                        Plan de cuotas sin interés pagando con tarjeta de débito. Todavía
-                        estamos conectando este medio de pago.
-                    </p>
                 </div>
             </div>
         </div>

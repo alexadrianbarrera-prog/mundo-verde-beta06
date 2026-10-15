@@ -23,10 +23,41 @@ const EXTENSIONES_COMPROBANTE = [
 ];
 const TAMANO_MAX_COMPROBANTE = 5 * 1024 * 1024; // 5 MB
 
+/**
+ * Número de pedido (MV-DDMM-NNNN) que NO exista en ningún pedido. Si el que propuso el
+ * front ($propuesta) ya está tomado o no vino, se genera uno nuevo. Para tarjeta
+ * es el backend quien manda: la referencia viaja a Getnet y a pago_resultado.html.
+ */
+function pedidos_referencia_unica(PDO $pdo, ?string $propuesta): string
+{
+    $existe = $pdo->prepare('SELECT 1 FROM pedidos WHERE referencia_pago = :r LIMIT 1');
+
+    if ($propuesta !== null && $propuesta !== '') {
+        $existe->execute(['r' => $propuesta]);
+        if (!$existe->fetchColumn()) return $propuesta;
+    }
+
+    $hoy = (new DateTime('now', new DateTimeZone('America/Argentina/Buenos_Aires')))->format('dm');
+    for ($i = 0; $i < 50; $i++) {
+        $ref = sprintf('MV-%s-%04d', $hoy, random_int(0, 9999));
+        $existe->execute(['r' => $ref]);
+        if (!$existe->fetchColumn()) return $ref;
+    }
+    throw new RuntimeException('No se pudo generar un número de pedido único.');
+}
+
 function pedidos_crear(PDO $pdo): void
 {
     $usuario = usuarioAutenticado($pdo, false); // el checkout admite invitados
     $body = leerBody();
+
+    // De paso se cierran los pedidos de tarjeta abandonados hace más de 1 hora
+    // (cancela y libera el Código Verde). Nunca frena el pedido nuevo.
+    try {
+        pagos_cancelar_vencidos($pdo);
+    } catch (Throwable $e) {
+        error_log('[pedidos_crear][limpieza] ' . $e->getMessage());
+    }
 
     $items = $body['items'] ?? [];
     if (!is_array($items) || count($items) === 0) {
@@ -50,11 +81,24 @@ function pedidos_crear(PDO $pdo): void
             if (!preg_match('/^MV-\d{4}-\d{4}$/', $ref)) error('Número de pedido inválido.');
             $referenciaPago = $ref;
         }
+        // Con tarjeta el número lo garantiza el backend (único). Con transferencia se respeta el
+        // del front porque el cliente ya lo usó como concepto de su transferencia.
+        if ($formaPago === 'tarjeta') {
+            $referenciaPago = pedidos_referencia_unica($pdo, $referenciaPago);
+        }
     }
 
     $cliente = $body['cliente'] ?? [];
     $envio   = $body['envio'] ?? [];
     $retiro  = $body['retiro'] ?? [];
+
+    // Mail del comprador: el que cargó, o el de su cuenta. Con tarjeta es obligatorio
+    // (Getnet lo pide y es adónde llega el comprobante); los invitados lo cargan en el checkout.
+    $emailCliente = trim((string)($cliente['email'] ?? ''));
+    if ($emailCliente === '' && $usuario) $emailCliente = trim((string)($usuario['email'] ?? ''));
+    if ($formaPago === 'tarjeta' && !validarEmail($emailCliente)) {
+        error('Ingresá un mail válido para pagar con tarjeta: ahí te enviamos el comprobante.');
+    }
 
     if ($formaEntrega === 'envio') {
         foreach (['domicilio', 'localidad', 'cp'] as $campo) {
@@ -160,7 +204,7 @@ function pedidos_crear(PDO $pdo): void
         $stmt->execute([
             'usuario_id'      => $usuario['id'] ?? null,
             'cliente_nombre'  => $cliente['nombre'] ?? null,
-            'cliente_email'   => $cliente['email'] ?? null,
+            'cliente_email'   => $emailCliente !== '' ? $emailCliente : null,
             'cliente_celular' => $cliente['celular'] ?? null,
             'forma_entrega'   => $formaEntrega,
             'forma_pago'      => $formaPago,
@@ -229,7 +273,7 @@ function pedidos_crear(PDO $pdo): void
             'id'              => $pedidoId,
             'referencia'      => $referenciaPago,
             'fecha'           => (new DateTime('now', new DateTimeZone('America/Argentina/Buenos_Aires')))->format('d/m/Y H:i'),
-            'email'           => $cliente['email'] ?? ($usuario['email'] ?? ''),
+            'email'           => $emailCliente,
             'nombre'          => $cliente['nombre'] ?? '',
             'forma_entrega'   => $formaEntrega,
             'forma_pago'      => $formaPago,

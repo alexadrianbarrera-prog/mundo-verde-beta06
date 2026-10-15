@@ -9,9 +9,9 @@
  */
 
 $host = 'localhost';
-$db   = 'u366545585_mundo_verdeDB'; // <-- Cambiar a la base de datos real en Hostinger
+$db   = 'u366545585_mundo_verdeDB';
 $user = 'u366545585_AlexBarrera'; // <-- Cambiar al usuario real de la base de datos en Hostinger
-$pass = 'r1#4fdlcr45V/'; // <-- Cambiar a la contraseña real de la base de datos en Hostinger
+$pass = 'r1#4fdlcr45V/';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -34,7 +34,7 @@ try {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'error' => 'No se pudo conectar a la base de datos. Verificá el usuario, la contraseña ' .
-                   'y que la base "u366545585_Vivero80" exista y tenga las tablas importadas.',
+                   'y que la base "u366545585_mundo_verdeDB" exista y tenga las tablas importadas.',
     ]);
     exit;
 }

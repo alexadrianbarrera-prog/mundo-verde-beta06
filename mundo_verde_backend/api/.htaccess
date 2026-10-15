@@ -3,6 +3,10 @@
 # (requiere que XAMPP tenga mod_rewrite habilitado, viene activado por defecto)
 
 RewriteEngine On
+
+# Pasa el encabezado Authorization a PHP (algunos hostings lo descartan; Getnet lo usa en el webhook)
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php/$1 [L]
