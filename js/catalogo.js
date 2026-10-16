@@ -101,6 +101,11 @@ window.CATALOGO_MUNDO_VERDE = [
     "categoria": "Categoría"
   },
   {
+    "nombre": "Newsletter",
+    "pagina": "5_0_newsletter.html",
+    "categoria": "Categoría"
+  },
+  {
     "nombre": "PLANTINES",
     "pagina": "1_2_plantines.html",
     "categoria": "Categoría"
