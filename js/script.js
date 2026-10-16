@@ -468,6 +468,10 @@ function inyectarEstilosDescuentos() {
         .cd-quitar{background:none;border:0;color:#c62828;text-decoration:underline;cursor:pointer;font-size:.8rem}
         .cuenta-inauguracion{background:linear-gradient(90deg,#2e7d32,#66bb6a);color:#fff;font-weight:600;
             text-align:center;padding:8px 12px;border-radius:10px;font-size:.9rem;font-variant-numeric:tabular-nums}
+        /* Celular: iOS hace zoom al enfocar un campo con letra menor a 16px (la altura del panel está en styles.css) */
+        @media (max-width:768px){
+            .cd-codigo-fila input{font-size:16px}
+        }
     `;
     document.head.appendChild(st);
 }
