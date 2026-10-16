@@ -606,6 +606,19 @@ body {
     display: inline-block;
 }
 
+/* Logo del header como enlace al inicio (1_0_vivero.html) */
+.header-center .Tit_Ppal .logo-link {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.header-center .Tit_Ppal .logo-link img {
+    transition: transform 0.2s ease;
+}
+.header-center .Tit_Ppal .logo-link:hover img {
+    transform: scale(1.08);
+}
+
 /*======header loguin=====================*/
 /* LOGIN */
 .header-right{
