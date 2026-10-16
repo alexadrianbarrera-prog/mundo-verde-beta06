@@ -455,7 +455,8 @@ function inyectarEstilosDescuentos() {
         .cd-fila{display:flex;justify-content:space-between;gap:8px}
         .cd-fila.cd-desc{color:#1b5e20;font-weight:600}
         .cd-codigo{background:#f1f8e9;border:1px dashed #66bb6a;border-radius:10px;padding:10px;margin-bottom:4px}
-        .cd-codigo label{display:block;font-size:.82rem;margin-bottom:6px;line-height:1.3}
+        .cd-codigo label{display:block;font-size:.85rem;margin-bottom:8px;line-height:1.35;color:#1b4d1f !important;font-weight:500;text-shadow:none}
+        .cd-codigo label strong{color:#0f3d14 !important;font-weight:700}
         .cd-codigo-fila{display:flex;gap:6px}
         .cd-codigo-fila input{flex:1;min-width:0;padding:8px 10px;border:1px solid #a5d6a7;border-radius:8px;
             text-transform:uppercase;letter-spacing:2px;font-size:.9rem}
@@ -498,7 +499,7 @@ function renderDescuentosCarrito(desc) {
                  </div>`;
     } else {
         html += `<div class="cd-codigo">
-                    <label for="codigo-verde-input">¿Estás suscripto al newsletter? Ingresá tu <strong>Código Verde</strong> y obtené ${CONFIG_DESCUENTOS.newsletterPct}% OFF (válido una sola vez)</label>
+                    <label for="codigo-verde-input">¿Queres tu codigo de descuento? Suscribite al newsletter y recibilo por email! Completa tu <strong>Código Verde</strong> aqui abajo y obtené ${CONFIG_DESCUENTOS.newsletterPct}% OFF (válido una sola vez)</label>
                     <div class="cd-codigo-fila">
                         <input type="text" id="codigo-verde-input" maxlength="12" autocomplete="off"
                                placeholder="Ej: MV-A3B2C1" value="${previo}">
