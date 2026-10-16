@@ -25,53 +25,81 @@ document.querySelectorAll('.nav_item--dropdown').forEach(item => {
     }
 });
 
-/* ── Audio de fondo (index.html) ───────────────────────── */
+/* ── Video + audio de fondo (index.html) ───────────────── */
 window.addEventListener('load', () => {
   const audio   = document.getElementById('bgAudio');
+  const video   = document.querySelector('.video-bg');
   const btnLogo = document.getElementById('btn-logo');
   if (!audio) return;  // si no estamos en index.html, no hace nada
 
   audio.volume = 0.9;
 
+  // iPhone: el video solo arranca solo si está muteado y con playsinline.
+  // Además el "Modo de bajo consumo" de iOS frena cualquier autoplay de video:
+  // en ese caso se reintenta en el primer toque (ver activarSonido).
+  const reproducirVideo = () => {
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    const p = video.play();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  };
+  reproducirVideo();
+
   // Los navegadores bloquean el audio CON sonido si no hubo interacción
   // previa del usuario, pero sí permiten autoplay muted. Por eso arranca
-  // muteado junto con el video, y en el primer gesto del usuario (click,
-  // touch o scroll) se le saca el mute para que la música "ya esté sonando".
+  // muteado junto con el video, y en el primer gesto del usuario se le saca
+  // el mute para que la música "ya esté sonando".
   audio.muted = true;
   audio.play().catch(() => {});
 
   const avisoSonido = document.getElementById('aviso-sonido');
 
+  // IMPORTANTE (iOS): Safari solo deja activar el sonido dentro de "click" o
+  // "touchend". "touchstart" NO cuenta como gesto válido en iPhone, por eso
+  // antes el cartel desaparecía pero no sonaba nada. Además no se usa "once":
+  // si el navegador rechaza el play() se vuelve a intentar en el próximo toque.
+  const GESTOS = ['click', 'touchend'];
+  let sonidoActivo = false;
+
   const activarSonido = () => {
+    if (sonidoActivo) return;
+    if (video && video.paused) reproducirVideo();   // reintento (bajo consumo)
     audio.muted = false;
-    audio.play().catch(() => {});
-    if (avisoSonido) {
-        avisoSonido.classList.add('oculto');
-        setTimeout(() => avisoSonido.remove(), 700);
+    const listo = () => {
+        sonidoActivo = true;
+        GESTOS.forEach(ev => document.removeEventListener(ev, activarSonido));
+        if (avisoSonido) {
+            avisoSonido.classList.add('oculto');
+            setTimeout(() => avisoSonido.remove(), 700);
+        }
+    };
+    const p = audio.play();
+    if (p && typeof p.then === 'function') {
+        p.then(listo).catch(() => { audio.muted = true; });
+    } else {
+        listo();
     }
   };
-  document.addEventListener('click', activarSonido, { once: true });
-  document.addEventListener('touchstart', activarSonido, { once: true });
-  document.addEventListener('scroll', activarSonido, { once: true });
+  GESTOS.forEach(ev => document.addEventListener(ev, activarSonido));
 
-  // El cartel ahora SÍ captura el toque (para no dejarlo pasar al logo
-  // que puede estar debajo). Se le corta la propagación para que ese
-  // toque active el sonido pero nunca dispare la navegación del logo.
+  // El cartel captura el toque (para no dejarlo pasar al logo que puede
+  // estar debajo). Se le corta la propagación para que ese toque active el
+  // sonido pero nunca dispare la navegación del logo.
   if (avisoSonido) {
-    avisoSonido.addEventListener('click', (e) => {
+    GESTOS.forEach(ev => avisoSonido.addEventListener(ev, (e) => {
         e.stopPropagation();
         activarSonido();
-    });
-    avisoSonido.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-        activarSonido();
-    });
+    }));
   }
 
   // Al hacer click en el logo, detener y navegar
   if (btnLogo) {
     btnLogo.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();   // que este click no vuelva a activar el audio
       audio.pause();
       audio.currentTime = 0;
       window.location.href = btnLogo.href;
