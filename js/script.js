@@ -25,28 +25,16 @@ document.querySelectorAll('.nav_item--dropdown').forEach(item => {
     }
 });
 
-/* ── Video + audio de fondo (index.html) ───────────────── */
+/* ── Audio de fondo (index.html) ───────────────── */
 window.addEventListener('load', () => {
   const audio   = document.getElementById('bgAudio');
-  const video   = document.querySelector('.video-bg');
   const btnLogo = document.getElementById('btn-logo');
   if (!audio) return;  // si no estamos en index.html, no hace nada
 
   audio.volume = 0.9;
 
-  // iPhone: el video solo arranca solo si está muteado y con playsinline.
-  // Además el "Modo de bajo consumo" de iOS frena cualquier autoplay de video:
-  // en ese caso se reintenta en el primer toque (ver activarSonido).
-  const reproducirVideo = () => {
-    if (!video) return;
-    video.muted = true;
-    video.defaultMuted = true;
-    video.setAttribute('playsinline', '');
-    video.setAttribute('webkit-playsinline', '');
-    const p = video.play();
-    if (p && typeof p.catch === 'function') p.catch(() => {});
-  };
-  reproducirVideo();
+  // El video arranca solo por los atributos del HTML (autoplay muted loop
+  // playsinline): acá no se lo toca.
 
   // Los navegadores bloquean el audio CON sonido si no hubo interacción
   // previa del usuario, pero sí permiten autoplay muted. Por eso arranca
@@ -66,7 +54,6 @@ window.addEventListener('load', () => {
 
   const activarSonido = () => {
     if (sonidoActivo) return;
-    if (video && video.paused) reproducirVideo();   // reintento (bajo consumo)
     audio.muted = false;
     const listo = () => {
         sonidoActivo = true;
