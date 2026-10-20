@@ -1235,7 +1235,7 @@ function generarQrAlias() {
 // (de una versión anterior), no deja continuar el pedido con ese método.
 // Pago con tarjeta (Getnet): ponelo en true recién cuando Getnet habilite Web Checkout
 // para tus credenciales y probar_pago_getnet.php cree el pago sin errores.
-const TARJETA_HABILITADA = false;
+const TARJETA_HABILITADA = false; // ← cambiar a false si Getnet no está habilitado para tu cuenta
 const METODOS_ACTIVOS = TARJETA_HABILITADA ? ['transferencia', 'tarjeta'] : ['transferencia'];
 
 // Mientras la tarjeta no esté habilitada, se quita su botón del paso 3 y se ajusta el texto.
