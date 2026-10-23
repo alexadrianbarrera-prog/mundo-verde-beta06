@@ -940,7 +940,7 @@ body {
     object-fit: cover; 
     display: block; 
 }
-.card-vi h3 { 
+.card-vi h2 { 
     font-family: 'Iosevka-Regular', 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     padding: 8px 10px 4px; 
     font-size: 15px; color: 
@@ -973,7 +973,7 @@ body {
     object-fit: cover; 
     display: block; 
 }
-.card-pl h3 { 
+.card-pl h2 { 
     font-family: 'Iosevka-Regular', 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     padding: 8px 10px 4px; 
     font-size: 15px; color: 
